@@ -737,7 +737,7 @@
         'use strict';
         
         // ImgBB API Key (бесплатный, получите на imgbb.com)
-        const IMGBB_API_KEY = '4c12f79b77c7b5cf8b0d193258e9c75d';
+        const IMGBB_API_KEY = 'e7020e01382f14a53e5bbe345450f788';
         const MAX_PHOTOS = 5;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
         
@@ -852,7 +852,9 @@
                 } catch (err) {
                     console.error('Upload error:', err);
                     removePhotoPreview(tempId);
-                    setPhotoStatus('Ошибка загрузки. Попробуйте ещё раз.', 'error');
+                    // Выводим реальный текст ошибки
+                    setPhotoStatus(`Ошибка: ${err.message}`, 'error'); 
+                    alert(`Подробности ошибки: ${err.message}`); // Всплывающее окно для отладки
                     haptic('error');
                 } finally {
                     uploadingCount--;
