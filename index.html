@@ -56,7 +56,7 @@
         }
         
         .header.scrolled {
-            background: color-mix(in srgb, var(--tg-bg) 85%, transparent);
+            background: rgba(242, 242, 247, 0.85);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             box-shadow: 0 1px 0 rgba(0,0,0,0.08);
@@ -103,7 +103,7 @@
             width: 0%;
         }
         
-        .progress-fill[data-complete="true"] {
+        .progress-fill.complete {
             background: var(--color-success);
         }
         
@@ -228,12 +228,13 @@
         .textarea:focus {
             background: var(--tg-secondary-bg);
             border-color: var(--tg-button);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--tg-button) 15%, transparent);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
         }
         
         .input::placeholder,
         .textarea::placeholder {
-            color: color-mix(in srgb, var(--tg-hint) 70%, transparent);
+            color: var(--tg-hint);
+            opacity: 0.7;
         }
         
         .textarea {
@@ -276,14 +277,14 @@
         .form-group.is-success .input,
         .form-group.is-success .textarea {
             border-color: var(--color-success);
-            background: color-mix(in srgb, var(--color-success) 5%, var(--tg-bg));
+            background: rgba(52, 199, 89, 0.05);
         }
         
         .form-group.is-error .input,
         .form-group.is-error .textarea,
         .form-group.is-error .select {
             border-color: var(--color-error);
-            background: color-mix(in srgb, var(--color-error) 5%, var(--tg-bg));
+            background: rgba(255, 59, 48, 0.05);
             animation: shake 0.35s ease;
         }
         
@@ -298,7 +299,8 @@
         }
         
         .field-hint {
-            color: color-mix(in srgb, var(--tg-hint) 80%, transparent);
+            color: var(--tg-hint);
+            opacity: 0.8;
         }
         
         .char-count {
@@ -322,6 +324,28 @@
         .form-group.is-error .error-message {
             display: block;
             animation: fadeIn 0.25s ease;
+        }
+        
+        /* Contact type indicator */
+        .contact-type {
+            font-size: 11px;
+            color: var(--color-success);
+            margin-top: 4px;
+            padding-left: 2px;
+            display: none;
+        }
+        
+        .contact-type.is-visible {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+        
+        .contact-type.is-phone::before {
+            content: '📱 ';
+        }
+        
+        .contact-type.is-username::before {
+            content: '👤 ';
         }
         
         /* ===== TOGGLE ===== */
@@ -464,6 +488,10 @@
         @media (prefers-color-scheme: dark) {
             .toggle-track {
                 background: #39393d;
+            }
+            
+            .header.scrolled {
+                background: rgba(0, 0, 0, 0.85);
             }
         }
     </style>
@@ -641,11 +669,15 @@
                             type="text" 
                             id="contact"
                             name="contact"
-                            placeholder="@username или телефон"
+                            placeholder="@username или +7 999 123-45-67"
                             autocomplete="off"
                             required
                         >
-                        <p class="error-message">Укажите контакт для связи</p>
+                        <div class="field-footer">
+                            <span class="field-hint">Telegram или телефон</span>
+                        </div>
+                        <p class="contact-type" id="contactType"></p>
+                        <p class="error-message" id="contactError">Введите @username или номер телефона</p>
                     </div>
                     
                     <div class="form-group">
@@ -682,62 +714,72 @@
             
             // ===== TELEGRAM INIT =====
             const tg = window.Telegram?.WebApp;
-            if (!tg) {
-                console.warn('Telegram WebApp not available');
-                return;
+            
+            if (tg) {
+                tg.ready();
+                tg.expand();
             }
             
-            tg.ready();
-            tg.expand();
-            
             // ===== DOM ELEMENTS =====
-            const $ = (selector) => document.querySelector(selector);
-            const $$ = (selector) => document.querySelectorAll(selector);
-            
             const elements = {
-                header: $('#header'),
-                form: $('#adForm'),
-                progressFill: $('#progressFill'),
-                progressText: $('#progressText'),
+                header: document.getElementById('header'),
+                form: document.getElementById('adForm'),
+                progressFill: document.getElementById('progressFill'),
+                progressText: document.getElementById('progressText'),
                 
-                // Inputs
-                title: $('#title'),
-                description: $('#description'),
-                price: $('#price'),
-                contact: $('#contact'),
-                location: $('#location'),
-                adType: $('#adType'),
-                category: $('#category'),
-                negotiable: $('#negotiable'),
+                title: document.getElementById('title'),
+                description: document.getElementById('description'),
+                price: document.getElementById('price'),
+                contact: document.getElementById('contact'),
+                location: document.getElementById('location'),
+                adType: document.getElementById('adType'),
+                category: document.getElementById('category'),
+                negotiable: document.getElementById('negotiable'),
                 
-                // Groups
-                titleGroup: $('#titleGroup'),
-                contactGroup: $('#contactGroup'),
+                titleGroup: document.getElementById('titleGroup'),
+                contactGroup: document.getElementById('contactGroup'),
                 
-                // Counters
-                titleCounter: $('#titleCounter'),
-                descCounter: $('#descCounter'),
+                titleCounter: document.getElementById('titleCounter'),
+                descCounter: document.getElementById('descCounter'),
                 
-                // Toggle
-                negotiableField: $('#negotiableField')
+                contactType: document.getElementById('contactType'),
+                contactError: document.getElementById('contactError'),
+                
+                negotiableField: document.getElementById('negotiableField')
             };
             
             // ===== CONFIG =====
             const config = {
                 minTitleLength: 3,
-                minContactLength: 2,
                 maxTitleLength: 100,
                 maxDescLength: 1000,
                 requiredFields: 4
             };
             
+            // ===== CONTACT VALIDATION PATTERNS =====
+            const patterns = {
+                // Telegram username: @ followed by 5-32 alphanumeric characters or underscores
+                username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/,
+                
+                // Phone: various formats with country codes
+                // Supports: +7, 8, +375, +380, +1, etc.
+                phone: /^[\+]?[0-9]?[-\s]?\(?[0-9]{1,4}\)?[-\s]?[0-9]{1,4}[-\s]?[0-9]{1,4}[-\s]?[0-9]{0,4}$/,
+                
+                // Simplified phone check (at least 10 digits)
+                phoneDigits: /^[\d\s\-\+\(\)]{10,}$/
+            };
+            
             // ===== UTILS =====
             const haptic = (type = 'light') => {
-                tg.HapticFeedback?.impactOccurred(type);
+                if (tg?.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred(type);
+                }
             };
             
             const hapticNotification = (type = 'success') => {
-                tg.HapticFeedback?.notificationOccurred(type);
+                if (tg?.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred(type);
+                }
             };
             
             const updateCharCounter = (element, current, max) => {
@@ -758,6 +800,82 @@
                 if (state) group.classList.add(state);
             };
             
+            // ===== CONTACT VALIDATION =====
+            const validateContact = (value) => {
+                const trimmed = value.trim();
+                
+                if (!trimmed) {
+                    return { valid: false, type: null, message: 'Введите @username или номер телефона' };
+                }
+                
+                // Check if it's a username
+                if (trimmed.startsWith('@')) {
+                    if (patterns.username.test(trimmed)) {
+                        return { valid: true, type: 'username', message: 'Telegram username' };
+                    } else {
+                        return { 
+                            valid: false, 
+                            type: 'username', 
+                            message: 'Username: 5-32 символа (буквы, цифры, _)' 
+                        };
+                    }
+                }
+                
+                // Check if it looks like a phone number
+                const digitsOnly = trimmed.replace(/\D/g, '');
+                
+                if (digitsOnly.length >= 10 && digitsOnly.length <= 15) {
+                    // Valid phone number
+                    return { valid: true, type: 'phone', message: 'Номер телефона' };
+                }
+                
+                if (digitsOnly.length > 0 && digitsOnly.length < 10) {
+                    return { 
+                        valid: false, 
+                        type: 'phone', 
+                        message: 'Номер слишком короткий (мин. 10 цифр)' 
+                    };
+                }
+                
+                if (digitsOnly.length > 15) {
+                    return { 
+                        valid: false, 
+                        type: 'phone', 
+                        message: 'Номер слишком длинный (макс. 15 цифр)' 
+                    };
+                }
+                
+                return { 
+                    valid: false, 
+                    type: null, 
+                    message: 'Введите @username или номер телефона' 
+                };
+            };
+            
+            const updateContactUI = (validation) => {
+                const { contactType, contactError, contactGroup } = elements;
+                
+                // Reset
+                contactType.classList.remove('is-visible', 'is-phone', 'is-username');
+                setFieldState(contactGroup, null);
+                
+                if (validation.valid) {
+                    contactType.textContent = validation.message;
+                    contactType.classList.add('is-visible');
+                    
+                    if (validation.type === 'phone') {
+                        contactType.classList.add('is-phone');
+                    } else if (validation.type === 'username') {
+                        contactType.classList.add('is-username');
+                    }
+                    
+                    setFieldState(contactGroup, 'is-success');
+                } else if (elements.contact.value.trim()) {
+                    // Only show error if user has typed something
+                    contactError.textContent = validation.message;
+                }
+            };
+            
             // ===== PROGRESS =====
             const updateProgress = () => {
                 let filled = 0;
@@ -765,19 +883,26 @@
                 if (elements.adType.value) filled++;
                 if (elements.category.value) filled++;
                 if (elements.title.value.length >= config.minTitleLength) filled++;
-                if (elements.contact.value.length >= config.minContactLength) filled++;
+                
+                const contactValidation = validateContact(elements.contact.value);
+                if (contactValidation.valid) filled++;
                 
                 const percentage = Math.round((filled / config.requiredFields) * 100);
                 const isComplete = filled === config.requiredFields;
                 
                 elements.progressFill.style.width = `${percentage}%`;
-                elements.progressFill.dataset.complete = isComplete;
+                elements.progressFill.classList.toggle('complete', isComplete);
                 elements.progressText.textContent = `${percentage}%`;
                 
-                tg.MainButton.setParams({
-                    is_active: isComplete,
-                    text: isComplete ? 'Продолжить →' : `Осталось: ${config.requiredFields - filled}`
-                });
+                // Update button
+                if (tg?.MainButton) {
+                    tg.MainButton.setParams({
+                        is_active: isComplete,
+                        text: isComplete ? 'Продолжить →' : `Осталось: ${config.requiredFields - filled}`
+                    });
+                }
+                
+                return isComplete;
             };
             
             // ===== VALIDATION =====
@@ -787,12 +912,16 @@
                 setFieldState(elements.titleGroup, null);
                 setFieldState(elements.contactGroup, null);
                 
+                // Validate title
                 if (elements.title.value.length < config.minTitleLength) {
                     setFieldState(elements.titleGroup, 'is-error');
                     isValid = false;
                 }
                 
-                if (elements.contact.value.length < config.minContactLength) {
+                // Validate contact
+                const contactValidation = validateContact(elements.contact.value);
+                if (!contactValidation.valid) {
+                    elements.contactError.textContent = contactValidation.message;
                     setFieldState(elements.contactGroup, 'is-error');
                     isValid = false;
                 }
@@ -825,13 +954,8 @@
             };
             
             const handleContactInput = () => {
-                const len = elements.contact.value.length;
-                
-                setFieldState(elements.contactGroup, null);
-                if (len >= config.minContactLength) {
-                    setFieldState(elements.contactGroup, 'is-success');
-                }
-                
+                const validation = validateContact(elements.contact.value);
+                updateContactUI(validation);
                 updateProgress();
             };
             
@@ -847,18 +971,27 @@
                 if (!validateForm()) {
                     hapticNotification('error');
                     
-                    tg.showPopup({
-                        title: 'Заполните поля',
-                        message: 'Проверьте обязательные поля формы',
-                        buttons: [{ type: 'ok', text: 'Понятно' }]
-                    });
+                    if (tg?.showPopup) {
+                        tg.showPopup({
+                            title: 'Проверьте данные',
+                            message: 'Заполните все обязательные поля корректно',
+                            buttons: [{ type: 'ok', text: 'Понятно' }]
+                        });
+                    } else {
+                        alert('Заполните все обязательные поля корректно');
+                    }
                     
-                    const firstError = $('.form-group.is-error');
-                    firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const firstError = document.querySelector('.form-group.is-error');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                     return;
                 }
                 
-                tg.MainButton.showProgress();
+                // Show loading
+                if (tg?.MainButton) {
+                    tg.MainButton.showProgress();
+                }
                 
                 const priceValue = elements.price.value;
                 const isNegotiable = elements.negotiable.checked;
@@ -879,25 +1012,40 @@
                     negotiable: isNegotiable
                 };
                 
+                console.log('Form data:', data);
+                
                 hapticNotification('success');
-                tg.sendData(JSON.stringify(data));
+                
+                if (tg?.sendData) {
+                    tg.sendData(JSON.stringify(data));
+                } else {
+                    // Fallback for testing outside Telegram
+                    alert('Данные готовы к отправке:\n' + JSON.stringify(data, null, 2));
+                    if (tg?.MainButton) {
+                        tg.MainButton.hideProgress();
+                    }
+                }
             };
             
             // ===== INIT =====
             const init = () => {
                 // Main button setup
-                tg.MainButton.setParams({
-                    text: 'Заполните форму',
-                    color: tg.themeParams.button_color || '#007aff',
-                    text_color: tg.themeParams.button_text_color || '#ffffff',
-                    is_active: false,
-                    is_visible: true
-                });
+                if (tg?.MainButton) {
+                    tg.MainButton.setParams({
+                        text: 'Заполните форму',
+                        color: tg.themeParams?.button_color || '#007aff',
+                        text_color: tg.themeParams?.button_text_color || '#ffffff',
+                        is_active: false,
+                        is_visible: true
+                    });
+                    
+                    tg.MainButton.onClick(handleSubmit);
+                }
                 
                 // Autofill contact from Telegram
-                const username = tg.initDataUnsafe?.user?.username;
-                if (username) {
-                    elements.contact.value = `@${username}`;
+                if (tg?.initDataUnsafe?.user?.username) {
+                    elements.contact.value = `@${tg.initDataUnsafe.user.username}`;
+                    handleContactInput();
                 }
                 
                 // Event listeners
@@ -908,23 +1056,30 @@
                 elements.contact.addEventListener('input', handleContactInput);
                 elements.price.addEventListener('input', updateProgress);
                 elements.location.addEventListener('input', updateProgress);
-                elements.adType.addEventListener('change', () => { haptic('light'); updateProgress(); });
-                elements.category.addEventListener('change', () => { haptic('light'); updateProgress(); });
+                
+                elements.adType.addEventListener('change', () => { 
+                    haptic('light'); 
+                    updateProgress(); 
+                });
+                
+                elements.category.addEventListener('change', () => { 
+                    haptic('light'); 
+                    updateProgress(); 
+                });
+                
                 elements.negotiable.addEventListener('change', () => haptic('light'));
                 elements.negotiableField.addEventListener('click', handleToggleClick);
                 
                 // Focus haptic
-                $$('.input, .textarea').forEach(el => {
+                document.querySelectorAll('.input, .textarea').forEach(el => {
                     el.addEventListener('focus', () => haptic('light'));
                 });
-                
-                tg.MainButton.onClick(handleSubmit);
                 
                 // Initial progress update
                 updateProgress();
             };
             
-            // Run
+            // Run when DOM is ready
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', init);
             } else {
