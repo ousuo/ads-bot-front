@@ -969,7 +969,6 @@
         <div id="previewView" class="view">
             <div class="preview-container">
                 <div class="telegram-message" id="previewMessage">
-                    <!-- Photos will be inserted here -->
                     <div class="message-photos" id="previewPhotos"></div>
                     
                     <div class="message-content">
@@ -1008,7 +1007,7 @@
         
         const tg = window.Telegram?.WebApp;
         
-        let photoUrls = [];
+        let photoData = []; // Храним и URL, и thumb
         let uploadingCount = 0;
         let currentView = 'form';
         
@@ -1020,18 +1019,13 @@
         const $ = (id) => document.getElementById(id);
         
         const elements = {
-            // Views
             formView: $('formView'),
             previewView: $('previewView'),
-            
-            // Header
             header: $('header'),
             headerTitle: $('headerTitle'),
             headerSubtitle: $('headerSubtitle'),
             progressFill: $('progressFill'),
             progressText: $('progressText'),
-            
-            // Form
             form: $('adForm'),
             title: $('title'),
             description: $('description'),
@@ -1041,30 +1035,20 @@
             adType: $('adType'),
             category: $('category'),
             negotiable: $('negotiable'),
-            
-            // Form groups
             adTypeGroup: $('adTypeGroup'),
             categoryGroup: $('categoryGroup'),
             titleGroup: $('titleGroup'),
             descriptionGroup: $('descriptionGroup'),
             contactGroup: $('contactGroup'),
-            
-            // Counters
             titleCounter: $('titleCounter'),
             descCounter: $('descCounter'),
             contactType: $('contactType'),
             contactError: $('contactError'),
-            
-            // Toggle
             negotiableField: $('negotiableField'),
-            
-            // Photos
             photoUploadArea: $('photoUploadArea'),
             photoInput: $('photoInput'),
             photoPreviewGrid: $('photoPreviewGrid'),
             photoStatus: $('photoStatus'),
-            
-            // Preview
             previewMessage: $('previewMessage'),
             previewPhotos: $('previewPhotos'),
             previewHashtags: $('previewHashtags'),
@@ -1103,16 +1087,16 @@
             
             return {
                 url: data.data.url,
-                thumb: data.data.thumb?.url || data.data.url,
+                thumb: data.data.thumb?.url || data.data.medium?.url || data.data.url,
                 delete_url: data.data.delete_url
             };
         };
-        
+
         const handlePhotoSelect = async (files) => {
             const fileArray = Array.from(files);
             
             for (const file of fileArray) {
-                if (photoUrls.length + uploadingCount >= MAX_PHOTOS) {
+                if (photoData.length + uploadingCount >= MAX_PHOTOS) {
                     setPhotoStatus(`Максимум ${MAX_PHOTOS} фото`, 'error');
                     haptic('error');
                     break;
@@ -1139,10 +1123,14 @@
                     setPhotoStatus(`Загрузка ${uploadingCount}...`, '');
                     const result = await uploadToImgBB(file);
                     
-                    photoUrls.push(result.url);
+                    photoData.push({
+                        url: result.url,
+                        thumb: result.thumb
+                    });
+                    
                     updatePhotoPreview(tempId, result.url, result.thumb);
                     
-                    setPhotoStatus(`Загружено ${photoUrls.length} из ${MAX_PHOTOS}`, 'success');
+                    setPhotoStatus(`Загружено ${photoData.length} из ${MAX_PHOTOS}`, 'success');
                     haptic('success');
                     
                 } catch (err) {
@@ -1201,17 +1189,17 @@
         };
         
         const removePhoto = (url) => {
-            photoUrls = photoUrls.filter(u => u !== url);
+            photoData = photoData.filter(p => p.url !== url);
             removePhotoPreview(url);
             updateUploadArea();
             updateProgress();
-            setPhotoStatus(photoUrls.length > 0 ? `${photoUrls.length} из ${MAX_PHOTOS} фото` : '', '');
+            setPhotoStatus(photoData.length > 0 ? `${photoData.length} из ${MAX_PHOTOS} фото` : '', '');
             haptic('light');
         };
-        
+
         const updateUploadArea = () => {
             const area = elements.photoUploadArea;
-            const total = photoUrls.length + uploadingCount;
+            const total = photoData.length + uploadingCount;
             
             if (total >= MAX_PHOTOS) {
                 area.querySelector('.upload-text').textContent = 'Достигнут лимит фото';
@@ -1443,18 +1431,13 @@
         };
         
         const renderPreview = () => {
-            // Hashtags
             const adType = elements.adType.value.replace(' ', '_').replace(/[()]/g, '');
             const category = elements.category.value.replace(' ', '_').replace(/[()]/g, '');
             elements.previewHashtags.textContent = `#${adType} #${category}`;
             
-            // Title
             elements.previewTitle.textContent = elements.title.value.trim();
-            
-            // Description
             elements.previewDescription.textContent = elements.description.value.trim();
             
-            // Info
             const priceVal = elements.price.value;
             const isNegotiable = elements.negotiable.checked;
             let priceText = priceVal || '0';
@@ -1489,25 +1472,24 @@
             
             elements.previewInfo.innerHTML = infoHTML;
             
-            // Photos
             elements.previewPhotos.innerHTML = '';
             
-            if (photoUrls.length > 0) {
-                const count = photoUrls.length;
+            if (photoData.length > 0) {
+                const count = photoData.length;
                 
                 if (count === 1) {
                     elements.previewPhotos.className = 'message-photos single-photo';
                     elements.previewPhotos.innerHTML = `
                         <div class="message-photo">
-                            <img src="${photoUrls[0]}" alt="Фото">
+                            <img src="${photoData[0].thumb}" alt="Фото" loading="lazy">
                         </div>
                     `;
                 } else {
                     elements.previewPhotos.className = `message-photos multiple-photos count-${count}`;
-                    photoUrls.forEach(url => {
+                    photoData.forEach(photo => {
                         const photoDiv = document.createElement('div');
                         photoDiv.className = 'message-photo';
-                        photoDiv.innerHTML = `<img src="${url}" alt="Фото">`;
+                        photoDiv.innerHTML = `<img src="${photo.thumb}" alt="Фото" loading="lazy">`;
                         elements.previewPhotos.appendChild(photoDiv);
                     });
                 }
@@ -1537,8 +1519,8 @@
                 contact: elements.contact.value.trim(),
                 location: elements.location.value.trim() || null,
                 negotiable: isNegotiable,
-                photos: photoUrls,
-                photoCount: photoUrls.length,
+                photos: photoData.map(p => p.url),
+                photoCount: photoData.length,
                 timestamp: Date.now()
             };
             
@@ -1547,7 +1529,7 @@
             }
             
             const jsonData = JSON.stringify(data);
-            console.log('Отправка данных:', jsonData.length, 'байт', 'фото:', photoUrls.length);
+            console.log('Отправка данных:', jsonData.length, 'байт', 'фото:', photoData.length);
             
             if (tg?.sendData) {
                 try {
@@ -1655,9 +1637,9 @@
                 handleContactInput();
             }
             
-            // Photo upload
+            // Photo upload - ИСПРАВЛЕНО: photoData вместо photoUrls
             elements.photoUploadArea.addEventListener('click', () => {
-                if (photoUrls.length + uploadingCount < MAX_PHOTOS) {
+                if (photoData.length + uploadingCount < MAX_PHOTOS) {
                     elements.photoInput.click();
                     haptic('light');
                 }
@@ -1670,7 +1652,6 @@
                 }
             });
             
-            // Drag & drop
             elements.photoUploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 elements.photoUploadArea.classList.add('dragover');
@@ -1688,7 +1669,6 @@
                 }
             });
             
-            // Form handlers
             elements.adType.addEventListener('change', handleAdTypeChange);
             elements.category.addEventListener('change', handleCategoryChange);
             elements.title.addEventListener('input', handleTitleInput);
@@ -1704,7 +1684,6 @@
                 }
             });
             
-            // Preview buttons
             elements.submitBtn.addEventListener('click', handleSubmit);
             elements.backToFormBtn.addEventListener('click', () => switchView('form'));
             
