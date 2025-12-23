@@ -714,10 +714,13 @@
             
             // ===== TELEGRAM INIT =====
             const tg = window.Telegram?.WebApp;
+            let mainButtonInitialized = false;
             
             if (tg) {
                 tg.ready();
                 tg.expand();
+                // Ensure colors match theme
+                document.documentElement.style.setProperty('--tg-bg', tg.backgroundColor || '#f2f2f7');
             }
             
             // ===== DOM ELEMENTS =====
@@ -896,10 +899,15 @@
                 
                 // Update button
                 if (tg?.MainButton) {
-                    tg.MainButton.setParams({
-                        is_active: isComplete,
-                        text: isComplete ? 'Продолжить →' : `Осталось: ${config.requiredFields - filled}`
-                    });
+                    if (isComplete) {
+                        tg.MainButton.setText('Продолжить →');
+                        tg.MainButton.enable();
+                        tg.MainButton.show();
+                    } else {
+                        tg.MainButton.setText(`Осталось полей: ${config.requiredFields - filled}`);
+                        tg.MainButton.disable();
+                        tg.MainButton.show(); // Keep visible but disabled
+                    }
                 }
                 
                 return isComplete;
@@ -966,6 +974,7 @@
             };
             
             const handleSubmit = () => {
+                try {
                 haptic('medium');
                 
                 if (!validateForm()) {
@@ -1025,21 +1034,27 @@
                         tg.MainButton.hideProgress();
                     }
                 }
+                } catch (e) {
+                    alert('Ошибка: ' + e.message);
+                    if (tg?.MainButton) tg.MainButton.hideProgress();
+                }
             };
             
             // ===== INIT =====
             const init = () => {
                 // Main button setup
                 if (tg?.MainButton) {
-                    tg.MainButton.setParams({
-                        text: 'Заполните форму',
-                        color: tg.themeParams?.button_color || '#007aff',
-                        text_color: tg.themeParams?.button_text_color || '#ffffff',
-                        is_active: false,
-                        is_visible: true
-                    });
+                    // Reset params first
+                    tg.MainButton.text = 'Заполните форму';
+                    tg.MainButton.color = tg.themeParams?.button_color || '#007aff';
+                    tg.MainButton.textColor = tg.themeParams?.button_text_color || '#ffffff';
                     
-                    tg.MainButton.onClick(handleSubmit);
+                    if (!mainButtonInitialized) {
+                        tg.MainButton.onClick(handleSubmit);
+                        mainButtonInitialized = true;
+                    }
+                    
+                    tg.MainButton.show();
                 }
                 
                 // Autofill contact from Telegram
