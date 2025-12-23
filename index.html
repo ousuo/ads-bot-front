@@ -31,34 +31,28 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        html {
-            scroll-behavior: smooth;
-        }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
             background: var(--tg-bg);
             color: var(--tg-text);
             line-height: 1.5;
-            padding-bottom: 100px;
-            overflow-x: hidden;
+            padding-bottom: 120px;
             min-height: 100vh;
         }
         
-        /* ===== HEADER ===== */
+        /* Header */
         .header {
             position: sticky;
             top: 0;
             z-index: 100;
             background: var(--tg-bg);
             padding: 16px 16px 12px;
-            transition: background var(--transition), box-shadow var(--transition);
         }
         
         .header.scrolled {
-            background: rgba(242, 242, 247, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(242, 242, 247, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             box-shadow: 0 1px 0 rgba(0,0,0,0.08);
         }
         
@@ -71,7 +65,6 @@
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 2px;
-            letter-spacing: -0.5px;
         }
         
         .header-subtitle {
@@ -80,7 +73,7 @@
             margin-bottom: 12px;
         }
         
-        /* ===== PROGRESS ===== */
+        /* Progress */
         .progress-wrapper {
             display: flex;
             align-items: center;
@@ -99,7 +92,7 @@
             height: 100%;
             background: var(--tg-button);
             border-radius: 100px;
-            transition: width 0.4s ease-out, background 0.3s;
+            transition: width 0.4s ease-out;
             width: 0%;
         }
         
@@ -113,30 +106,23 @@
             color: var(--tg-hint);
             min-width: 36px;
             text-align: right;
-            font-variant-numeric: tabular-nums;
         }
         
-        /* ===== CONTAINER ===== */
+        /* Container */
         .container {
             padding: 0 16px;
             max-width: 600px;
             margin: 0 auto;
         }
         
-        /* ===== CARD ===== */
+        /* Card */
         .card {
             background: var(--tg-secondary-bg);
             border-radius: var(--radius-lg);
             margin-bottom: 12px;
             box-shadow: var(--shadow);
             overflow: hidden;
-            animation: slideUp 0.4s ease-out backwards;
         }
-        
-        .card:nth-child(1) { animation-delay: 0.02s; }
-        .card:nth-child(2) { animation-delay: 0.06s; }
-        .card:nth-child(3) { animation-delay: 0.10s; }
-        .card:nth-child(4) { animation-delay: 0.14s; }
         
         .card-header {
             padding: 14px 16px 10px;
@@ -153,15 +139,11 @@
             gap: 6px;
         }
         
-        .card-title .icon {
-            font-size: 14px;
-        }
-        
         .card-body {
             padding: 0 16px 16px;
         }
         
-        /* ===== FORM ===== */
+        /* Form */
         .form-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -192,7 +174,6 @@
             padding: 2px 5px;
             border-radius: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
         
         .badge--required {
@@ -205,10 +186,8 @@
             color: var(--tg-hint);
         }
         
-        /* ===== INPUTS ===== */
-        .input,
-        .select,
-        .textarea {
+        /* Inputs */
+        .input, .select, .textarea {
             width: 100%;
             padding: 12px 14px;
             border: 2px solid transparent;
@@ -220,19 +199,15 @@
             outline: none;
             transition: all var(--transition);
             -webkit-appearance: none;
-            appearance: none;
         }
         
-        .input:focus,
-        .select:focus,
-        .textarea:focus {
+        .input:focus, .select:focus, .textarea:focus {
             background: var(--tg-secondary-bg);
             border-color: var(--tg-button);
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
         }
         
-        .input::placeholder,
-        .textarea::placeholder {
+        .input::placeholder, .textarea::placeholder {
             color: var(--tg-hint);
             opacity: 0.7;
         }
@@ -240,7 +215,6 @@
         .textarea {
             resize: none;
             min-height: 90px;
-            line-height: 1.5;
         }
         
         .select {
@@ -251,7 +225,7 @@
             cursor: pointer;
         }
         
-        /* Price input */
+        /* Price */
         .price-field {
             position: relative;
         }
@@ -270,7 +244,6 @@
             font-size: 18px;
             font-weight: 600;
             color: var(--tg-hint);
-            pointer-events: none;
         }
         
         /* States */
@@ -285,14 +258,12 @@
         .form-group.is-error .select {
             border-color: var(--color-error);
             background: rgba(255, 59, 48, 0.05);
-            animation: shake 0.35s ease;
         }
         
-        /* ===== CHAR COUNTER ===== */
+        /* Field footer */
         .field-footer {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-top: 4px;
             padding: 0 2px;
             font-size: 11px;
@@ -300,14 +271,11 @@
         
         .field-hint {
             color: var(--tg-hint);
-            opacity: 0.8;
         }
         
         .char-count {
             color: var(--tg-hint);
             font-weight: 500;
-            font-variant-numeric: tabular-nums;
-            transition: color 0.2s;
         }
         
         .char-count.is-warning { color: var(--color-warning); }
@@ -317,38 +285,25 @@
             color: var(--color-error);
             font-size: 11px;
             margin-top: 4px;
-            padding-left: 2px;
             display: none;
         }
         
         .form-group.is-error .error-message {
             display: block;
-            animation: fadeIn 0.25s ease;
         }
         
-        /* Contact type indicator */
         .contact-type {
             font-size: 11px;
             color: var(--color-success);
             margin-top: 4px;
-            padding-left: 2px;
             display: none;
         }
         
         .contact-type.is-visible {
             display: block;
-            animation: fadeIn 0.25s ease;
         }
         
-        .contact-type.is-phone::before {
-            content: '📱 ';
-        }
-        
-        .contact-type.is-username::before {
-            content: '👤 ';
-        }
-        
-        /* ===== TOGGLE ===== */
+        /* Toggle */
         .toggle-field {
             display: flex;
             align-items: center;
@@ -357,14 +312,7 @@
             background: var(--tg-bg);
             border-radius: var(--radius);
             cursor: pointer;
-            user-select: none;
             margin-top: 10px;
-            transition: transform 0.15s, opacity 0.15s;
-        }
-        
-        .toggle-field:active {
-            transform: scale(0.98);
-            opacity: 0.8;
         }
         
         .toggle-label {
@@ -375,15 +323,10 @@
             gap: 8px;
         }
         
-        .toggle-label .icon {
-            font-size: 16px;
-        }
-        
         .toggle {
             position: relative;
             width: 48px;
             height: 28px;
-            flex-shrink: 0;
         }
         
         .toggle input {
@@ -421,7 +364,7 @@
             transform: translateX(20px);
         }
         
-        /* ===== INFO BANNER ===== */
+        /* Info banner */
         .info-banner {
             display: flex;
             gap: 10px;
@@ -430,12 +373,6 @@
             border-radius: var(--radius-lg);
             margin-top: 12px;
             box-shadow: var(--shadow);
-            animation: slideUp 0.4s ease-out 0.18s backwards;
-        }
-        
-        .info-banner .icon {
-            font-size: 20px;
-            flex-shrink: 0;
         }
         
         .info-banner-content {
@@ -451,71 +388,86 @@
         .info-banner-text {
             font-size: 12px;
             color: var(--tg-hint);
-            line-height: 1.45;
         }
         
-        /* ===== ANIMATIONS ===== */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-3px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 380px) {
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            
-            .header h1 {
-                font-size: 24px;
-            }
-        }
-        
-        /* ===== DARK MODE ===== */
-        @media (prefers-color-scheme: dark) {
-            .toggle-track {
-                background: #39393d;
-            }
-            
-            .header.scrolled {
-                background: rgba(0, 0, 0, 0.85);
-            }
-        }
-        
-        /* DEBUG CONSOLE */
+        /* Debug Console */
         #debug-console {
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 100%;
-            height: 200px;
-            background: rgba(0,0,0,0.9);
+            right: 0;
+            max-height: 40vh;
+            background: rgba(0,0,0,0.95);
             color: #0f0;
-            font-family: monospace;
+            font-family: 'SF Mono', Monaco, monospace;
             font-size: 11px;
             overflow-y: auto;
             padding: 10px;
-            z-index: 9999;
-            border-top: 1px solid #333;
-            word-break: break-all;
+            z-index: 10000;
             display: none;
+            border-top: 2px solid #333;
+        }
+        
+        #debug-console.visible {
+            display: block;
+        }
+        
+        .debug-line {
+            padding: 2px 0;
+            border-bottom: 1px solid #222;
+            word-break: break-all;
+        }
+        
+        .debug-line.error { color: #ff6b6b; }
+        .debug-line.warn { color: #ffd93d; }
+        .debug-line.info { color: #6bcfff; }
+        .debug-line.success { color: #6bff6b; }
+        
+        #debug-toggle {
+            position: fixed;
+            bottom: 70px;
+            right: 10px;
+            z-index: 10001;
+            background: #ff3b30;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* Platform info */
+        #platform-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 380px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .toggle-track {
+                background: #39393d;
+            }
         }
     </style>
 </head>
 <body>
+    <div id="platform-info">Loading...</div>
+    
     <header class="header" id="header">
         <div class="header-content">
             <h1>Новое объявление</h1>
@@ -534,17 +486,13 @@
             <!-- Тип и категория -->
             <article class="card">
                 <header class="card-header">
-                    <h2 class="card-title">
-                        <span class="icon">📋</span>
-                        Тип и категория
-                    </h2>
+                    <h2 class="card-title">📋 Тип и категория</h2>
                 </header>
                 <div class="card-body">
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="adType">
-                                Тип
-                                <span class="badge badge--required">обяз.</span>
+                                Тип <span class="badge badge--required">обяз.</span>
                             </label>
                             <select class="select" id="adType" name="adType" required>
                                 <option value="Продам">🏷️ Продам</option>
@@ -558,8 +506,7 @@
                         
                         <div class="form-group">
                             <label class="form-label" for="category">
-                                Категория
-                                <span class="badge badge--required">обяз.</span>
+                                Категория <span class="badge badge--required">обяз.</span>
                             </label>
                             <select class="select" id="category" name="category" required>
                                 <option value="Электроника">📱 Электроника</option>
@@ -581,26 +528,17 @@
             <!-- Описание -->
             <article class="card">
                 <header class="card-header">
-                    <h2 class="card-title">
-                        <span class="icon">✏️</span>
-                        Описание
-                    </h2>
+                    <h2 class="card-title">✏️ Описание</h2>
                 </header>
                 <div class="card-body">
                     <div class="form-group" id="titleGroup">
                         <label class="form-label" for="title">
-                            Заголовок
-                            <span class="badge badge--required">обяз.</span>
+                            Заголовок <span class="badge badge--required">обяз.</span>
                         </label>
                         <input 
-                            class="input"
-                            type="text" 
-                            id="title"
-                            name="title"
+                            class="input" type="text" id="title" name="title"
                             placeholder="Например: iPhone 14 Pro 256GB"
-                            maxlength="100"
-                            autocomplete="off"
-                            required
+                            maxlength="100" autocomplete="off" required
                         >
                         <div class="field-footer">
                             <span class="field-hint">Краткое название</span>
@@ -611,13 +549,10 @@
                     
                     <div class="form-group">
                         <label class="form-label" for="description">
-                            Описание
-                            <span class="badge badge--optional">опционально</span>
+                            Описание <span class="badge badge--optional">опционально</span>
                         </label>
                         <textarea 
-                            class="textarea"
-                            id="description"
-                            name="description"
+                            class="textarea" id="description" name="description"
                             placeholder="Состояние, комплектация, причина продажи..."
                             maxlength="1000"
                         ></textarea>
@@ -632,34 +567,22 @@
             <!-- Цена -->
             <article class="card">
                 <header class="card-header">
-                    <h2 class="card-title">
-                        <span class="icon">💰</span>
-                        Стоимость
-                    </h2>
+                    <h2 class="card-title">💰 Стоимость</h2>
                 </header>
                 <div class="card-body">
                     <div class="form-group">
                         <label class="form-label" for="price">Цена</label>
                         <div class="price-field">
                             <input 
-                                class="input"
-                                type="number" 
-                                id="price"
-                                name="price"
-                                placeholder="0"
-                                min="0"
-                                max="999999999"
-                                inputmode="numeric"
+                                class="input" type="number" id="price" name="price"
+                                placeholder="0" min="0" max="999999999" inputmode="numeric"
                             >
                             <span class="currency">₽</span>
                         </div>
                     </div>
                     
                     <div class="toggle-field" id="negotiableField">
-                        <span class="toggle-label">
-                            <span class="icon">🤝</span>
-                            Торг возможен
-                        </span>
+                        <span class="toggle-label">🤝 Торг возможен</span>
                         <label class="toggle">
                             <input type="checkbox" id="negotiable" name="negotiable">
                             <span class="toggle-track"></span>
@@ -672,25 +595,17 @@
             <!-- Контакты -->
             <article class="card">
                 <header class="card-header">
-                    <h2 class="card-title">
-                        <span class="icon">📞</span>
-                        Контакты
-                    </h2>
+                    <h2 class="card-title">📞 Контакты</h2>
                 </header>
                 <div class="card-body">
                     <div class="form-group" id="contactGroup">
                         <label class="form-label" for="contact">
-                            Связь
-                            <span class="badge badge--required">обяз.</span>
+                            Связь <span class="badge badge--required">обяз.</span>
                         </label>
                         <input 
-                            class="input"
-                            type="text" 
-                            id="contact"
-                            name="contact"
+                            class="input" type="text" id="contact" name="contact"
                             placeholder="@username или +7 999 123-45-67"
-                            autocomplete="off"
-                            required
+                            autocomplete="off" required
                         >
                         <div class="field-footer">
                             <span class="field-hint">Telegram или телефон</span>
@@ -701,472 +616,520 @@
                     
                     <div class="form-group">
                         <label class="form-label" for="location">
-                            Местоположение
-                            <span class="badge badge--optional">опционально</span>
+                            Местоположение <span class="badge badge--optional">опционально</span>
                         </label>
                         <input 
-                            class="input"
-                            type="text" 
-                            id="location"
-                            name="location"
-                            placeholder="Город, район, метро"
-                            autocomplete="off"
+                            class="input" type="text" id="location" name="location"
+                            placeholder="Город, район, метро" autocomplete="off"
                         >
                     </div>
                 </div>
             </article>
             
-            <!-- Info -->
             <aside class="info-banner">
-                <span class="icon">💡</span>
+                <span style="font-size: 20px;">💡</span>
                 <div class="info-banner-content">
                     <p class="info-banner-title">Следующий шаг</p>
-                    <p class="info-banner-text">Добавление фото и публикация за 1 ⭐. Модерация до 24 часов.</p>
+                    <p class="info-banner-text">Добавление фото и публикация за 1 ⭐</p>
                 </div>
             </aside>
         </form>
     </main>
     
-    <!-- DEBUG OVERLAY -->
+    <button id="debug-toggle">🐛 LOGS</button>
     <div id="debug-console"></div>
-    <button onclick="document.getElementById('debug-console').style.display = document.getElementById('debug-console').style.display === 'block' ? 'none' : 'block'" style="position:fixed;bottom:10px;right:10px;z-index:10000;opacity:0.8;background:red;color:white;border:none;border-radius:4px;padding:6px 10px;font-size:12px;">LOGS</button>
 
     <script>
-        (function() {
-            'use strict';
+    (function() {
+        'use strict';
+        
+        // ==================== DEBUG LOGGER ====================
+        const debugConsole = document.getElementById('debug-console');
+        const debugToggle = document.getElementById('debug-toggle');
+        const platformInfo = document.getElementById('platform-info');
+        
+        const Logger = {
+            logs: [],
             
-            // ===== DEBUG LOGGER =====
-            const debugConsole = document.getElementById('debug-console');
-            const originalLog = console.log;
-            
-            function logToScreen(args, color = '#0f0') {
+            _addLine(message, type = 'log') {
+                const time = new Date().toLocaleTimeString('ru-RU');
                 const line = document.createElement('div');
-                line.style.color = color;
-                line.style.marginBottom = '4px';
-                line.style.borderBottom = '1px solid #333';
+                line.className = `debug-line ${type}`;
                 
-                const text = args.map(a => {
-                    try { return typeof a === 'object' ? JSON.stringify(a) : String(a); }
-                    catch (e) { return String(a); }
-                }).join(' ');
+                let text;
+                if (typeof message === 'object') {
+                    try {
+                        text = JSON.stringify(message, null, 2);
+                    } catch (e) {
+                        text = String(message);
+                    }
+                } else {
+                    text = String(message);
+                }
                 
-                line.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+                line.textContent = `[${time}] ${text}`;
                 debugConsole.appendChild(line);
                 debugConsole.scrollTop = debugConsole.scrollHeight;
+                
+                this.logs.push({ time, type, message: text });
+            },
+            
+            log(...args) {
+                console.log(...args);
+                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'log');
+            },
+            
+            info(...args) {
+                console.info(...args);
+                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'info');
+            },
+            
+            warn(...args) {
+                console.warn(...args);
+                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'warn');
+            },
+            
+            error(...args) {
+                console.error(...args);
+                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'error');
+            },
+            
+            success(...args) {
+                console.log('✅', ...args);
+                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'success');
+            }
+        };
+        
+        // Toggle debug console
+        debugToggle.addEventListener('click', () => {
+            debugConsole.classList.toggle('visible');
+        });
+        
+        // Global error handler
+        window.onerror = (msg, url, line, col, error) => {
+            Logger.error(`GLOBAL ERROR: ${msg} at line ${line}:${col}`);
+            return false;
+        };
+        
+        window.onunhandledrejection = (event) => {
+            Logger.error(`UNHANDLED PROMISE: ${event.reason}`);
+        };
+        
+        // ==================== TELEGRAM WEBAPP ====================
+        Logger.info('=== INIT START ===');
+        
+        const tg = window.Telegram?.WebApp;
+        
+        if (!tg) {
+            Logger.error('Telegram WebApp API not found!');
+            platformInfo.textContent = '❌ No TG API';
+            platformInfo.style.background = 'red';
+        } else {
+            Logger.success('Telegram WebApp API found');
+            
+            // Log all available info
+            Logger.info('TG Version: ' + tg.version);
+            Logger.info('TG Platform: ' + tg.platform);
+            Logger.info('TG ColorScheme: ' + tg.colorScheme);
+            Logger.info('TG isExpanded: ' + tg.isExpanded);
+            Logger.info('TG viewportHeight: ' + tg.viewportHeight);
+            Logger.info('TG viewportStableHeight: ' + tg.viewportStableHeight);
+            
+            // Check initData
+            if (tg.initData) {
+                Logger.success('initData present, length: ' + tg.initData.length);
+            } else {
+                Logger.warn('initData is EMPTY - might be opened outside Telegram');
             }
             
-            console.log = function(...args) {
-                originalLog.apply(console, args);
-                logToScreen(args);
-            };
+            // Check initDataUnsafe
+            if (tg.initDataUnsafe) {
+                Logger.info('initDataUnsafe: ' + JSON.stringify(tg.initDataUnsafe));
+                if (tg.initDataUnsafe.user) {
+                    Logger.success('User: ' + tg.initDataUnsafe.user.first_name + ' (@' + (tg.initDataUnsafe.user.username || 'no username') + ')');
+                }
+            }
             
-            window.onerror = function(msg, url, line) {
-                logToScreen([`ERROR: ${msg} line ${line}`], '#ff5555');
-            };
+            // Platform info
+            const platform = tg.platform || 'unknown';
+            platformInfo.textContent = `📱 ${platform} | v${tg.version}`;
+            platformInfo.style.background = platform === 'unknown' ? 'orange' : 'rgba(0,128,0,0.8)';
             
-            // ===== TELEGRAM INIT =====
-            const tg = window.Telegram?.WebApp;
-            let mainButtonInitialized = false;
-            
-            if (tg) {
+            // Ready & Expand
+            try {
                 tg.ready();
-                tg.expand();
-                // Ensure colors match theme
-                document.documentElement.style.setProperty('--tg-bg', tg.backgroundColor || '#f2f2f7');
+                Logger.success('tg.ready() called');
+            } catch (e) {
+                Logger.error('tg.ready() failed: ' + e.message);
             }
             
-            // ===== DOM ELEMENTS =====
-            const elements = {
-                header: document.getElementById('header'),
-                form: document.getElementById('adForm'),
-                progressFill: document.getElementById('progressFill'),
-                progressText: document.getElementById('progressText'),
-                
-                title: document.getElementById('title'),
-                description: document.getElementById('description'),
-                price: document.getElementById('price'),
-                contact: document.getElementById('contact'),
-                location: document.getElementById('location'),
-                adType: document.getElementById('adType'),
-                category: document.getElementById('category'),
-                negotiable: document.getElementById('negotiable'),
-                
-                titleGroup: document.getElementById('titleGroup'),
-                contactGroup: document.getElementById('contactGroup'),
-                
-                titleCounter: document.getElementById('titleCounter'),
-                descCounter: document.getElementById('descCounter'),
-                
-                contactType: document.getElementById('contactType'),
-                contactError: document.getElementById('contactError'),
-                
-                negotiableField: document.getElementById('negotiableField')
-            };
+            try {
+                tg.expand();
+                Logger.success('tg.expand() called');
+            } catch (e) {
+                Logger.error('tg.expand() failed: ' + e.message);
+            }
             
-            // ===== CONFIG =====
-            const config = {
-                minTitleLength: 3,
-                maxTitleLength: 100,
-                maxDescLength: 1000,
-                requiredFields: 4
-            };
+            // Check MainButton availability
+            if (tg.MainButton) {
+                Logger.success('MainButton available');
+                Logger.info('MainButton.isVisible: ' + tg.MainButton.isVisible);
+                Logger.info('MainButton.isActive: ' + tg.MainButton.isActive);
+                Logger.info('MainButton.text: ' + tg.MainButton.text);
+            } else {
+                Logger.error('MainButton NOT available!');
+            }
             
-            // ===== CONTACT VALIDATION PATTERNS =====
-            const patterns = {
-                // Telegram username: @ followed by 5-32 alphanumeric characters or underscores
-                username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/,
-                
-                // Phone: various formats with country codes
-                // Supports: +7, 8, +375, +380, +1, etc.
-                phone: /^[\+]?[0-9]?[-\s]?\(?[0-9]{1,4}\)?[-\s]?[0-9]{1,4}[-\s]?[0-9]{1,4}[-\s]?[0-9]{0,4}$/,
-                
-                // Simplified phone check (at least 10 digits)
-                phoneDigits: /^[\d\s\-\+\(\)]{10,}$/
-            };
+            // Check sendData
+            if (typeof tg.sendData === 'function') {
+                Logger.success('sendData method available');
+            } else {
+                Logger.error('sendData method NOT available!');
+            }
+        }
+        
+        // ==================== DOM ELEMENTS ====================
+        const $ = (id) => document.getElementById(id);
+        
+        const elements = {
+            form: $('adForm'),
+            header: $('header'),
+            progressFill: $('progressFill'),
+            progressText: $('progressText'),
+            title: $('title'),
+            description: $('description'),
+            price: $('price'),
+            contact: $('contact'),
+            location: $('location'),
+            adType: $('adType'),
+            category: $('category'),
+            negotiable: $('negotiable'),
+            titleGroup: $('titleGroup'),
+            contactGroup: $('contactGroup'),
+            titleCounter: $('titleCounter'),
+            descCounter: $('descCounter'),
+            contactType: $('contactType'),
+            contactError: $('contactError'),
+            negotiableField: $('negotiableField')
+        };
+        
+        // ==================== VALIDATION ====================
+        const patterns = {
+            username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
+        };
+        
+        const validateContact = (value) => {
+            const v = value.trim();
             
-            // ===== UTILS =====
-            const haptic = (type = 'light') => {
+            if (!v) {
+                return { valid: false, type: null, message: 'Введите @username или номер' };
+            }
+            
+            if (v.startsWith('@')) {
+                if (patterns.username.test(v)) {
+                    return { valid: true, type: 'username', message: 'Telegram username ✓' };
+                }
+                return { valid: false, type: 'username', message: 'Username: 5-32 символа после @' };
+            }
+            
+            const digits = v.replace(/\D/g, '');
+            if (digits.length >= 10 && digits.length <= 15) {
+                return { valid: true, type: 'phone', message: 'Номер телефона ✓' };
+            }
+            
+            if (digits.length > 0 && digits.length < 10) {
+                return { valid: false, type: 'phone', message: 'Номер слишком короткий' };
+            }
+            
+            return { valid: false, type: null, message: 'Введите @username или номер' };
+        };
+        
+        // ==================== UI HELPERS ====================
+        const setFieldState = (group, state) => {
+            if (!group) return;
+            group.classList.remove('is-success', 'is-error');
+            if (state) group.classList.add(state);
+        };
+        
+        const updateCharCounter = (el, current, max) => {
+            el.textContent = `${current}/${max}`;
+            el.classList.remove('is-warning', 'is-danger');
+            if (current / max >= 0.95) el.classList.add('is-danger');
+            else if (current / max >= 0.8) el.classList.add('is-warning');
+        };
+        
+        const haptic = (type = 'light') => {
+            try {
                 if (tg?.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred(type);
                 }
-            };
+            } catch (e) {
+                Logger.warn('Haptic failed: ' + e.message);
+            }
+        };
+        
+        // ==================== PROGRESS ====================
+        let formComplete = false;
+        
+        const updateProgress = () => {
+            let filled = 0;
+            const total = 4;
             
-            const hapticNotification = (type = 'success') => {
-                if (tg?.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred(type);
-                }
-            };
+            if (elements.adType.value) filled++;
+            if (elements.category.value) filled++;
+            if (elements.title.value.trim().length >= 3) filled++;
+            if (validateContact(elements.contact.value).valid) filled++;
             
-            const updateCharCounter = (element, current, max) => {
-                element.textContent = `${current}/${max}`;
-                element.classList.remove('is-warning', 'is-danger');
-                
-                const ratio = current / max;
-                if (ratio >= 0.95) {
-                    element.classList.add('is-danger');
-                } else if (ratio >= 0.8) {
-                    element.classList.add('is-warning');
-                }
-            };
+            const pct = Math.round((filled / total) * 100);
+            formComplete = filled === total;
             
-            const setFieldState = (group, state) => {
-                if (!group) return;
-                group.classList.remove('is-success', 'is-error');
-                if (state) group.classList.add(state);
-            };
+            elements.progressFill.style.width = pct + '%';
+            elements.progressFill.classList.toggle('complete', formComplete);
+            elements.progressText.textContent = pct + '%';
             
-            // ===== CONTACT VALIDATION =====
-            const validateContact = (value) => {
-                const trimmed = value.trim();
-                console.log('Validating contact:', trimmed);
-                
-                if (!trimmed) {
-                    return { valid: false, type: null, message: 'Введите @username или номер телефона' };
-                }
-                
-                // Check if it's a username
-                if (trimmed.startsWith('@')) {
-                    if (patterns.username.test(trimmed)) {
-                        return { valid: true, type: 'username', message: 'Telegram username' };
-                    } else {
-                        return { 
-                            valid: false, 
-                            type: 'username', 
-                            message: 'Username: 5-32 символа (буквы, цифры, _)' 
-                        };
-                    }
-                }
-                
-                // Check if it looks like a phone number
-                const digitsOnly = trimmed.replace(/\D/g, '');
-                
-                if (digitsOnly.length >= 10 && digitsOnly.length <= 15) {
-                    // Valid phone number
-                    return { valid: true, type: 'phone', message: 'Номер телефона' };
-                }
-                
-                if (digitsOnly.length > 0 && digitsOnly.length < 10) {
-                    return { 
-                        valid: false, 
-                        type: 'phone', 
-                        message: 'Номер слишком короткий (мин. 10 цифр)' 
-                    };
-                }
-                
-                if (digitsOnly.length > 15) {
-                    return { 
-                        valid: false, 
-                        type: 'phone', 
-                        message: 'Номер слишком длинный (макс. 15 цифр)' 
-                    };
-                }
-                
-                return { 
-                    valid: false, 
-                    type: null, 
-                    message: 'Введите @username или номер телефона' 
-                };
-            };
-            
-            const updateContactUI = (validation) => {
-                const { contactType, contactError, contactGroup } = elements;
-                
-                // Reset
-                contactType.classList.remove('is-visible', 'is-phone', 'is-username');
-                setFieldState(contactGroup, null);
-                
-                if (validation.valid) {
-                    contactType.textContent = validation.message;
-                    contactType.classList.add('is-visible');
-                    
-                    if (validation.type === 'phone') {
-                        contactType.classList.add('is-phone');
-                    } else if (validation.type === 'username') {
-                        contactType.classList.add('is-username');
-                    }
-                    
-                    setFieldState(contactGroup, 'is-success');
-                } else if (elements.contact.value.trim()) {
-                    // Only show error if user has typed something
-                    contactError.textContent = validation.message;
-                }
-            };
-            
-            // ===== PROGRESS =====
-            const updateProgress = () => {
-                let filled = 0;
-                
-                if (elements.adType.value) filled++;
-                if (elements.category.value) filled++;
-                if (elements.title.value.length >= config.minTitleLength) filled++;
-                
-                const contactValidation = validateContact(elements.contact.value);
-                if (contactValidation.valid) filled++;
-                
-                const percentage = Math.round((filled / config.requiredFields) * 100);
-                const isComplete = filled === config.requiredFields;
-                
-                console.log('Progress Check:', {
-                    adType: !!elements.adType.value,
-                    category: !!elements.category.value,
-                    title: elements.title.value.length >= config.minTitleLength,
-                    contact: contactValidation.valid,
-                    filled: filled,
-                    isComplete: isComplete
-                });
-                
-                elements.progressFill.style.width = `${percentage}%`;
-                elements.progressFill.classList.toggle('complete', isComplete);
-                elements.progressText.textContent = `${percentage}%`;
-                
-                // Update button
-                if (tg?.MainButton) {
-                    console.log('Updating MainButton. Active:', isComplete);
-                    if (isComplete) {
+            // Update MainButton
+            if (tg?.MainButton) {
+                try {
+                    if (formComplete) {
                         tg.MainButton.setText('Продолжить →');
                         tg.MainButton.enable();
                         tg.MainButton.show();
+                        Logger.info('MainButton: enabled, shown');
                     } else {
-                        tg.MainButton.setText(`Осталось полей: ${config.requiredFields - filled}`);
+                        tg.MainButton.setText('Заполните форму (' + pct + '%)');
                         tg.MainButton.disable();
-                        tg.MainButton.show(); // Keep visible but disabled
+                        tg.MainButton.show();
                     }
+                } catch (e) {
+                    Logger.error('MainButton update failed: ' + e.message);
                 }
-                
-                return isComplete;
-            };
+            }
             
-            // ===== VALIDATION =====
-            const validateForm = () => {
-                let isValid = true;
-                
-                setFieldState(elements.titleGroup, null);
-                setFieldState(elements.contactGroup, null);
-                
-                // Validate title
-                if (elements.title.value.length < config.minTitleLength) {
-                    setFieldState(elements.titleGroup, 'is-error');
-                    isValid = false;
-                }
-                
-                // Validate contact
-                const contactValidation = validateContact(elements.contact.value);
-                if (!contactValidation.valid) {
-                    elements.contactError.textContent = contactValidation.message;
-                    setFieldState(elements.contactGroup, 'is-error');
-                    isValid = false;
-                }
-                
-                return isValid;
-            };
+            return formComplete;
+        };
+        
+        // ==================== FORM VALIDATION ====================
+        const validateForm = () => {
+            let valid = true;
             
-            // ===== EVENT HANDLERS =====
-            const handleScroll = () => {
-                const isScrolled = window.scrollY > 20;
-                elements.header.classList.toggle('scrolled', isScrolled);
-            };
+            setFieldState(elements.titleGroup, null);
+            setFieldState(elements.contactGroup, null);
             
-            const handleTitleInput = () => {
-                const len = elements.title.value.length;
-                updateCharCounter(elements.titleCounter, len, config.maxTitleLength);
-                
-                setFieldState(elements.titleGroup, null);
-                if (len >= config.minTitleLength) {
-                    setFieldState(elements.titleGroup, 'is-success');
-                }
-                
-                updateProgress();
-            };
+            if (elements.title.value.trim().length < 3) {
+                setFieldState(elements.titleGroup, 'is-error');
+                valid = false;
+                Logger.warn('Validation failed: title too short');
+            }
             
-            const handleDescInput = () => {
-                const len = elements.description.value.length;
-                updateCharCounter(elements.descCounter, len, config.maxDescLength);
-                updateProgress();
-            };
+            const contactResult = validateContact(elements.contact.value);
+            if (!contactResult.valid) {
+                elements.contactError.textContent = contactResult.message;
+                setFieldState(elements.contactGroup, 'is-error');
+                valid = false;
+                Logger.warn('Validation failed: contact invalid');
+            }
             
-            const handleContactInput = () => {
-                const validation = validateContact(elements.contact.value);
-                updateContactUI(validation);
-                updateProgress();
-            };
+            return valid;
+        };
+        
+        // ==================== SUBMIT HANDLER ====================
+        const handleSubmit = () => {
+            Logger.info('=== SUBMIT TRIGGERED ===');
+            haptic('medium');
             
-            const handleToggleClick = (e) => {
-                if (e.target.closest('.toggle')) return;
-                elements.negotiable.checked = !elements.negotiable.checked;
-                haptic('light');
-            };
-            
-            const handleSubmit = () => {
-                try {
-                console.log('Submit handler triggered');
-                haptic('medium');
+            if (!validateForm()) {
+                Logger.warn('Form validation failed');
+                haptic('error');
                 
-                if (!validateForm()) {
-                    hapticNotification('error');
-                    
-                    if (tg?.showPopup) {
-                        tg.showPopup({
-                            title: 'Проверьте данные',
-                            message: 'Заполните все обязательные поля корректно',
-                            buttons: [{ type: 'ok', text: 'Понятно' }]
-                        });
-                    } else {
-                        alert('Заполните все обязательные поля корректно');
-                    }
-                    
-                    const firstError = document.querySelector('.form-group.is-error');
-                    if (firstError) {
-                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                    return;
-                }
-                
-                // Show loading
-                if (tg?.MainButton) {
-                    tg.MainButton.showProgress();
-                }
-                
-                const priceValue = elements.price.value;
-                const isNegotiable = elements.negotiable.checked;
-                
-                let priceText = priceValue || '0';
-                if (isNegotiable) {
-                    priceText = priceValue ? `${priceValue} (торг)` : 'Договорная';
-                }
-                
-                const data = {
-                    adType: elements.adType.value,
-                    category: elements.category.value,
-                    title: elements.title.value.trim(),
-                    price: priceText,
-                    contact: elements.contact.value.trim(),
-                    description: elements.description.value.trim(),
-                    location: elements.location.value.trim() || null,
-                    negotiable: isNegotiable
-                };
-                
-                console.log('Form data:', data);
-                
-                hapticNotification('success');
-                
-                if (tg?.sendData) {
-                    tg.sendData(JSON.stringify(data));
+                if (tg?.showPopup) {
+                    tg.showPopup({
+                        title: 'Проверьте данные',
+                        message: 'Заполните все обязательные поля',
+                        buttons: [{ type: 'ok' }]
+                    });
                 } else {
-                    // Fallback for testing outside Telegram
-                    alert('Данные готовы к отправке:\n' + JSON.stringify(data, null, 2));
+                    alert('Заполните все обязательные поля');
+                }
+                return;
+            }
+            
+            // Collect data
+            const priceVal = elements.price.value;
+            const isNegotiable = elements.negotiable.checked;
+            let priceText = priceVal || '0';
+            if (isNegotiable) {
+                priceText = priceVal ? priceVal + ' (торг)' : 'Договорная';
+            }
+            
+            const data = {
+                adType: elements.adType.value,
+                category: elements.category.value,
+                title: elements.title.value.trim(),
+                description: elements.description.value.trim(),
+                price: priceText,
+                contact: elements.contact.value.trim(),
+                location: elements.location.value.trim() || null,
+                negotiable: isNegotiable,
+                timestamp: Date.now()
+            };
+            
+            Logger.info('Form data collected:');
+            Logger.info(data);
+            
+            // Show loading
+            if (tg?.MainButton) {
+                try {
+                    tg.MainButton.showProgress(true);
+                    Logger.info('MainButton progress shown');
+                } catch (e) {
+                    Logger.error('showProgress failed: ' + e.message);
+                }
+            }
+            
+            // Send data
+            const jsonData = JSON.stringify(data);
+            Logger.info('JSON to send: ' + jsonData);
+            Logger.info('JSON length: ' + jsonData.length + ' bytes');
+            
+            if (tg?.sendData) {
+                try {
+                    Logger.info('Calling tg.sendData()...');
+                    tg.sendData(jsonData);
+                    Logger.success('sendData() called successfully');
+                    // Note: WebApp will close after sendData
+                } catch (e) {
+                    Logger.error('sendData() FAILED: ' + e.message);
+                    
                     if (tg?.MainButton) {
                         tg.MainButton.hideProgress();
                     }
-                }
-                } catch (e) {
-                    alert('Ошибка: ' + e.message);
-                    if (tg?.MainButton) tg.MainButton.hideProgress();
-                }
-            };
-            
-            // ===== INIT =====
-            const init = () => {
-                console.log('Init started. TG:', !!tg, 'MainButton:', !!tg?.MainButton);
-                // Main button setup
-                if (tg?.MainButton) {
-                    // Reset params first
-                    tg.MainButton.text = 'Заполните форму';
-                    tg.MainButton.color = tg.themeParams?.button_color || '#007aff';
-                    tg.MainButton.textColor = tg.themeParams?.button_text_color || '#ffffff';
                     
-                    if (!mainButtonInitialized) {
-                        console.log('Adding MainButton click listener');
-                        tg.MainButton.onClick(handleSubmit);
-                        mainButtonInitialized = true;
+                    if (tg?.showPopup) {
+                        tg.showPopup({
+                            title: 'Ошибка',
+                            message: 'Не удалось отправить данные: ' + e.message,
+                            buttons: [{ type: 'ok' }]
+                        });
+                    } else {
+                        alert('Ошибка отправки: ' + e.message);
                     }
+                }
+            } else {
+                Logger.error('sendData not available!');
+                Logger.info('Fallback: showing data in alert');
+                
+                if (tg?.MainButton) {
+                    tg.MainButton.hideProgress();
+                }
+                
+                alert('sendData недоступен.\n\nДанные:\n' + JSON.stringify(data, null, 2));
+            }
+        };
+        
+        // ==================== EVENT HANDLERS ====================
+        const handleTitleInput = () => {
+            const len = elements.title.value.length;
+            updateCharCounter(elements.titleCounter, len, 100);
+            setFieldState(elements.titleGroup, len >= 3 ? 'is-success' : null);
+            updateProgress();
+        };
+        
+        const handleDescInput = () => {
+            updateCharCounter(elements.descCounter, elements.description.value.length, 1000);
+        };
+        
+        const handleContactInput = () => {
+            const result = validateContact(elements.contact.value);
+            
+            elements.contactType.classList.remove('is-visible');
+            setFieldState(elements.contactGroup, null);
+            
+            if (result.valid) {
+                elements.contactType.textContent = result.message;
+                elements.contactType.classList.add('is-visible');
+                setFieldState(elements.contactGroup, 'is-success');
+            } else if (elements.contact.value.trim()) {
+                elements.contactError.textContent = result.message;
+            }
+            
+            updateProgress();
+        };
+        
+        const handleScroll = () => {
+            elements.header.classList.toggle('scrolled', window.scrollY > 20);
+        };
+        
+        // ==================== INIT ====================
+        const init = () => {
+            Logger.info('=== INIT HANDLERS ===');
+            
+            // MainButton setup
+            if (tg?.MainButton) {
+                try {
+                    // Set initial state
+                    tg.MainButton.setText('Заполните форму');
+                    tg.MainButton.setParams({
+                        color: tg.themeParams?.button_color || '#007aff',
+                        text_color: tg.themeParams?.button_text_color || '#ffffff',
+                        is_active: false,
+                        is_visible: true
+                    });
+                    
+                    // Add click handler
+                    tg.MainButton.onClick(handleSubmit);
+                    Logger.success('MainButton onClick handler attached');
                     
                     tg.MainButton.show();
+                    Logger.success('MainButton shown');
+                } catch (e) {
+                    Logger.error('MainButton setup failed: ' + e.message);
                 }
-                
-                // Autofill contact from Telegram
-                if (tg?.initDataUnsafe?.user?.username) {
-                    elements.contact.value = `@${tg.initDataUnsafe.user.username}`;
-                    handleContactInput();
-                }
-                
-                // Event listeners
-                window.addEventListener('scroll', handleScroll, { passive: true });
-                
-                elements.title.addEventListener('input', handleTitleInput);
-                elements.description.addEventListener('input', handleDescInput);
-                elements.contact.addEventListener('input', handleContactInput);
-                elements.price.addEventListener('input', updateProgress);
-                elements.location.addEventListener('input', updateProgress);
-                
-                elements.adType.addEventListener('change', () => { 
-                    haptic('light'); 
-                    updateProgress(); 
-                });
-                
-                elements.category.addEventListener('change', () => { 
-                    haptic('light'); 
-                    updateProgress(); 
-                });
-                
-                elements.negotiable.addEventListener('change', () => haptic('light'));
-                elements.negotiableField.addEventListener('click', handleToggleClick);
-                
-                // Focus haptic
-                document.querySelectorAll('.input, .textarea').forEach(el => {
-                    el.addEventListener('focus', () => haptic('light'));
-                });
-                
-                // Initial progress update
-                updateProgress();
-            };
-            
-            // Run when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
             }
-        })();
+            
+            // Autofill contact
+            if (tg?.initDataUnsafe?.user?.username) {
+                elements.contact.value = '@' + tg.initDataUnsafe.user.username;
+                Logger.info('Contact autofilled: ' + elements.contact.value);
+                handleContactInput();
+            }
+            
+            // Event listeners
+            elements.title.addEventListener('input', handleTitleInput);
+            elements.description.addEventListener('input', handleDescInput);
+            elements.contact.addEventListener('input', handleContactInput);
+            elements.price.addEventListener('input', updateProgress);
+            elements.location.addEventListener('input', updateProgress);
+            elements.adType.addEventListener('change', () => { haptic(); updateProgress(); });
+            elements.category.addEventListener('change', () => { haptic(); updateProgress(); });
+            elements.negotiable.addEventListener('change', () => haptic());
+            elements.negotiableField.addEventListener('click', (e) => {
+                if (!e.target.closest('.toggle')) {
+                    elements.negotiable.checked = !elements.negotiable.checked;
+                    haptic();
+                }
+            });
+            
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            
+            // Focus haptic
+            document.querySelectorAll('.input, .textarea, .select').forEach(el => {
+                el.addEventListener('focus', () => haptic());
+            });
+            
+            // Initial state
+            updateProgress();
+            
+            Logger.success('=== INIT COMPLETE ===');
+        };
+        
+        // Run init
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+        
+    })();
     </script>
 </body>
 </html>
