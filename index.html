@@ -23,13 +23,13 @@
             --color-warning: #ff9500;
             --color-error: #ff3b30;
             
-            --tg-message-bg: #ffffff;
-            --tg-message-text: #000000;
+            --tg-message-bg: #182533;
+            --tg-message-text: #ffffff;
         }
         
-        @media (prefers-color-scheme: dark) {
+        @media (prefers-color-scheme: light) {
             :root {
-                --tg-message-bg: #1c1c1e;
+                --tg-message-bg: #182533;
                 --tg-message-text: #ffffff;
             }
         }
@@ -600,6 +600,7 @@
         
         .message-photos.multiple-photos.count-3 {
             grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
         }
         
         .message-photos.multiple-photos.count-3 .message-photo:first-child {
@@ -622,6 +623,7 @@
             position: relative;
             aspect-ratio: 1;
             overflow: hidden;
+            background: #000;
         }
         
         .message-photos.single-photo .message-photo {
@@ -641,7 +643,7 @@
         
         .message-hashtags {
             font-size: 13px;
-            color: var(--tg-button);
+            color: #64B5EF;
             margin-bottom: 10px;
             font-weight: 500;
         }
@@ -1007,7 +1009,7 @@
         
         const tg = window.Telegram?.WebApp;
         
-        let photoData = []; // Храним и URL, и thumb
+        let photoData = [];
         let uploadingCount = 0;
         let currentView = 'form';
         
@@ -1062,8 +1064,6 @@
         const patterns = {
             username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
         };
-        
-        // === PHOTO UPLOAD TO IMGBB ===
         
         const uploadToImgBB = async (file) => {
             const formData = new FormData();
@@ -1220,8 +1220,6 @@
             elements.photoStatus.className = 'photo-status' + (type ? ' ' + type : '');
         };
         
-        // === VALIDATION ===
-        
         const validateContact = (value) => {
             const v = value.trim();
             
@@ -1356,8 +1354,6 @@
             return valid;
         };
         
-        // === VIEW SWITCHING ===
-        
         const switchView = (view) => {
             currentView = view;
             
@@ -1431,8 +1427,8 @@
         };
         
         const renderPreview = () => {
-            const adType = elements.adType.value.replace(' ', '_').replace(/[()]/g, '');
-            const category = elements.category.value.replace(' ', '_').replace(/[()]/g, '');
+            const adType = elements.adType.value.replace(/\s+/g, '_').replace(/[()]/g, '');
+            const category = elements.category.value.replace(/\s+/g, '_').replace(/[()]/g, '');
             elements.previewHashtags.textContent = `#${adType} #${category}`;
             
             elements.previewTitle.textContent = elements.title.value.trim();
@@ -1472,6 +1468,7 @@
             
             elements.previewInfo.innerHTML = infoHTML;
             
+            // ФОТО - ИСПРАВЛЕНО для 3 фото
             elements.previewPhotos.innerHTML = '';
             
             if (photoData.length > 0) {
@@ -1557,8 +1554,6 @@
             }
         };
         
-        // === EVENT HANDLERS ===
-        
         const handleAdTypeChange = () => {
             elements.adType.classList.remove('placeholder');
             setFieldState(elements.adTypeGroup, 'is-success');
@@ -1615,8 +1610,6 @@
             }
         };
         
-        // === INIT ===
-        
         const init = () => {
             if (tg?.MainButton) {
                 try {
@@ -1637,7 +1630,6 @@
                 handleContactInput();
             }
             
-            // Photo upload - ИСПРАВЛЕНО: photoData вместо photoUrls
             elements.photoUploadArea.addEventListener('click', () => {
                 if (photoData.length + uploadingCount < MAX_PHOTOS) {
                     elements.photoInput.click();
