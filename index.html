@@ -519,7 +519,7 @@
     </div>
     
     <div class="container">
-        <form id="adForm">
+        <form id="adForm" onsubmit="return false;">
             <!-- Основная информация -->
             <div class="card">
                 <div class="card-header">
@@ -886,6 +886,7 @@
                 return;
             }
             
+            tg.MainButton.showProgress();
             let priceText = priceInput.value || '0';
             if (negotiableCheck.checked) {
                 priceText = priceInput.value ? `${priceInput.value} (торг)` : 'Договорная';
