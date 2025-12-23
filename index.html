@@ -22,6 +22,16 @@
             --color-success: #34c759;
             --color-warning: #ff9500;
             --color-error: #ff3b30;
+            
+            --tg-message-bg: #ffffff;
+            --tg-message-text: #000000;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --tg-message-bg: #1c1c1e;
+                --tg-message-text: #ffffff;
+            }
         }
         
         * {
@@ -117,6 +127,14 @@
             padding: 0 16px;
             max-width: 600px;
             margin: 0 auto;
+        }
+        
+        .view {
+            display: none;
+        }
+        
+        .view.active {
+            display: block;
         }
         
         .card {
@@ -543,6 +561,179 @@
             color: var(--tg-text);
         }
         
+        /* PREVIEW STYLES */
+        .preview-container {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .telegram-message {
+            background: var(--tg-message-bg);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+        
+        .message-photos {
+            position: relative;
+            background: #000;
+        }
+        
+        .message-photos.single-photo img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .message-photos.multiple-photos {
+            display: grid;
+            gap: 2px;
+            background: #000;
+        }
+        
+        .message-photos.multiple-photos.count-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .message-photos.multiple-photos.count-3 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .message-photos.multiple-photos.count-3 .message-photo:first-child {
+            grid-row: span 2;
+        }
+        
+        .message-photos.multiple-photos.count-4 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .message-photos.multiple-photos.count-5 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .message-photos.multiple-photos.count-5 .message-photo:first-child {
+            grid-column: span 2;
+        }
+        
+        .message-photo {
+            position: relative;
+            aspect-ratio: 1;
+            overflow: hidden;
+        }
+        
+        .message-photos.single-photo .message-photo {
+            aspect-ratio: auto;
+        }
+        
+        .message-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .message-content {
+            padding: 16px;
+        }
+        
+        .message-hashtags {
+            font-size: 13px;
+            color: var(--tg-button);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .message-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--tg-message-text);
+            line-height: 1.3;
+        }
+        
+        .message-description {
+            font-size: 15px;
+            color: var(--tg-message-text);
+            margin-bottom: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .message-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .message-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--tg-message-text);
+        }
+        
+        .message-info-icon {
+            font-size: 16px;
+        }
+        
+        .message-info-label {
+            font-weight: 600;
+        }
+        
+        .preview-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .preview-button {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .preview-button-primary {
+            background: var(--tg-button);
+            color: white;
+        }
+        
+        .preview-button-primary:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+        
+        .preview-button-secondary {
+            background: var(--tg-secondary-bg);
+            color: var(--tg-text);
+            border: 2px solid var(--tg-section-bg);
+        }
+        
+        .preview-button-secondary:active {
+            background: var(--tg-section-bg);
+        }
+        
+        .preview-hint {
+            text-align: center;
+            font-size: 13px;
+            color: var(--tg-hint);
+            margin-top: 12px;
+            line-height: 1.4;
+        }
+        
         @media (max-width: 380px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -562,8 +753,8 @@
 <body>
     <header class="header" id="header">
         <div class="header-content">
-            <h1>Новое объявление</h1>
-            <p class="header-subtitle">Заполните информацию о товаре</p>
+            <h1 id="headerTitle">Новое объявление</h1>
+            <p class="header-subtitle" id="headerSubtitle">Заполните информацию о товаре</p>
             <div class="progress-wrapper">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
@@ -573,201 +764,238 @@
         </div>
     </header>
     
-    <main class="container">
-        <form id="adForm" novalidate>
-            <article class="card">
-                <header class="card-header">
-                    <h2 class="card-title">📋 Тип и категория</h2>
-                </header>
-                <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group" id="adTypeGroup">
-                            <label class="form-label" for="adType">
-                                Тип <span class="badge badge--required">обязательно</span>
-                            </label>
-                            <select class="select placeholder" id="adType" name="adType" required>
-                                <option value="" disabled selected>Выберите тип</option>
-                                <option value="Продам">🏷️ Продам</option>
-                                <option value="Куплю">🛒 Куплю</option>
-                                <option value="Услуга">🔧 Услуга</option>
-                                <option value="Вакансия">💼 Вакансия</option>
-                                <option value="Аренда">🏠 Аренда</option>
-                                <option value="Обмен">🔄 Обмен</option>
-                            </select>
-                            <p class="error-message">Выберите тип объявления</p>
+    <main>
+        <!-- FORM VIEW -->
+        <div id="formView" class="view active">
+            <div class="container">
+                <form id="adForm" novalidate>
+                    <article class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">📋 Тип и категория</h2>
+                        </header>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group" id="adTypeGroup">
+                                    <label class="form-label" for="adType">
+                                        Тип <span class="badge badge--required">обязательно</span>
+                                    </label>
+                                    <select class="select placeholder" id="adType" name="adType" required>
+                                        <option value="" disabled selected>Выберите тип</option>
+                                        <option value="Продам">🏷️ Продам</option>
+                                        <option value="Куплю">🛒 Куплю</option>
+                                        <option value="Услуга">🔧 Услуга</option>
+                                        <option value="Вакансия">💼 Вакансия</option>
+                                        <option value="Аренда">🏠 Аренда</option>
+                                        <option value="Обмен">🔄 Обмен</option>
+                                    </select>
+                                    <p class="error-message">Выберите тип объявления</p>
+                                </div>
+                                
+                                <div class="form-group" id="categoryGroup">
+                                    <label class="form-label" for="category">
+                                        Категория <span class="badge badge--required">обязательно</span>
+                                    </label>
+                                    <select class="select placeholder" id="category" name="category" required>
+                                        <option value="" disabled selected>Выберите категорию</option>
+                                        <option value="Электроника">📱 Электроника</option>
+                                        <option value="Одежда">👕 Одежда</option>
+                                        <option value="Авто">🚗 Авто</option>
+                                        <option value="Недвижимость">🏠 Недвижимость</option>
+                                        <option value="Работа">💼 Работа</option>
+                                        <option value="Услуги">🔧 Услуги</option>
+                                        <option value="Дом">🏡 Дом и сад</option>
+                                        <option value="Детское">👶 Детское</option>
+                                        <option value="Хобби">🎨 Хобби</option>
+                                        <option value="Другое">📦 Другое</option>
+                                    </select>
+                                    <p class="error-message">Выберите категорию</p>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <div class="form-group" id="categoryGroup">
-                            <label class="form-label" for="category">
-                                Категория <span class="badge badge--required">обязательно</span>
-                            </label>
-                            <select class="select placeholder" id="category" name="category" required>
-                                <option value="" disabled selected>Выберите категорию</option>
-                                <option value="Электроника">📱 Электроника</option>
-                                <option value="Одежда">👕 Одежда</option>
-                                <option value="Авто">🚗 Авто</option>
-                                <option value="Недвижимость">🏠 Недвижимость</option>
-                                <option value="Работа">💼 Работа</option>
-                                <option value="Услуги">🔧 Услуги</option>
-                                <option value="Дом">🏡 Дом и сад</option>
-                                <option value="Детское">👶 Детское</option>
-                                <option value="Хобби">🎨 Хобби</option>
-                                <option value="Другое">📦 Другое</option>
-                            </select>
-                            <p class="error-message">Выберите категорию</p>
+                    </article>
+                    
+                    <article class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">✏️ Описание</h2>
+                        </header>
+                        <div class="card-body">
+                            <div class="form-group" id="titleGroup">
+                                <label class="form-label" for="title">
+                                    Заголовок <span class="badge badge--required">обязательно</span>
+                                </label>
+                                <input 
+                                    class="input" type="text" id="title" name="title"
+                                    placeholder="Например: iPhone 14 Pro 256GB"
+                                    maxlength="100" autocomplete="off" required
+                                >
+                                <div class="field-footer">
+                                    <span class="field-hint">Краткое название</span>
+                                    <span class="char-count" id="titleCounter">0/100</span>
+                                </div>
+                                <p class="error-message">Минимум 3 символа</p>
+                            </div>
+                            
+                            <div class="form-group" id="descriptionGroup">
+                                <label class="form-label" for="description">
+                                    Описание <span class="badge badge--required">обязательно</span>
+                                </label>
+                                <textarea 
+                                    class="textarea" id="description" name="description"
+                                    placeholder="Опишите состояние, комплектацию, особенности товара..."
+                                    maxlength="1000" required
+                                ></textarea>
+                                <div class="field-footer">
+                                    <span class="field-hint">Подробности о товаре</span>
+                                    <span class="char-count" id="descCounter">0/1000</span>
+                                </div>
+                                <p class="error-message">Минимум 10 символов</p>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </article>
-            
-            <article class="card">
-                <header class="card-header">
-                    <h2 class="card-title">✏️ Описание</h2>
-                </header>
-                <div class="card-body">
-                    <div class="form-group" id="titleGroup">
-                        <label class="form-label" for="title">
-                            Заголовок <span class="badge badge--required">обязательно</span>
-                        </label>
-                        <input 
-                            class="input" type="text" id="title" name="title"
-                            placeholder="Например: iPhone 14 Pro 256GB"
-                            maxlength="100" autocomplete="off" required
-                        >
-                        <div class="field-footer">
-                            <span class="field-hint">Краткое название</span>
-                            <span class="char-count" id="titleCounter">0/100</span>
+                    </article>
+                    
+                    <!-- Фото -->
+                    <article class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">📸 Фотографии</h2>
+                        </header>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Фото товара <span class="badge badge--optional">рекомендуется</span>
+                                </label>
+                                <div class="photo-upload-area" id="photoUploadArea">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Нажмите для выбора фото</div>
+                                    <div class="upload-hint">JPG, PNG до 5 МБ • Макс. 5 шт.</div>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    id="photoInput" 
+                                    class="photo-input" 
+                                    accept="image/jpeg,image/png,image/webp"
+                                    multiple
+                                >
+                                <div class="photo-preview-grid" id="photoPreviewGrid"></div>
+                                <div class="photo-status" id="photoStatus"></div>
+                            </div>
                         </div>
-                        <p class="error-message">Минимум 3 символа</p>
+                    </article>
+                    
+                    <article class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">💰 Стоимость</h2>
+                        </header>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="price">Цена</label>
+                                <div class="price-field">
+                                    <input 
+                                        class="input" type="number" id="price" name="price"
+                                        placeholder="0" min="0" max="999999999" inputmode="numeric"
+                                    >
+                                    <span class="currency">₽</span>
+                                </div>
+                                <div class="field-footer">
+                                    <span class="field-hint">Оставьте 0 для «Договорная»</span>
+                                </div>
+                            </div>
+                            
+                            <div class="toggle-field" id="negotiableField">
+                                <span class="toggle-label">🤝 Торг возможен</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="negotiable" name="negotiable">
+                                    <span class="toggle-track"></span>
+                                    <span class="toggle-thumb"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </article>
+                    
+                    <article class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">📞 Контакты</h2>
+                        </header>
+                        <div class="card-body">
+                            <div class="form-group" id="contactGroup">
+                                <label class="form-label" for="contact">
+                                    Связь <span class="badge badge--required">обязательно</span>
+                                </label>
+                                <input 
+                                    class="input" type="text" id="contact" name="contact"
+                                    placeholder="@username или +7 999 123-45-67"
+                                    autocomplete="off" required
+                                >
+                                <div class="field-footer">
+                                    <span class="field-hint">Telegram или телефон</span>
+                                </div>
+                                <p class="contact-type" id="contactType"></p>
+                                <p class="error-message" id="contactError">Введите @username или номер телефона</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="location">
+                                    Местоположение <span class="badge badge--optional">опционально</span>
+                                </label>
+                                <input 
+                                    class="input" type="text" id="location" name="location"
+                                    placeholder="Город, район, метро" autocomplete="off"
+                                >
+                                <div class="field-footer">
+                                    <span class="field-hint">Упростит поиск для покупателей</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    
+                    <div class="warning-banner">
+                        <span style="font-size: 18px;">⚠️</span>
+                        <div>
+                            <strong>Важно:</strong> Запрещена публикация материалов, содержащих спам, признаки мошенничества, а также товаров, реализация которых запрещена законодательством РФ. Нарушители будут заблокированы.
+                        </div>
                     </div>
                     
-                    <div class="form-group" id="descriptionGroup">
-                        <label class="form-label" for="description">
-                            Описание <span class="badge badge--required">обязательно</span>
-                        </label>
-                        <textarea 
-                            class="textarea" id="description" name="description"
-                            placeholder="Опишите состояние, комплектацию, особенности товара..."
-                            maxlength="1000" required
-                        ></textarea>
-                        <div class="field-footer">
-                            <span class="field-hint">Подробности о товаре</span>
-                            <span class="char-count" id="descCounter">0/1000</span>
+                    <aside class="info-banner">
+                        <span style="font-size: 20px;">💡</span>
+                        <div class="info-banner-content">
+                            <p class="info-banner-title">Модерация и оплата</p>
+                            <p class="info-banner-text">Объявление проверит модератор (обычно 5-30 минут). После одобрения придёт запрос на оплату ⭐</p>
                         </div>
-                        <p class="error-message">Минимум 10 символов</p>
-                    </div>
-                </div>
-            </article>
-            
-            <!-- Фото -->
-            <article class="card">
-                <header class="card-header">
-                    <h2 class="card-title">📸 Фотографии</h2>
-                </header>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label class="form-label">
-                            Фото товара <span class="badge badge--optional">рекомендуется</span>
-                        </label>
-                        <div class="photo-upload-area" id="photoUploadArea">
-                            <div class="upload-icon">📷</div>
-                            <div class="upload-text">Нажмите для выбора фото</div>
-                            <div class="upload-hint">JPG, PNG до 5 МБ • Макс. 5 шт.</div>
-                        </div>
-                        <input 
-                            type="file" 
-                            id="photoInput" 
-                            class="photo-input" 
-                            accept="image/jpeg,image/png,image/webp"
-                            multiple
-                        >
-                        <div class="photo-preview-grid" id="photoPreviewGrid"></div>
-                        <div class="photo-status" id="photoStatus"></div>
-                    </div>
-                </div>
-            </article>
-            
-            <article class="card">
-                <header class="card-header">
-                    <h2 class="card-title">💰 Стоимость</h2>
-                </header>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label class="form-label" for="price">Цена</label>
-                        <div class="price-field">
-                            <input 
-                                class="input" type="number" id="price" name="price"
-                                placeholder="0" min="0" max="999999999" inputmode="numeric"
-                            >
-                            <span class="currency">₽</span>
-                        </div>
-                        <div class="field-footer">
-                            <span class="field-hint">Оставьте 0 для «Договорная»</span>
-                        </div>
-                    </div>
-                    
-                    <div class="toggle-field" id="negotiableField">
-                        <span class="toggle-label">🤝 Торг возможен</span>
-                        <label class="toggle">
-                            <input type="checkbox" id="negotiable" name="negotiable">
-                            <span class="toggle-track"></span>
-                            <span class="toggle-thumb"></span>
-                        </label>
-                    </div>
-                </div>
-            </article>
-            
-            <article class="card">
-                <header class="card-header">
-                    <h2 class="card-title">📞 Контакты</h2>
-                </header>
-                <div class="card-body">
-                    <div class="form-group" id="contactGroup">
-                        <label class="form-label" for="contact">
-                            Связь <span class="badge badge--required">обязательно</span>
-                        </label>
-                        <input 
-                            class="input" type="text" id="contact" name="contact"
-                            placeholder="@username или +7 999 123-45-67"
-                            autocomplete="off" required
-                        >
-                        <div class="field-footer">
-                            <span class="field-hint">Telegram или телефон</span>
-                        </div>
-                        <p class="contact-type" id="contactType"></p>
-                        <p class="error-message" id="contactError">Введите @username или номер телефона</p>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="location">
-                            Местоположение <span class="badge badge--optional">опционально</span>
-                        </label>
-                        <input 
-                            class="input" type="text" id="location" name="location"
-                            placeholder="Город, район, метро" autocomplete="off"
-                        >
-                        <div class="field-footer">
-                            <span class="field-hint">Упростит поиск для покупателей</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            
-            <div class="warning-banner">
-                <span style="font-size: 18px;">⚠️</span>
-                <div>
-                    <strong>Важно:</strong> Запрещена публикация материалов, содержащих спам, признаки мошенничества, а также товаров, реализация которых запрещена законодательством РФ. Нарушители будут заблокированы.
-                </div>
+                    </aside>
+                </form>
             </div>
-            
-            <aside class="info-banner">
-                <span style="font-size: 20px;">💡</span>
-                <div class="info-banner-content">
-                    <p class="info-banner-title">Модерация и оплата</p>
-                    <p class="info-banner-text">Объявление проверит модератор (обычно 5-30 минут). После одобрения придёт запрос на оплату ⭐</p>
+        </div>
+
+        <!-- PREVIEW VIEW -->
+        <div id="previewView" class="view">
+            <div class="preview-container">
+                <div class="telegram-message" id="previewMessage">
+                    <!-- Photos will be inserted here -->
+                    <div class="message-photos" id="previewPhotos"></div>
+                    
+                    <div class="message-content">
+                        <div class="message-hashtags" id="previewHashtags"></div>
+                        <div class="message-title" id="previewTitle"></div>
+                        <div class="message-description" id="previewDescription"></div>
+                        <div class="message-info" id="previewInfo"></div>
+                    </div>
                 </div>
-            </aside>
-        </form>
+
+                <div class="preview-actions">
+                    <button type="button" class="preview-button preview-button-primary" id="submitBtn">
+                        <span>✓</span>
+                        <span>Отправить на модерацию</span>
+                    </button>
+                    <button type="button" class="preview-button preview-button-secondary" id="backToFormBtn">
+                        <span>←</span>
+                        <span>Вернуться к заполнению</span>
+                    </button>
+                </div>
+
+                <p class="preview-hint">
+                    Проверьте, как будет выглядеть ваше объявление в канале. При необходимости вы можете вернуться и внести изменения.
+                </p>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -782,6 +1010,7 @@
         
         let photoUrls = [];
         let uploadingCount = 0;
+        let currentView = 'form';
         
         if (tg) {
             tg.ready();
@@ -791,10 +1020,19 @@
         const $ = (id) => document.getElementById(id);
         
         const elements = {
-            form: $('adForm'),
+            // Views
+            formView: $('formView'),
+            previewView: $('previewView'),
+            
+            // Header
             header: $('header'),
+            headerTitle: $('headerTitle'),
+            headerSubtitle: $('headerSubtitle'),
             progressFill: $('progressFill'),
             progressText: $('progressText'),
+            
+            // Form
+            form: $('adForm'),
             title: $('title'),
             description: $('description'),
             price: $('price'),
@@ -803,20 +1041,38 @@
             adType: $('adType'),
             category: $('category'),
             negotiable: $('negotiable'),
+            
+            // Form groups
             adTypeGroup: $('adTypeGroup'),
             categoryGroup: $('categoryGroup'),
             titleGroup: $('titleGroup'),
             descriptionGroup: $('descriptionGroup'),
             contactGroup: $('contactGroup'),
+            
+            // Counters
             titleCounter: $('titleCounter'),
             descCounter: $('descCounter'),
             contactType: $('contactType'),
             contactError: $('contactError'),
+            
+            // Toggle
             negotiableField: $('negotiableField'),
+            
+            // Photos
             photoUploadArea: $('photoUploadArea'),
             photoInput: $('photoInput'),
             photoPreviewGrid: $('photoPreviewGrid'),
-            photoStatus: $('photoStatus')
+            photoStatus: $('photoStatus'),
+            
+            // Preview
+            previewMessage: $('previewMessage'),
+            previewPhotos: $('previewPhotos'),
+            previewHashtags: $('previewHashtags'),
+            previewTitle: $('previewTitle'),
+            previewDescription: $('previewDescription'),
+            previewInfo: $('previewInfo'),
+            submitBtn: $('submitBtn'),
+            backToFormBtn: $('backToFormBtn')
         };
         
         const patterns = {
@@ -1035,7 +1291,7 @@
         
         const updateProgress = () => {
             let filled = 0;
-            const total = 5; // Теперь 5 обязательных полей
+            const total = 5;
             
             if (elements.adType.value) filled++;
             if (elements.category.value) filled++;
@@ -1050,62 +1306,58 @@
             elements.progressFill.classList.toggle('complete', formComplete);
             elements.progressText.textContent = pct + '%';
             
-            const canSubmit = formComplete && uploadingCount === 0;
+            const canProceed = formComplete && uploadingCount === 0;
             
             if (tg?.MainButton) {
                 try {
-                    if (uploadingCount > 0) {
-                        tg.MainButton.setText('Загрузка фото...');
-                        tg.MainButton.disable();
-                    } else if (canSubmit) {
-                        tg.MainButton.setText('Отправить на модерацию →');
-                        tg.MainButton.enable();
-                    } else {
-                        tg.MainButton.setText('Заполните форму (' + pct + '%)');
-                        tg.MainButton.disable();
+                    if (currentView === 'form') {
+                        if (uploadingCount > 0) {
+                            tg.MainButton.setText('Загрузка фото...');
+                            tg.MainButton.disable();
+                        } else if (canProceed) {
+                            tg.MainButton.setText('Предпросмотр →');
+                            tg.MainButton.enable();
+                        } else {
+                            tg.MainButton.setText('Заполните форму (' + pct + '%)');
+                            tg.MainButton.disable();
+                        }
                     }
                     tg.MainButton.show();
                 } catch (e) {}
             }
             
-            return canSubmit;
+            return canProceed;
         };
         
         const validateForm = () => {
             let valid = true;
             
-            // Сброс состояний
             setFieldState(elements.adTypeGroup, null);
             setFieldState(elements.categoryGroup, null);
             setFieldState(elements.titleGroup, null);
             setFieldState(elements.descriptionGroup, null);
             setFieldState(elements.contactGroup, null);
             
-            // Проверка типа
             if (!elements.adType.value) {
                 setFieldState(elements.adTypeGroup, 'is-error');
                 valid = false;
             }
             
-            // Проверка категории
             if (!elements.category.value) {
                 setFieldState(elements.categoryGroup, 'is-error');
                 valid = false;
             }
             
-            // Проверка заголовка
             if (elements.title.value.trim().length < 3) {
                 setFieldState(elements.titleGroup, 'is-error');
                 valid = false;
             }
             
-            // Проверка описания (минимум 10 символов)
             if (elements.description.value.trim().length < 10) {
                 setFieldState(elements.descriptionGroup, 'is-error');
                 valid = false;
             }
             
-            // Проверка контакта
             const contactResult = validateContact(elements.contact.value);
             if (!contactResult.valid) {
                 elements.contactError.textContent = contactResult.message;
@@ -1116,7 +1368,42 @@
             return valid;
         };
         
-        const handleSubmit = () => {
+        // === VIEW SWITCHING ===
+        
+        const switchView = (view) => {
+            currentView = view;
+            
+            elements.formView.classList.remove('active');
+            elements.previewView.classList.remove('active');
+            
+            if (view === 'form') {
+                elements.formView.classList.add('active');
+                elements.headerTitle.textContent = 'Новое объявление';
+                elements.headerSubtitle.textContent = 'Заполните информацию о товаре';
+                
+                if (tg?.MainButton) {
+                    tg.MainButton.offClick(showPreview);
+                    tg.MainButton.onClick(showPreview);
+                }
+                
+                updateProgress();
+            } else if (view === 'preview') {
+                elements.previewView.classList.add('active');
+                elements.headerTitle.textContent = 'Предпросмотр';
+                elements.headerSubtitle.textContent = 'Так будет выглядеть объявление';
+                
+                if (tg?.MainButton) {
+                    tg.MainButton.hide();
+                }
+                
+                renderPreview();
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            haptic('light');
+        };
+        
+        const showPreview = () => {
             haptic('medium');
             
             if (uploadingCount > 0) {
@@ -1151,6 +1438,88 @@
                 }
                 return;
             }
+            
+            switchView('preview');
+        };
+        
+        const renderPreview = () => {
+            // Hashtags
+            const adType = elements.adType.value.replace(' ', '_').replace(/[()]/g, '');
+            const category = elements.category.value.replace(' ', '_').replace(/[()]/g, '');
+            elements.previewHashtags.textContent = `#${adType} #${category}`;
+            
+            // Title
+            elements.previewTitle.textContent = elements.title.value.trim();
+            
+            // Description
+            elements.previewDescription.textContent = elements.description.value.trim();
+            
+            // Info
+            const priceVal = elements.price.value;
+            const isNegotiable = elements.negotiable.checked;
+            let priceText = priceVal || '0';
+            if (isNegotiable) {
+                priceText = priceVal ? priceVal + ' ₽ (торг)' : 'Договорная';
+            } else {
+                priceText = priceVal ? priceVal + ' ₽' : 'Договорная';
+            }
+            
+            let infoHTML = `
+                <div class="message-info-item">
+                    <span class="message-info-icon">💰</span>
+                    <span><span class="message-info-label">Цена:</span> ${priceText}</span>
+                </div>
+            `;
+            
+            if (elements.location.value.trim()) {
+                infoHTML += `
+                    <div class="message-info-item">
+                        <span class="message-info-icon">📍</span>
+                        <span><span class="message-info-label">Локация:</span> ${elements.location.value.trim()}</span>
+                    </div>
+                `;
+            }
+            
+            infoHTML += `
+                <div class="message-info-item">
+                    <span class="message-info-icon">👤</span>
+                    <span><span class="message-info-label">Контакт:</span> ${elements.contact.value.trim()}</span>
+                </div>
+            `;
+            
+            elements.previewInfo.innerHTML = infoHTML;
+            
+            // Photos
+            elements.previewPhotos.innerHTML = '';
+            
+            if (photoUrls.length > 0) {
+                const count = photoUrls.length;
+                
+                if (count === 1) {
+                    elements.previewPhotos.className = 'message-photos single-photo';
+                    elements.previewPhotos.innerHTML = `
+                        <div class="message-photo">
+                            <img src="${photoUrls[0]}" alt="Фото">
+                        </div>
+                    `;
+                } else {
+                    elements.previewPhotos.className = `message-photos multiple-photos count-${count}`;
+                    photoUrls.forEach(url => {
+                        const photoDiv = document.createElement('div');
+                        photoDiv.className = 'message-photo';
+                        photoDiv.innerHTML = `<img src="${url}" alt="Фото">`;
+                        elements.previewPhotos.appendChild(photoDiv);
+                    });
+                }
+                
+                elements.previewPhotos.style.display = 'grid';
+            } else {
+                elements.previewPhotos.style.display = 'none';
+            }
+        };
+        
+        const handleSubmit = () => {
+            haptic('medium');
             
             const priceVal = elements.price.value;
             const isNegotiable = elements.negotiable.checked;
@@ -1276,7 +1645,7 @@
                         is_active: false,
                         is_visible: true
                     });
-                    tg.MainButton.onClick(handleSubmit);
+                    tg.MainButton.onClick(showPreview);
                     tg.MainButton.show();
                 } catch (e) {}
             }
@@ -1335,6 +1704,10 @@
                 }
             });
             
+            // Preview buttons
+            elements.submitBtn.addEventListener('click', handleSubmit);
+            elements.backToFormBtn.addEventListener('click', () => switchView('form'));
+            
             window.addEventListener('scroll', handleScroll, { passive: true });
             
             document.querySelectorAll('.input, .textarea, .select').forEach(el => {
@@ -1354,5 +1727,3 @@
     </script>
 </body>
 </html>
-
-
