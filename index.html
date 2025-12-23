@@ -48,6 +48,7 @@
             line-height: 1.5;
             padding-bottom: 120px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
         .header {
@@ -75,6 +76,11 @@
         .header-content {
             max-width: 600px;
             margin: 0 auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .header-content.changing {
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .header h1 {
@@ -131,10 +137,84 @@
         
         .view {
             display: none;
+            animation-duration: 0.3s;
+            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            animation-fill-mode: both;
         }
         
         .view.active {
             display: block;
+        }
+        
+        .view.slide-in-right {
+            animation-name: slideInRight;
+        }
+        
+        .view.slide-out-left {
+            animation-name: slideOutLeft;
+        }
+        
+        .view.slide-in-left {
+            animation-name: slideInLeft;
+        }
+        
+        .view.slide-out-right {
+            animation-name: slideOutRight;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutLeft {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .card {
@@ -574,11 +654,13 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 16px;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
         }
         
         .message-photos {
             position: relative;
             background: #000;
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
         
         .message-photos.single-photo img {
@@ -639,6 +721,7 @@
         
         .message-content {
             padding: 16px;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
         }
         
         .message-hashtags {
@@ -690,6 +773,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
         }
         
         .preview-button {
@@ -734,6 +818,7 @@
             color: var(--tg-hint);
             margin-top: 12px;
             line-height: 1.4;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
         }
         
         @media (max-width: 380px) {
@@ -1355,33 +1440,62 @@
         };
         
         const switchView = (view) => {
+            const fromView = currentView;
             currentView = view;
             
-            elements.formView.classList.remove('active');
-            elements.previewView.classList.remove('active');
+            const fromElement = fromView === 'form' ? elements.formView : elements.previewView;
+            const toElement = view === 'form' ? elements.formView : elements.previewView;
             
-            if (view === 'form') {
-                elements.formView.classList.add('active');
-                elements.headerTitle.textContent = 'Новое объявление';
-                elements.headerSubtitle.textContent = 'Заполните информацию о товаре';
-                
-                if (tg?.MainButton) {
-                    tg.MainButton.offClick(showPreview);
-                    tg.MainButton.onClick(showPreview);
-                }
-                
-                updateProgress();
-            } else if (view === 'preview') {
-                elements.previewView.classList.add('active');
-                elements.headerTitle.textContent = 'Предпросмотр';
-                elements.headerSubtitle.textContent = 'Так будет выглядеть объявление';
-                
-                if (tg?.MainButton) {
-                    tg.MainButton.hide();
-                }
-                
-                renderPreview();
+            const isForward = view === 'preview';
+            
+            fromElement.classList.remove('slide-in-right', 'slide-out-left', 'slide-in-left', 'slide-out-right');
+            toElement.classList.remove('slide-in-right', 'slide-out-left', 'slide-in-left', 'slide-out-right');
+            
+            if (isForward) {
+                fromElement.classList.add('slide-out-left');
+            } else {
+                fromElement.classList.add('slide-out-right');
             }
+            
+            setTimeout(() => {
+                fromElement.classList.remove('active');
+                toElement.classList.add('active');
+                
+                if (isForward) {
+                    toElement.classList.add('slide-in-right');
+                } else {
+                    toElement.classList.add('slide-in-left');
+                }
+                
+                const headerContent = elements.header.querySelector('.header-content');
+                headerContent.classList.add('changing');
+                
+                if (view === 'form') {
+                    elements.headerTitle.textContent = 'Новое объявление';
+                    elements.headerSubtitle.textContent = 'Заполните информацию о товаре';
+                    
+                    if (tg?.MainButton) {
+                        tg.MainButton.offClick(showPreview);
+                        tg.MainButton.onClick(showPreview);
+                    }
+                    
+                    updateProgress();
+                } else if (view === 'preview') {
+                    elements.headerTitle.textContent = 'Предпросмотр';
+                    elements.headerSubtitle.textContent = 'Так будет выглядеть объявление';
+                    
+                    if (tg?.MainButton) {
+                        tg.MainButton.hide();
+                    }
+                    
+                    renderPreview();
+                }
+                
+                setTimeout(() => {
+                    headerContent.classList.remove('changing');
+                }, 300);
+                
+            }, 50);
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
             haptic('light');
@@ -1427,6 +1541,19 @@
         };
         
         const renderPreview = () => {
+            const resetAnimation = (element) => {
+                if (element) {
+                    element.style.animation = 'none';
+                    setTimeout(() => {
+                        element.style.animation = '';
+                    }, 10);
+                }
+            };
+            
+            resetAnimation(elements.previewMessage);
+            resetAnimation(elements.previewPhotos);
+            resetAnimation(elements.previewMessage.querySelector('.message-content'));
+            
             const adType = elements.adType.value.replace(/\s+/g, '_').replace(/[()]/g, '');
             const category = elements.category.value.replace(/\s+/g, '_').replace(/[()]/g, '');
             elements.previewHashtags.textContent = `#${adType} #${category}`;
@@ -1468,7 +1595,6 @@
             
             elements.previewInfo.innerHTML = infoHTML;
             
-            // ФОТО - ИСПРАВЛЕНО для 3 фото
             elements.previewPhotos.innerHTML = '';
             
             if (photoData.length > 0) {
