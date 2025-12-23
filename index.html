@@ -140,15 +140,6 @@
                 return;
             }
 
-            // Простая валидация URL изображения
-            if (imageUrl && !imageUrl.match(/\.(jpeg|jpg|gif|png)$/i)) {
-                tg.showPopup({
-                    title: 'Ошибка', 
-                    message: 'Пожалуйста, введите корректную ссылку на изображение (jpg, jpeg, png, gif).'
-                });
-                return;
-            }
-
             const data = {
                 adType: adType,
                 category: category,
