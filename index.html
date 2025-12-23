@@ -7,10 +7,14 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --tg-radius: 12px;
-            --tg-radius-lg: 16px;
-            --tg-spacing: 8px;
-            --tg-transition: all 0.15s ease;
+            --radius: 14px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --spacing: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
         }
         
         * {
@@ -21,11 +25,11 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #f5f5f5);
             color: var(--tg-theme-text-color, #000000);
-            line-height: 1.4;
-            padding-bottom: 80px;
+            line-height: 1.5;
+            padding-bottom: 100px;
             overflow-x: hidden;
         }
         
@@ -34,28 +38,40 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: var(--tg-theme-bg-color, #ffffff);
-            padding: 20px 16px 12px;
-            backdrop-filter: blur(10px);
+            background: var(--tg-theme-bg-color, #f5f5f5);
+            padding: 24px 20px 16px;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+        
+        .header-content {
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .header h1 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            letter-spacing: -0.8px;
+            background: linear-gradient(135deg, 
+                var(--tg-theme-text-color, #000) 0%, 
+                var(--tg-theme-text-color, #000) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
         }
         
         .header-subtitle {
-            font-size: 14px;
+            font-size: 15px;
             color: var(--tg-theme-hint-color, #8e8e93);
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            font-weight: 400;
         }
         
-        .progress-bar {
-            height: 4px;
-            background: var(--tg-theme-section-bg-color, #efeff3);
-            border-radius: 2px;
+        .progress-container {
+            background: var(--tg-theme-secondary-bg-color, #e5e5ea);
+            border-radius: 100px;
+            height: 6px;
             overflow: hidden;
             position: relative;
         }
@@ -64,58 +80,87 @@
             height: 100%;
             background: linear-gradient(90deg, 
                 var(--tg-theme-button-color, #3390ec) 0%, 
-                var(--tg-theme-button-color, #3390ec) 100%);
-            border-radius: 2px;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 8px rgba(51, 144, 236, 0.4);
+                var(--tg-theme-link-color, #007aff) 100%);
+            border-radius: 100px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 0 12px rgba(51, 144, 236, 0.5);
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-30px); }
+            100% { transform: translateX(100px); }
         }
         
         /* Container */
         .container {
-            padding: 12px 16px;
+            padding: 0 20px;
+            max-width: 640px;
+            margin: 0 auto;
         }
         
-        /* Card Section */
+        /* Card */
         .card {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: var(--tg-radius-lg);
-            margin-bottom: 12px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
             overflow: hidden;
-            box-shadow: 0 0.5px 0 rgba(0,0,0,0.04);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-md);
         }
         
         .card-header {
-            padding: 16px 16px 12px;
-            border-bottom: 0.5px solid var(--tg-theme-section-separator-color, rgba(0,0,0,0.07));
+            padding: 20px 20px 16px;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(0,0,0,0.01) 100%);
         }
         
         .card-title {
-            font-size: 15px;
+            font-size: 17px;
             font-weight: 600;
             color: var(--tg-theme-text-color, #000000);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            letter-spacing: -0.3px;
         }
         
         .card-title .emoji {
-            font-size: 18px;
+            font-size: 22px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
         
         .card-body {
-            padding: 12px 16px 16px;
+            padding: 0 20px 20px;
         }
         
         /* Form Elements */
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
         
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
         
         .form-group:last-child {
@@ -124,61 +169,74 @@
         
         label {
             display: block;
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
             color: var(--tg-theme-text-color, #000000);
+            letter-spacing: -0.2px;
+        }
+        
+        .label-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-left: 6px;
+            letter-spacing: 0;
         }
         
         .label-required {
-            color: var(--tg-theme-link-color, #3390ec);
+            background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
+            color: white;
         }
         
         .label-optional {
+            background: var(--tg-theme-section-bg-color, #e5e5ea);
             color: var(--tg-theme-hint-color, #8e8e93);
-            font-weight: 400;
-            font-size: 12px;
         }
         
-        /* Input Styles */
+        /* Inputs */
         input, textarea, select {
             width: 100%;
-            padding: 11px 14px;
-            border: none;
-            border-radius: 10px;
+            padding: 14px 16px;
+            border: 2px solid transparent;
+            border-radius: 12px;
             background: var(--tg-theme-section-bg-color, #f2f2f7);
             color: var(--tg-theme-text-color, #000000);
             font-size: 17px;
             font-family: inherit;
             outline: none;
-            transition: var(--tg-transition);
+            transition: var(--transition);
             -webkit-appearance: none;
             appearance: none;
         }
         
         input:focus, textarea:focus, select:focus {
-            background: var(--tg-theme-section-bg-color, #e8e8ed);
-            transform: scale(1.005);
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #3390ec);
+            box-shadow: 0 0 0 4px rgba(51, 144, 236, 0.1);
+            transform: translateY(-1px);
         }
         
         input::placeholder, textarea::placeholder {
             color: var(--tg-theme-hint-color, #8e8e93);
-            opacity: 1;
         }
         
         textarea {
-            resize: none;
-            min-height: 100px;
-            line-height: 1.5;
-            padding: 12px 14px;
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
         }
         
         select {
-            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238e8e93' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 5.5L7 9.5L11 5.5' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 40px;
+            background-position: right 16px center;
+            background-size: 14px;
+            padding-right: 46px;
             cursor: pointer;
+            font-weight: 500;
         }
         
         /* Price Input */
@@ -187,54 +245,110 @@
         }
         
         .price-wrapper input {
-            padding-right: 45px;
-            font-weight: 600;
-            font-size: 20px;
+            padding-right: 60px;
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, 
+                var(--tg-theme-section-bg-color, #f2f2f7) 0%, 
+                var(--tg-theme-section-bg-color, #e8e8ed) 100%);
+        }
+        
+        .price-wrapper input:focus {
+            background: var(--tg-theme-bg-color, #ffffff);
         }
         
         .price-symbol {
             position: absolute;
-            right: 14px;
+            right: 18px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 24px;
+            font-weight: 700;
             color: var(--tg-theme-hint-color, #8e8e93);
             pointer-events: none;
         }
         
-        /* Checkbox */
-        .checkbox-wrapper {
+        /* Toggle Switch */
+        .toggle-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 14px;
+            justify-content: space-between;
+            padding: 16px 18px;
             background: var(--tg-theme-section-bg-color, #f2f2f7);
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: var(--tg-transition);
+            transition: var(--transition);
             user-select: none;
+            margin-top: 16px;
         }
         
-        .checkbox-wrapper:active {
+        .toggle-wrapper:active {
             transform: scale(0.98);
-            opacity: 0.8;
+            background: var(--tg-theme-section-bg-color, #e8e8ed);
         }
         
-        .checkbox-wrapper input[type="checkbox"] {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            accent-color: var(--tg-theme-button-color, #3390ec);
-            margin: 0;
+        .toggle-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--tg-theme-text-color, #000000);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .checkbox-wrapper label {
-            margin: 0;
+        .toggle-label .emoji {
+            font-size: 20px;
+        }
+        
+        /* Custom Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+        
+        .toggle-slider {
+            position: absolute;
             cursor: pointer;
-            flex: 1;
-            font-size: 15px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #d1d1d6;
+            border-radius: 100px;
+            transition: var(--transition);
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 28px;
+            width: 28px;
+            left: 2px;
+            bottom: 2px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(135deg, 
+                var(--tg-theme-button-color, #34c759) 0%, 
+                #30d158 100%);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
         }
         
         /* Character Counter */
@@ -242,12 +356,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 6px;
-            font-size: 12px;
+            margin-top: 8px;
+            font-size: 13px;
         }
         
         .char-counter {
             color: var(--tg-theme-hint-color, #8e8e93);
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
         }
         
         .char-counter.warning {
@@ -256,6 +372,7 @@
         
         .char-counter.danger {
             color: #ff3b30;
+            font-weight: 600;
         }
         
         .char-hint {
@@ -265,27 +382,42 @@
         /* Info Banner */
         .info-banner {
             display: flex;
-            gap: 12px;
-            padding: 14px;
+            gap: 14px;
+            padding: 18px;
             background: linear-gradient(135deg, 
-                rgba(51, 144, 236, 0.08) 0%, 
+                rgba(0, 122, 255, 0.08) 0%, 
                 rgba(51, 144, 236, 0.12) 100%);
-            border-radius: var(--tg-radius);
-            border-left: 3px solid var(--tg-theme-button-color, #3390ec);
-            margin-top: 12px;
+            border-radius: var(--radius);
+            margin-top: 16px;
+            border: 2px solid rgba(51, 144, 236, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                var(--tg-theme-button-color, #3390ec) 0%, 
+                var(--tg-theme-link-color, #007aff) 100%);
         }
         
         .info-banner .emoji {
-            font-size: 20px;
+            font-size: 24px;
             flex-shrink: 0;
             line-height: 1.5;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
         
         .info-banner p {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--tg-theme-text-color, #000000);
-            opacity: 0.85;
-            line-height: 1.5;
+            opacity: 0.9;
+            line-height: 1.6;
         }
         
         /* Validation */
@@ -293,37 +425,42 @@
         .form-group.error textarea,
         .form-group.error select {
             background: rgba(255, 59, 48, 0.08);
-            animation: shake 0.3s ease;
+            border-color: #ff3b30;
+            animation: shake 0.4s ease;
         }
         
         .error-hint {
             color: #ff3b30;
-            font-size: 12px;
-            margin-top: 6px;
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: 500;
             display: none;
+            padding-left: 4px;
         }
         
         .form-group.error .error-hint {
-            display: block;
-            animation: fadeIn 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: fadeIn 0.3s ease;
         }
         
-        /* Select Options Emoji */
-        option {
-            padding: 10px;
+        .form-group.error .error-hint::before {
+            content: '⚠️';
+            font-size: 14px;
         }
         
         /* Animations */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+            20%, 40%, 60%, 80% { transform: translateX(6px); }
         }
         
         @keyframes fadeIn {
             from { 
                 opacity: 0; 
-                transform: translateY(-4px); 
+                transform: translateY(-8px); 
             }
             to { 
                 opacity: 1; 
@@ -334,7 +471,7 @@
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -342,46 +479,75 @@
             }
         }
         
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        
         .card {
-            animation: slideUp 0.3s ease;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
         }
         
         .card:nth-child(1) { animation-delay: 0s; }
-        .card:nth-child(2) { animation-delay: 0.05s; }
-        .card:nth-child(3) { animation-delay: 0.1s; }
-        .card:nth-child(4) { animation-delay: 0.15s; }
+        .card:nth-child(2) { animation-delay: 0.08s; }
+        .card:nth-child(3) { animation-delay: 0.16s; }
+        .card:nth-child(4) { animation-delay: 0.24s; }
+        .info-banner { animation-delay: 0.32s; }
         
         /* Responsive */
-        @media (max-width: 380px) {
+        @media (max-width: 480px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
             
             .header h1 {
-                font-size: 24px;
+                font-size: 28px;
+            }
+            
+            .container {
+                padding: 0 16px;
             }
         }
         
-        /* Dark theme improvements */
+        /* Dark theme */
         @media (prefers-color-scheme: dark) {
+            body {
+                background: var(--tg-theme-bg-color, #000000);
+            }
+            
             .card {
-                box-shadow: 0 0.5px 0 rgba(255,255,255,0.04);
+                box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+                border-color: rgba(255,255,255,0.06);
             }
             
             .info-banner {
                 background: linear-gradient(135deg, 
-                    rgba(51, 144, 236, 0.12) 0%, 
-                    rgba(51, 144, 236, 0.18) 100%);
+                    rgba(0, 122, 255, 0.15) 0%, 
+                    rgba(51, 144, 236, 0.2) 100%);
+                border-color: rgba(51, 144, 236, 0.25);
             }
+            
+            .toggle-slider {
+                background: #48484a;
+            }
+        }
+        
+        /* Glassmorphism effect for cards on scroll */
+        .card.scrolled {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Новое объявление</h1>
-        <p class="header-subtitle">Заполните информацию о товаре</p>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        <div class="header-content">
+            <h1>Новое объявление</h1>
+            <p class="header-subtitle">Заполните информацию о вашем товаре</p>
+            <div class="progress-container">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
         </div>
     </div>
     
@@ -399,7 +565,8 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>
-                                Тип <span class="label-required">*</span>
+                                Тип
+                                <span class="label-badge label-required">обязательно</span>
                             </label>
                             <select id="adType" required>
                                 <option value="Продам">🏷️ Продам</option>
@@ -413,7 +580,8 @@
                         
                         <div class="form-group">
                             <label>
-                                Категория <span class="label-required">*</span>
+                                Категория
+                                <span class="label-badge label-required">обязательно</span>
                             </label>
                             <select id="category" required>
                                 <option value="Электроника">📱 Электроника</option>
@@ -443,17 +611,18 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label>
-                            Заголовок <span class="label-required">*</span>
+                            Заголовок
+                            <span class="label-badge label-required">обязательно</span>
                         </label>
                         <input 
                             type="text" 
                             id="title" 
-                            placeholder="iPhone 14 Pro 256GB"
+                            placeholder="iPhone 14 Pro 256GB Space Black"
                             maxlength="100"
                             required
                         >
                         <div class="char-info">
-                            <span class="char-hint">Будет видно в списке</span>
+                            <span class="char-hint">Краткое и понятное название</span>
                             <span class="char-counter"><span id="titleCount">0</span>/100</span>
                         </div>
                         <div class="error-hint">Минимум 3 символа</div>
@@ -461,15 +630,16 @@
                     
                     <div class="form-group">
                         <label>
-                            Описание <span class="label-optional">(по желанию)</span>
+                            Подробное описание
+                            <span class="label-badge label-optional">по желанию</span>
                         </label>
                         <textarea 
                             id="description" 
-                            placeholder="Состояние, комплектация, причина продажи..."
+                            placeholder="Расскажите о состоянии, комплектации, сроке использования, причине продажи и других важных деталях..."
                             maxlength="1000"
                         ></textarea>
                         <div class="char-info">
-                            <span class="char-hint">Чем подробнее, тем лучше</span>
+                            <span class="char-hint">Больше деталей — больше доверия</span>
                             <span class="char-counter"><span id="descCount">0</span>/1000</span>
                         </div>
                     </div>
@@ -486,7 +656,7 @@
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label>Цена</label>
+                        <label>Цена товара</label>
                         <div class="price-wrapper">
                             <input 
                                 type="number" 
@@ -500,9 +670,15 @@
                         </div>
                     </div>
                     
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="negotiable">
-                        <label for="negotiable">Торг возможен</label>
+                    <div class="toggle-wrapper" id="negotiableWrapper">
+                        <div class="toggle-label">
+                            <span class="emoji">🤝</span>
+                            <span>Торг возможен</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="negotiable">
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -518,25 +694,27 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label>
-                            Контакт для связи <span class="label-required">*</span>
+                            Способ связи
+                            <span class="label-badge label-required">обязательно</span>
                         </label>
                         <input 
                             type="text" 
                             id="contact" 
-                            placeholder="@username или телефон"
+                            placeholder="@username или +7 (900) 123-45-67"
                             required
                         >
-                        <div class="error-hint">Укажите как с вами связаться</div>
+                        <div class="error-hint">Укажите контакт для связи</div>
                     </div>
                     
                     <div class="form-group">
                         <label>
-                            Местоположение <span class="label-optional">(по желанию)</span>
+                            Местоположение
+                            <span class="label-badge label-optional">по желанию</span>
                         </label>
                         <input 
                             type="text" 
                             id="location" 
-                            placeholder="Город, район"
+                            placeholder="Москва, ЦАО, м. Театральная"
                         >
                     </div>
                 </div>
@@ -545,10 +723,12 @@
             <!-- Информация -->
             <div class="info-banner">
                 <span class="emoji">💡</span>
-                <p>
-                    На следующем шаге вы сможете добавить фото и оплатить публикацию (1 ⭐). 
-                    Объявление появится после модерации.
-                </p>
+                <div>
+                    <p>
+                        <strong>Следующий шаг:</strong> добавление фотографий и оплата публикации (1 ⭐). 
+                        Ваше объявление будет проверено модераторами и опубликовано в течение 24 часов.
+                    </p>
+                </div>
             </div>
         </form>
     </div>
@@ -560,9 +740,9 @@
         
         tg.MainButton.setParams({
             text: 'Продолжить',
-            color: tg.themeParams.button_color || '#3390ec',
+            color: tg.themeParams.button_color || '#007aff',
             text_color: tg.themeParams.button_text_color || '#ffffff',
-            is_active: true,
+            is_active: false,
             is_visible: true
         });
         
@@ -575,15 +755,27 @@
         const adTypeSelect = document.getElementById('adType');
         const categorySelect = document.getElementById('category');
         const negotiableCheck = document.getElementById('negotiable');
+        const negotiableWrapper = document.getElementById('negotiableWrapper');
         const progressFill = document.getElementById('progressFill');
         const titleCount = document.getElementById('titleCount');
         const descCount = document.getElementById('descCount');
         
-        // Автозаполнение
+        // Автозаполнение контакта
         if (tg.initDataUnsafe?.user?.username) {
             contactInput.value = '@' + tg.initDataUnsafe.user.username;
             updateProgress();
         }
+        
+        // Обработчик для wrapper торга
+        negotiableWrapper.addEventListener('click', (e) => {
+            // Предотвращаем двойное переключение если кликнули на сам чекбокс
+            if (e.target !== negotiableCheck) {
+                negotiableCheck.checked = !negotiableCheck.checked;
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+            }
+        });
         
         // Счётчики символов
         titleInput.addEventListener('input', () => {
@@ -606,15 +798,34 @@
             validateField(contactInput, contactInput.value.length >= 2);
         });
         
+        // Обновление прогресса
         [priceInput, locationInput, adTypeSelect, categorySelect, negotiableCheck].forEach(el => {
             el.addEventListener('input', updateProgress);
             el.addEventListener('change', updateProgress);
         });
         
+        // Haptic для всех инпутов
+        [titleInput, descInput, priceInput, contactInput, locationInput].forEach(input => {
+            input.addEventListener('focus', () => {
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+            });
+        });
+        
+        [adTypeSelect, categorySelect].forEach(select => {
+            select.addEventListener('change', () => {
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+            });
+        });
+        
         function updateCounterStyle(element, current, max) {
-            element.classList.remove('warning', 'danger');
-            if (current >= max * 0.9) element.classList.add('danger');
-            else if (current >= max * 0.75) element.classList.add('warning');
+            const parent = element.closest('.char-counter');
+            parent.classList.remove('warning', 'danger');
+            if (current >= max * 0.95) parent.classList.add('danger');
+            else if (current >= max * 0.8) parent.classList.add('warning');
         }
         
         function validateField(input, isValid) {
@@ -628,7 +839,7 @@
         
         function updateProgress() {
             let filled = 0;
-            const total = 4;
+            const total = 4; // Обязательные поля
             
             if (adTypeSelect.value) filled++;
             if (categorySelect.value) filled++;
@@ -638,8 +849,11 @@
             const percentage = (filled / total) * 100;
             progressFill.style.width = percentage + '%';
             
+            // Активация кнопки
+            const isComplete = filled === total;
             tg.MainButton.setParams({
-                is_active: filled === total
+                is_active: isComplete,
+                text: isComplete ? 'Продолжить →' : `Заполните ещё ${total - filled}`
             });
         }
         
@@ -659,9 +873,10 @@
             return isValid;
         }
         
+        // Обработка отправки
         tg.MainButton.onClick(() => {
             if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
+                tg.HapticFeedback.impactOccurred('medium');
             }
             
             if (!validateForm()) {
@@ -669,13 +884,20 @@
                     tg.HapticFeedback.notificationOccurred('error');
                 }
                 tg.showPopup({
-                    title: 'Заполните все поля',
+                    title: '📝 Заполните все поля',
                     message: 'Пожалуйста, проверьте обязательные поля',
                     buttons: [{type: 'ok'}]
                 });
+                
+                // Скролл к первой ошибке
+                const firstError = document.querySelector('.form-group.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return;
             }
             
+            // Формирование цены
             let priceText = priceInput.value || '0';
             if (negotiableCheck.checked) {
                 priceText = priceInput.value ? `${priceInput.value} (торг)` : 'Договорная';
@@ -688,7 +910,8 @@
                 price: priceText,
                 contact: contactInput.value.trim(),
                 description: descInput.value.trim(),
-                location: locationInput.value.trim() || null
+                location: locationInput.value.trim() || null,
+                negotiable: negotiableCheck.checked
             };
             
             if (tg.HapticFeedback) {
@@ -698,7 +921,26 @@
             tg.sendData(JSON.stringify(data));
         });
         
+        // Инициализация
         updateProgress();
+        
+        // Эффект при скролле (опционально)
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.add('scrolled');
+                });
+            } else {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.remove('scrolled');
+                });
+            }
+            
+            lastScroll = currentScroll;
+        });
     </script>
 </body>
 </html>
