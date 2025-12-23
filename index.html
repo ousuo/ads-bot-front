@@ -806,6 +806,7 @@
             // ===== CONTACT VALIDATION =====
             const validateContact = (value) => {
                 const trimmed = value.trim();
+                console.log('Validating contact:', trimmed);
                 
                 if (!trimmed) {
                     return { valid: false, type: null, message: 'Введите @username или номер телефона' };
@@ -893,12 +894,22 @@
                 const percentage = Math.round((filled / config.requiredFields) * 100);
                 const isComplete = filled === config.requiredFields;
                 
+                console.log('Progress Check:', {
+                    adType: !!elements.adType.value,
+                    category: !!elements.category.value,
+                    title: elements.title.value.length >= config.minTitleLength,
+                    contact: contactValidation.valid,
+                    filled: filled,
+                    isComplete: isComplete
+                });
+                
                 elements.progressFill.style.width = `${percentage}%`;
                 elements.progressFill.classList.toggle('complete', isComplete);
                 elements.progressText.textContent = `${percentage}%`;
                 
                 // Update button
                 if (tg?.MainButton) {
+                    console.log('Updating MainButton. Active:', isComplete);
                     if (isComplete) {
                         tg.MainButton.setText('Продолжить →');
                         tg.MainButton.enable();
@@ -975,6 +986,7 @@
             
             const handleSubmit = () => {
                 try {
+                console.log('Submit handler triggered');
                 haptic('medium');
                 
                 if (!validateForm()) {
@@ -1042,6 +1054,7 @@
             
             // ===== INIT =====
             const init = () => {
+                console.log('Init started. TG:', !!tg, 'MainButton:', !!tg?.MainButton);
                 // Main button setup
                 if (tg?.MainButton) {
                     // Reset params first
@@ -1050,6 +1063,7 @@
                     tg.MainButton.textColor = tg.themeParams?.button_text_color || '#ffffff';
                     
                     if (!mainButtonInitialized) {
+                        console.log('Adding MainButton click listener');
                         tg.MainButton.onClick(handleSubmit);
                         mainButtonInitialized = true;
                     }
