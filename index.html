@@ -40,7 +40,6 @@
             min-height: 100vh;
         }
         
-        /* Header */
         .header {
             position: sticky;
             top: 0;
@@ -73,7 +72,6 @@
             margin-bottom: 12px;
         }
         
-        /* Progress */
         .progress-wrapper {
             display: flex;
             align-items: center;
@@ -108,14 +106,12 @@
             text-align: right;
         }
         
-        /* Container */
         .container {
             padding: 0 16px;
             max-width: 600px;
             margin: 0 auto;
         }
         
-        /* Card */
         .card {
             background: var(--tg-secondary-bg);
             border-radius: var(--radius-lg);
@@ -143,7 +139,6 @@
             padding: 0 16px 16px;
         }
         
-        /* Form */
         .form-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -186,7 +181,6 @@
             color: var(--tg-hint);
         }
         
-        /* Inputs */
         .input, .select, .textarea {
             width: 100%;
             padding: 12px 14px;
@@ -226,7 +220,6 @@
             cursor: pointer;
         }
         
-        /* Price */
         .price-field {
             position: relative;
         }
@@ -247,7 +240,6 @@
             color: var(--tg-hint);
         }
         
-        /* States */
         .form-group.is-success .input,
         .form-group.is-success .textarea {
             border-color: var(--color-success);
@@ -261,7 +253,6 @@
             background: rgba(255, 59, 48, 0.05);
         }
         
-        /* Field footer */
         .field-footer {
             display: flex;
             justify-content: space-between;
@@ -304,7 +295,6 @@
             display: block;
         }
         
-        /* Toggle */
         .toggle-field {
             display: flex;
             align-items: center;
@@ -365,7 +355,6 @@
             transform: translateX(20px);
         }
         
-        /* Info banner */
         .info-banner {
             display: flex;
             gap: 10px;
@@ -391,68 +380,6 @@
             color: var(--tg-hint);
         }
         
-        /* Debug Console */
-        #debug-console {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 40vh;
-            background: rgba(0,0,0,0.95);
-            color: #0f0;
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 11px;
-            overflow-y: auto;
-            padding: 10px;
-            z-index: 10000;
-            display: none;
-            border-top: 2px solid #333;
-        }
-        
-        #debug-console.visible {
-            display: block;
-        }
-        
-        .debug-line {
-            padding: 2px 0;
-            border-bottom: 1px solid #222;
-            word-break: break-all;
-        }
-        
-        .debug-line.error { color: #ff6b6b; }
-        .debug-line.warn { color: #ffd93d; }
-        .debug-line.info { color: #6bcfff; }
-        .debug-line.success { color: #6bff6b; }
-        
-        #debug-toggle {
-            position: fixed;
-            bottom: 70px;
-            right: 10px;
-            z-index: 10001;
-            background: #ff3b30;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 12px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        /* Platform info */
-        #platform-info {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            z-index: 1000;
-        }
-        
         @media (max-width: 380px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -467,8 +394,6 @@
     </style>
 </head>
 <body>
-    <div id="platform-info">Loading...</div>
-    
     <header class="header" id="header">
         <div class="header-content">
             <h1>Новое объявление</h1>
@@ -484,7 +409,6 @@
     
     <main class="container">
         <form id="adForm" novalidate>
-            <!-- Тип и категория -->
             <article class="card">
                 <header class="card-header">
                     <h2 class="card-title">📋 Тип и категория</h2>
@@ -526,7 +450,6 @@
                 </div>
             </article>
             
-            <!-- Описание -->
             <article class="card">
                 <header class="card-header">
                     <h2 class="card-title">✏️ Описание</h2>
@@ -565,7 +488,6 @@
                 </div>
             </article>
             
-            <!-- Цена -->
             <article class="card">
                 <header class="card-header">
                     <h2 class="card-title">💰 Стоимость</h2>
@@ -593,7 +515,6 @@
                 </div>
             </article>
             
-            <!-- Контакты -->
             <article class="card">
                 <header class="card-header">
                     <h2 class="card-title">📞 Контакты</h2>
@@ -636,160 +557,18 @@
             </aside>
         </form>
     </main>
-    
-    <button id="debug-toggle">🐛 LOGS</button>
-    <div id="debug-console"></div>
 
     <script>
     (function() {
         'use strict';
         
-        // ==================== DEBUG LOGGER ====================
-        const debugConsole = document.getElementById('debug-console');
-        const debugToggle = document.getElementById('debug-toggle');
-        const platformInfo = document.getElementById('platform-info');
-        
-        const Logger = {
-            logs: [],
-            
-            _addLine(message, type = 'log') {
-                const time = new Date().toLocaleTimeString('ru-RU');
-                const line = document.createElement('div');
-                line.className = `debug-line ${type}`;
-                
-                let text;
-                if (typeof message === 'object') {
-                    try {
-                        text = JSON.stringify(message, null, 2);
-                    } catch (e) {
-                        text = String(message);
-                    }
-                } else {
-                    text = String(message);
-                }
-                
-                line.textContent = `[${time}] ${text}`;
-                debugConsole.appendChild(line);
-                debugConsole.scrollTop = debugConsole.scrollHeight;
-                
-                this.logs.push({ time, type, message: text });
-            },
-            
-            log(...args) {
-                console.log(...args);
-                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'log');
-            },
-            
-            info(...args) {
-                console.info(...args);
-                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'info');
-            },
-            
-            warn(...args) {
-                console.warn(...args);
-                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'warn');
-            },
-            
-            error(...args) {
-                console.error(...args);
-                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'error');
-            },
-            
-            success(...args) {
-                console.log('✅', ...args);
-                this._addLine(args.length === 1 ? args[0] : args.join(' '), 'success');
-            }
-        };
-        
-        // Toggle debug console
-        debugToggle.addEventListener('click', () => {
-            debugConsole.classList.toggle('visible');
-        });
-        
-        // Global error handler
-        window.onerror = (msg, url, line, col, error) => {
-            Logger.error(`GLOBAL ERROR: ${msg} at line ${line}:${col}`);
-            return false;
-        };
-        
-        window.onunhandledrejection = (event) => {
-            Logger.error(`UNHANDLED PROMISE: ${event.reason}`);
-        };
-        
-        // ==================== TELEGRAM WEBAPP ====================
-        Logger.info('=== INIT START ===');
-        
         const tg = window.Telegram?.WebApp;
         
-        if (!tg) {
-            Logger.error('Telegram WebApp API not found!');
-            platformInfo.textContent = '❌ No TG API';
-            platformInfo.style.background = 'red';
-        } else {
-            Logger.success('Telegram WebApp API found');
-            
-            // Log all available info
-            Logger.info('TG Version: ' + tg.version);
-            Logger.info('TG Platform: ' + tg.platform);
-            Logger.info('TG ColorScheme: ' + tg.colorScheme);
-            Logger.info('TG isExpanded: ' + tg.isExpanded);
-            Logger.info('TG viewportHeight: ' + tg.viewportHeight);
-            Logger.info('TG viewportStableHeight: ' + tg.viewportStableHeight);
-            
-            // Check initData
-            if (tg.initData) {
-                Logger.success('initData present, length: ' + tg.initData.length);
-            } else {
-                Logger.warn('initData is EMPTY - might be opened outside Telegram');
-            }
-            
-            // Check initDataUnsafe
-            if (tg.initDataUnsafe) {
-                Logger.info('initDataUnsafe: ' + JSON.stringify(tg.initDataUnsafe));
-                if (tg.initDataUnsafe.user) {
-                    Logger.success('User: ' + tg.initDataUnsafe.user.first_name + ' (@' + (tg.initDataUnsafe.user.username || 'no username') + ')');
-                }
-            }
-            
-            // Platform info
-            const platform = tg.platform || 'unknown';
-            platformInfo.textContent = `📱 ${platform} | v${tg.version}`;
-            platformInfo.style.background = platform === 'unknown' ? 'orange' : 'rgba(0,128,0,0.8)';
-            
-            // Ready & Expand
-            try {
-                tg.ready();
-                Logger.success('tg.ready() called');
-            } catch (e) {
-                Logger.error('tg.ready() failed: ' + e.message);
-            }
-            
-            try {
-                tg.expand();
-                Logger.success('tg.expand() called');
-            } catch (e) {
-                Logger.error('tg.expand() failed: ' + e.message);
-            }
-            
-            // Check MainButton availability
-            if (tg.MainButton) {
-                Logger.success('MainButton available');
-                Logger.info('MainButton.isVisible: ' + tg.MainButton.isVisible);
-                Logger.info('MainButton.isActive: ' + tg.MainButton.isActive);
-                Logger.info('MainButton.text: ' + tg.MainButton.text);
-            } else {
-                Logger.error('MainButton NOT available!');
-            }
-            
-            // Check sendData
-            if (typeof tg.sendData === 'function') {
-                Logger.success('sendData method available');
-            } else {
-                Logger.error('sendData method NOT available!');
-            }
+        if (tg) {
+            tg.ready();
+            tg.expand();
         }
         
-        // ==================== DOM ELEMENTS ====================
         const $ = (id) => document.getElementById(id);
         
         const elements = {
@@ -814,7 +593,6 @@
             negotiableField: $('negotiableField')
         };
         
-        // ==================== VALIDATION ====================
         const patterns = {
             username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
         };
@@ -845,7 +623,6 @@
             return { valid: false, type: null, message: 'Введите @username или номер' };
         };
         
-        // ==================== UI HELPERS ====================
         const setFieldState = (group, state) => {
             if (!group) return;
             group.classList.remove('is-success', 'is-error');
@@ -864,12 +641,9 @@
                 if (tg?.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred(type);
                 }
-            } catch (e) {
-                Logger.warn('Haptic failed: ' + e.message);
-            }
+            } catch (e) {}
         };
         
-        // ==================== PROGRESS ====================
         let formComplete = false;
         
         const updateProgress = () => {
@@ -888,28 +662,23 @@
             elements.progressFill.classList.toggle('complete', formComplete);
             elements.progressText.textContent = pct + '%';
             
-            // Update MainButton
             if (tg?.MainButton) {
                 try {
                     if (formComplete) {
                         tg.MainButton.setText('Продолжить →');
                         tg.MainButton.enable();
                         tg.MainButton.show();
-                        Logger.info('MainButton: enabled, shown');
                     } else {
                         tg.MainButton.setText('Заполните форму (' + pct + '%)');
                         tg.MainButton.disable();
                         tg.MainButton.show();
                     }
-                } catch (e) {
-                    Logger.error('MainButton update failed: ' + e.message);
-                }
+                } catch (e) {}
             }
             
             return formComplete;
         };
         
-        // ==================== FORM VALIDATION ====================
         const validateForm = () => {
             let valid = true;
             
@@ -919,7 +688,6 @@
             if (elements.title.value.trim().length < 3) {
                 setFieldState(elements.titleGroup, 'is-error');
                 valid = false;
-                Logger.warn('Validation failed: title too short');
             }
             
             const contactResult = validateContact(elements.contact.value);
@@ -927,19 +695,15 @@
                 elements.contactError.textContent = contactResult.message;
                 setFieldState(elements.contactGroup, 'is-error');
                 valid = false;
-                Logger.warn('Validation failed: contact invalid');
             }
             
             return valid;
         };
         
-        // ==================== SUBMIT HANDLER ====================
         const handleSubmit = () => {
-            Logger.info('=== SUBMIT TRIGGERED ===');
             haptic('medium');
             
             if (!validateForm()) {
-                Logger.warn('Form validation failed');
                 haptic('error');
                 
                 if (tg?.showPopup) {
@@ -954,7 +718,6 @@
                 return;
             }
             
-            // Collect data
             const priceVal = elements.price.value;
             const isNegotiable = elements.negotiable.checked;
             let priceText = priceVal || '0';
@@ -974,33 +737,18 @@
                 timestamp: Date.now()
             };
             
-            Logger.info('Form data collected:');
-            Logger.info(data);
-            
-            // Show loading
             if (tg?.MainButton) {
                 try {
                     tg.MainButton.showProgress(true);
-                    Logger.info('MainButton progress shown');
-                } catch (e) {
-                    Logger.error('showProgress failed: ' + e.message);
-                }
+                } catch (e) {}
             }
             
-            // Send data
             const jsonData = JSON.stringify(data);
-            Logger.info('JSON to send: ' + jsonData);
-            Logger.info('JSON length: ' + jsonData.length + ' bytes');
             
             if (tg?.sendData) {
                 try {
-                    Logger.info('Calling tg.sendData()...');
                     tg.sendData(jsonData);
-                    Logger.success('sendData() called successfully');
-                    // Note: WebApp will close after sendData
                 } catch (e) {
-                    Logger.error('sendData() FAILED: ' + e.message);
-                    
                     if (tg?.MainButton) {
                         tg.MainButton.hideProgress();
                     }
@@ -1016,9 +764,6 @@
                     }
                 }
             } else {
-                Logger.error('sendData not available!');
-                Logger.info('Fallback: showing data in alert');
-                
                 if (tg?.MainButton) {
                     tg.MainButton.hideProgress();
                 }
@@ -1027,7 +772,6 @@
             }
         };
         
-        // ==================== EVENT HANDLERS ====================
         const handleTitleInput = () => {
             const len = elements.title.value.length;
             updateCharCounter(elements.titleCounter, len, 100);
@@ -1060,14 +804,9 @@
             elements.header.classList.toggle('scrolled', window.scrollY > 20);
         };
         
-        // ==================== INIT ====================
         const init = () => {
-            Logger.info('=== INIT HANDLERS ===');
-            
-            // MainButton setup
             if (tg?.MainButton) {
                 try {
-                    // Set initial state
                     tg.MainButton.setText('Заполните форму');
                     tg.MainButton.setParams({
                         color: tg.themeParams?.button_color || '#007aff',
@@ -1076,25 +815,16 @@
                         is_visible: true
                     });
                     
-                    // Add click handler
                     tg.MainButton.onClick(handleSubmit);
-                    Logger.success('MainButton onClick handler attached');
-                    
                     tg.MainButton.show();
-                    Logger.success('MainButton shown');
-                } catch (e) {
-                    Logger.error('MainButton setup failed: ' + e.message);
-                }
+                } catch (e) {}
             }
             
-            // Autofill contact
             if (tg?.initDataUnsafe?.user?.username) {
                 elements.contact.value = '@' + tg.initDataUnsafe.user.username;
-                Logger.info('Contact autofilled: ' + elements.contact.value);
                 handleContactInput();
             }
             
-            // Event listeners
             elements.title.addEventListener('input', handleTitleInput);
             elements.description.addEventListener('input', handleDescInput);
             elements.contact.addEventListener('input', handleContactInput);
@@ -1112,18 +842,13 @@
             
             window.addEventListener('scroll', handleScroll, { passive: true });
             
-            // Focus haptic
             document.querySelectorAll('.input, .textarea, .select').forEach(el => {
                 el.addEventListener('focus', () => haptic());
             });
             
-            // Initial state
             updateProgress();
-            
-            Logger.success('=== INIT COMPLETE ===');
         };
         
-        // Run init
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
