@@ -2018,11 +2018,18 @@
             initScheduleDate();
             
             if (tg?.initDataUnsafe?.user?.id) {
-                isAdmin = ADMIN_IDS.includes(tg.initDataUnsafe.user.id);
+                const userId = Number(tg.initDataUnsafe.user.id);
+                isAdmin = ADMIN_IDS.includes(userId);
+                
+                // Показываем alert для диагностики
+                if (tg.showAlert) {
+                    tg.showAlert(`Debug:\nUserID: ${userId}\nType: ${typeof userId}\nIsAdmin: ${isAdmin}\nArray: [${ADMIN_IDS}]`);
+                }
+                
                 if (isAdmin) {
                     createAdminDebugPanel();
                     debugLog('🔧 Admin mode enabled', 'success');
-                    debugLog(`User ID: ${tg.initDataUnsafe.user.id}`, 'info');
+                    debugLog(`User ID: ${userId}`, 'info');
                     debugLog(`API Key: ${IMGBB_API_KEY.slice(0, 15)}...`, 'info');
                 }
             }
