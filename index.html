@@ -1110,6 +1110,8 @@
         
         const MAX_PHOTOS = 5;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
+        const MAX_DIMENSION = 800; // Максимальная ширина/высота
+        const JPEG_QUALITY = 0.85; // Качество сжатия
         
         const tg = window.Telegram?.WebApp;
         
@@ -1174,7 +1176,7 @@
             username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
         };
         
-        // Инициализация минимальной даты (сегодня)
+        // Инициализация минимальной даты
         const initScheduleDate = () => {
             const today = new Date();
             const tomorrow = new Date(today);
@@ -1187,10 +1189,52 @@
             elements.scheduleDate.value = tomorrowStr;
         };
         
-        const fileToBase64 = (file) => {
+        // Сжатие изображения
+        const compressImage = (file) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
+                
+                reader.onload = (e) => {
+                    const img = new Image();
+                    
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Пропорциональное уменьшение
+                        if (width > height) {
+                            if (width > MAX_DIMENSION) {
+                                height = Math.round((height * MAX_DIMENSION) / width);
+                                width = MAX_DIMENSION;
+                            }
+                        } else {
+                            if (height > MAX_DIMENSION) {
+                                width = Math.round((width * MAX_DIMENSION) / height);
+                                height = MAX_DIMENSION;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Конвертируем в Base64 JPEG
+                        const base64 = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+                        
+                        // Создаём blob для превью
+                        canvas.toBlob((blob) => {
+                            const localUrl = URL.createObjectURL(blob);
+                            resolve({ base64, localUrl });
+                        }, 'image/jpeg', JPEG_QUALITY);
+                    };
+                    
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
@@ -1217,13 +1261,14 @@
                 }
                 
                 try {
-                    setPhotoStatus(`Обработка фото ${photoData.length + 1}...`, '');
+                    setPhotoStatus(`Сжатие фото ${photoData.length + 1}...`, '');
                     
-                    // Конвертируем в Base64
-                    const base64 = await fileToBase64(file);
+                    // Сжимаем изображение
+                    const { base64, localUrl } = await compressImage(file);
                     
-                    // Создаём локальный URL для превью
-                    const localUrl = URL.createObjectURL(file);
+                    // Проверяем размер после сжатия
+                    const sizeKB = Math.round((base64.length * 3) / 4 / 1024);
+                    console.log(`Фото ${photoData.length + 1}: ${sizeKB} KB`);
                     
                     photoData.push({
                         url: base64,      // Base64 для отправки боту
@@ -1232,7 +1277,7 @@
                     
                     addPhotoPreview(localUrl, base64, false);
                     
-                    setPhotoStatus(`Добавлено ${photoData.length} из ${MAX_PHOTOS}`, 'success');
+                    setPhotoStatus(`Добавлено ${photoData.length} из ${MAX_PHOTOS} (${sizeKB} KB)`, 'success');
                     haptic('success');
                     
                 } catch (err) {
@@ -1343,7 +1388,6 @@
                 return 'now';
             }
             
-            // Формат ISO: "2025-12-25T14:30:00"
             return `${date}T${time}:00`;
         };
         
@@ -1487,7 +1531,6 @@
                 valid = false;
             }
             
-            // Валидация времени если включена отложенная публикация
             if (elements.scheduleToggle.checked) {
                 const date = elements.scheduleDate.value;
                 const time = elements.scheduleTime.value;
@@ -1655,7 +1698,6 @@
                 </div>
             `;
             
-            // Показываем время публикации если установлено
             if (elements.scheduleToggle.checked) {
                 const date = elements.scheduleDate.value;
                 const time = elements.scheduleTime.value;
@@ -1732,7 +1774,7 @@
                 contact: elements.contact.value.trim(),
                 location: elements.location.value.trim() || null,
                 negotiable: isNegotiable,
-                photos: photoData.map(p => p.url),  // Массив Base64
+                photos: photoData.map(p => p.url),
                 photoCount: photoData.length,
                 scheduledTime: scheduledTime,
                 timestamp: Date.now()
@@ -1743,7 +1785,12 @@
             }
             
             const jsonData = JSON.stringify(data);
-            console.log('Отправка данных:', jsonData.length, 'байт', 'фото:', photoData.length, 'время:', scheduledTime);
+            const sizeKB = Math.round(jsonData.length / 1024);
+            console.log(`📦 Размер данных: ${sizeKB} KB, фото: ${photoData.length}`);
+            
+            if (sizeKB > 60) {
+                console.warn('⚠️ Данные могут быть слишком большими!');
+            }
             
             if (tg?.sendData) {
                 try {
@@ -1757,7 +1804,7 @@
                     if (tg?.showPopup) {
                         tg.showPopup({
                             title: 'Ошибка отправки',
-                            message: e.message || 'Не удалось отправить данные',
+                            message: e.message || 'Данные слишком большие. Попробуйте уменьшить количество фото.',
                             buttons: [{ type: 'ok' }]
                         });
                     }
@@ -1767,7 +1814,7 @@
                 if (tg?.MainButton) {
                     tg.MainButton.hideProgress();
                 }
-                alert('Режим отладки\n\nДанные:\n' + JSON.stringify(data, null, 2));
+                alert('Режим отладки\n\nРазмер: ' + sizeKB + ' KB\nФото: ' + photoData.length);
             }
         };
         
@@ -1906,7 +1953,6 @@
                 }
             });
             
-            // Обработчики расписания
             elements.scheduleToggle.addEventListener('change', handleScheduleToggle);
             elements.scheduleToggleField.addEventListener('click', (e) => {
                 if (!e.target.closest('.toggle')) {
