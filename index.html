@@ -1034,58 +1034,6 @@
                         </div>
                     </article>
                     
-                    <article class="card">
-                        <header class="card-header">
-                            <h2 class="card-title">⏰ Время публикации</h2>
-                        </header>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Когда опубликовать <span class="badge badge--optional">опционально</span>
-                                </label>
-                                
-                                <div class="toggle-field" id="scheduleToggleField">
-                                    <span class="toggle-label">📅 Отложенная публикация</span>
-                                    <label class="toggle">
-                                        <input type="checkbox" id="scheduleToggle">
-                                        <span class="toggle-track"></span>
-                                        <span class="toggle-thumb"></span>
-                                    </label>
-                                </div>
-                                
-                                <div id="scheduleFieldsContainer" style="display: none; margin-top: 12px;">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label class="form-label" for="scheduleDate">Дата</label>
-                                            <input 
-                                                class="input" 
-                                                type="date" 
-                                                id="scheduleDate" 
-                                                name="scheduleDate"
-                                                min=""
-                                            >
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label" for="scheduleTime">Время</label>
-                                            <input 
-                                                class="input" 
-                                                type="time" 
-                                                id="scheduleTime" 
-                                                name="scheduleTime"
-                                                value="12:00"
-                                            >
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="field-footer">
-                                        <span class="field-hint" id="scheduleHint">Выберите дату и время публикации</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-
                     <div class="warning-banner">
                         <span style="font-size: 18px;">⚠️</span>
                         <div>
@@ -1143,9 +1091,6 @@
         const IMGBB_API_KEY = 'e7020e01382f14a53e5bbe345450f788';
         const MAX_PHOTOS = 5;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-        const ADMIN_IDS = [6747158875]; // Замените на ваш ID
-        let isAdmin = true;
         
         const tg = window.Telegram?.WebApp;
         
@@ -1159,61 +1104,6 @@
         }
         
         const $ = (id) => document.getElementById(id);
-
-        // Создаём панель отладки для админа
-    const createAdminDebugPanel = () => {
-        if (!isAdmin) return null;
-        
-        const panel = document.createElement('div');
-        panel.id = 'adminDebugPanel';
-        panel.style.cssText = `
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 200px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.95);
-            color: #0f0;
-            font-family: monospace;
-            font-size: 10px;
-            padding: 10px;
-            z-index: 9999;
-            border-top: 2px solid #0f0;
-            display: none;
-        `;
-        document.body.appendChild(panel);
-        return panel;
-    };
-
-    const debugLog = (message, type = 'info') => {
-        if (!isAdmin) return;
-        
-        const panel = document.getElementById('adminDebugPanel');
-        if (!panel) return;
-        
-        const colors = {
-            info: '#0ff',
-            success: '#0f0',
-            error: '#f00',
-            warning: '#ff0'
-        };
-        
-        const time = new Date().toLocaleTimeString();
-        const logEntry = document.createElement('div');
-        logEntry.style.color = colors[type] || colors.info;
-        logEntry.style.marginBottom = '2px';
-        logEntry.textContent = `[${time}] ${message}`;
-        
-        panel.appendChild(logEntry);
-        panel.style.display = 'block';
-        panel.scrollTop = panel.scrollHeight;
-        
-        // Показываем также через Telegram если доступно
-        if (type === 'error' && tg?.showAlert) {
-            tg.showAlert(`[DEBUG] ${message}`);
-        }
-    };
         
         const elements = {
             formView: $('formView'),
@@ -1283,60 +1173,27 @@
             const formData = new FormData();
             formData.append('image', file);
             
-            try {
-                debugLog(`📁 Загрузка: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, 'info');
-                
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                debugLog(`📡 HTTP: ${response.status} ${response.statusText}`, 'info');
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    const errorMsg = data.error?.message || `HTTP ${response.status}`;
-                    debugLog(`❌ HTTP Error: ${errorMsg}`, 'error');
-                    debugLog(`Response: ${JSON.stringify(data)}`, 'error');
-                    throw new Error(errorMsg);
-                }
-                
-                if (!data.success) {
-                    const errorMsg = data.error?.message || 'Upload failed';
-                    debugLog(`❌ API Error: ${errorMsg}`, 'error');
-                    debugLog(`Error code: ${data.error?.code}`, 'error');
-                    debugLog(`Full error: ${JSON.stringify(data.error)}`, 'error');
-                    throw new Error(errorMsg);
-                }
-                
-                debugLog(`✅ Success: ${data.data.id}`, 'success');
-                debugLog(`URL: ${data.data.url}`, 'success');
-                
-                return {
-                    url: data.data.url,
-                    thumb: data.data.thumb?.url || data.data.medium?.url || data.data.url,
-                    delete_url: data.data.delete_url
-                };
-                
-            } catch (error) {
-                debugLog(`💥 Exception: ${error.message}`, 'error');
-                
-                if (error.message === 'Failed to fetch') {
-                    debugLog(`🔍 Причины: CORS / Network / API key`, 'warning');
-                    
-                    // Показываем алерт с деталями
-                    if (tg?.showPopup) {
-                        tg.showPopup({
-                            title: '🔧 Admin Debug',
-                            message: `Failed to fetch\n\nВозможные причины:\n• CORS блокировка\n• Неверный API ключ\n• Сеть недоступна\n• ImgBB API down\n\nAPI Key: ${IMGBB_API_KEY.slice(0, 10)}...`,
-                            buttons: [{type: 'ok'}]
-                        });
-                    }
-                }
-                
-                throw error;
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
             }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error?.message || 'Upload failed');
+            }
+            
+            return {
+                url: data.data.url,
+                thumb: data.data.thumb?.url || data.data.medium?.url || data.data.url,
+                delete_url: data.data.delete_url
+            };
         };
 
         const handlePhotoSelect = async (files) => {
@@ -2017,20 +1874,6 @@
         const init = () => {
             initScheduleDate();
             
-            if (tg?.initDataUnsafe?.user?.id) {
-                const userId = Number(tg.initDataUnsafe.user.id); // Конвертируем в число
-                isAdmin = ADMIN_IDS.includes(userId);
-                
-                // Временный дебаг (потом удалите)
-                console.log('UserID:', userId, 'Type:', typeof userId, 'IsAdmin:', isAdmin);
-                if (isAdmin) {
-                    createAdminDebugPanel();
-                    debugLog('🔧 Admin mode enabled', 'success');
-                    debugLog(`User ID: ${tg.initDataUnsafe.user.id}`, 'info');
-                    debugLog(`API Key: ${IMGBB_API_KEY.slice(0, 15)}...`, 'info');
-                }
-            }
-
             if (tg?.MainButton) {
                 try {
                     tg.MainButton.setText('Заполните форму');
@@ -2129,4 +1972,3 @@
     </script>
 </body>
 </html>
-
