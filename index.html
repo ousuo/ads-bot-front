@@ -1034,58 +1034,6 @@
                         </div>
                     </article>
                     
-                    <article class="card">
-                        <header class="card-header">
-                            <h2 class="card-title">⏰ Время публикации</h2>
-                        </header>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    Когда опубликовать <span class="badge badge--optional">опционально</span>
-                                </label>
-                                
-                                <div class="toggle-field" id="scheduleToggleField">
-                                    <span class="toggle-label">📅 Отложенная публикация</span>
-                                    <label class="toggle">
-                                        <input type="checkbox" id="scheduleToggle">
-                                        <span class="toggle-track"></span>
-                                        <span class="toggle-thumb"></span>
-                                    </label>
-                                </div>
-                                
-                                <div id="scheduleFieldsContainer" style="display: none; margin-top: 12px;">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label class="form-label" for="scheduleDate">Дата</label>
-                                            <input 
-                                                class="input" 
-                                                type="date" 
-                                                id="scheduleDate" 
-                                                name="scheduleDate"
-                                                min=""
-                                            >
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label" for="scheduleTime">Время</label>
-                                            <input 
-                                                class="input" 
-                                                type="time" 
-                                                id="scheduleTime" 
-                                                name="scheduleTime"
-                                                value="12:00"
-                                            >
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="field-footer">
-                                        <span class="field-hint" id="scheduleHint">Выберите дату и время публикации</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-
                     <div class="warning-banner">
                         <span style="font-size: 18px;">⚠️</span>
                         <div>
@@ -1140,7 +1088,7 @@
     (function() {
         'use strict';
         
-        const IMGBB_API_KEY = 'b517388bf404d9dcf74c5d948fc046ca';
+        const IMGBB_API_KEY = 'e7020e01382f14a53e5bbe345450f788';
         const MAX_PHOTOS = 5;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
         
@@ -1188,12 +1136,6 @@
             photoInput: $('photoInput'),
             photoPreviewGrid: $('photoPreviewGrid'),
             photoStatus: $('photoStatus'),
-            scheduleToggle: $('scheduleToggle'),
-            scheduleToggleField: $('scheduleToggleField'),
-            scheduleFieldsContainer: $('scheduleFieldsContainer'),
-            scheduleDate: $('scheduleDate'),
-            scheduleTime: $('scheduleTime'),
-            scheduleHint: $('scheduleHint'),
             previewMessage: $('previewMessage'),
             previewPhotos: $('previewPhotos'),
             previewHashtags: $('previewHashtags'),
@@ -1206,19 +1148,6 @@
         
         const patterns = {
             username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
-        };
-        
-        // Инициализация минимальной даты (сегодня)
-        const initScheduleDate = () => {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            const todayStr = today.toISOString().split('T')[0];
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
-            
-            elements.scheduleDate.min = todayStr;
-            elements.scheduleDate.value = tomorrowStr;
         };
         
         const uploadToImgBB = async (file) => {
@@ -1402,60 +1331,6 @@
             return { valid: false, type: null, message: 'Введите @username или номер' };
         };
         
-        const getScheduledTime = () => {
-            if (!elements.scheduleToggle.checked) {
-                return 'now';
-            }
-            
-            const date = elements.scheduleDate.value;
-            const time = elements.scheduleTime.value;
-            
-            if (!date || !time) {
-                return 'now';
-            }
-            
-            // Формат ISO: "2025-12-25T14:30:00"
-            return `${date}T${time}:00`;
-        };
-        
-        const updateScheduleHint = () => {
-            if (!elements.scheduleToggle.checked) return;
-            
-            const date = elements.scheduleDate.value;
-            const time = elements.scheduleTime.value;
-            
-            if (date && time) {
-                try {
-                    const dt = new Date(`${date}T${time}`);
-                    const now = new Date();
-                    
-                    if (dt <= now) {
-                        elements.scheduleHint.textContent = '⚠️ Выберите будущее время';
-                        elements.scheduleHint.style.color = 'var(--color-warning)';
-                    } else {
-                        const diffMs = dt - now;
-                        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-                        const diffDays = Math.floor(diffHours / 24);
-                        
-                        let hint = 'Публикация через ';
-                        if (diffDays > 0) {
-                            hint += `${diffDays} ${diffDays === 1 ? 'день' : 'дней'}`;
-                        } else if (diffHours > 0) {
-                            hint += `${diffHours} ${diffHours === 1 ? 'час' : 'часов'}`;
-                        } else {
-                            hint += 'менее часа';
-                        }
-                        
-                        elements.scheduleHint.textContent = hint;
-                        elements.scheduleHint.style.color = 'var(--tg-hint)';
-                    }
-                } catch (e) {
-                    elements.scheduleHint.textContent = 'Выберите дату и время';
-                    elements.scheduleHint.style.color = 'var(--tg-hint)';
-                }
-            }
-        };
-        
         const setFieldState = (group, state) => {
             if (!group) return;
             group.classList.remove('is-success', 'is-error');
@@ -1559,28 +1434,6 @@
                 elements.contactError.textContent = contactResult.message;
                 setFieldState(elements.contactGroup, 'is-error');
                 valid = false;
-            }
-            
-            // Валидация времени если включена отложенная публикация
-            if (elements.scheduleToggle.checked) {
-                const date = elements.scheduleDate.value;
-                const time = elements.scheduleTime.value;
-                
-                if (date && time) {
-                    const scheduledDt = new Date(`${date}T${time}`);
-                    const now = new Date();
-                    
-                    if (scheduledDt <= now) {
-                        valid = false;
-                        if (tg?.showPopup) {
-                            tg.showPopup({
-                                title: 'Ошибка',
-                                message: 'Время публикации должно быть в будущем',
-                                buttons: [{ type: 'ok' }]
-                            });
-                        }
-                    }
-                }
             }
             
             return valid;
@@ -1740,32 +1593,6 @@
                 </div>
             `;
             
-            // Показываем время публикации если установлено
-            if (elements.scheduleToggle.checked) {
-                const date = elements.scheduleDate.value;
-                const time = elements.scheduleTime.value;
-                
-                if (date && time) {
-                    try {
-                        const dt = new Date(`${date}T${time}`);
-                        const formatted = dt.toLocaleString('ru-RU', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                        
-                        infoHTML += `
-                            <div class="message-info-item">
-                                <span class="message-info-icon">⏰</span>
-                                <span><span class="message-info-label">Публикация:</span> ${formatted}</span>
-                            </div>
-                        `;
-                    } catch (e) {}
-                }
-            }
-            
             elements.previewInfo.innerHTML = infoHTML;
             
             elements.previewPhotos.innerHTML = '';
@@ -1806,8 +1633,6 @@
                 priceText = priceVal ? priceVal + ' (торг)' : 'Договорная';
             }
             
-            const scheduledTime = getScheduledTime();
-            
             const data = {
                 adType: elements.adType.value,
                 category: elements.category.value,
@@ -1819,7 +1644,6 @@
                 negotiable: isNegotiable,
                 photos: photoData.map(p => p.url),
                 photoCount: photoData.length,
-                scheduledTime: scheduledTime,
                 timestamp: Date.now()
             };
             
@@ -1828,7 +1652,7 @@
             }
             
             const jsonData = JSON.stringify(data);
-            console.log('Отправка данных:', jsonData.length, 'байт', 'фото:', photoData.length, 'время:', scheduledTime);
+            console.log('Отправка данных:', jsonData.length, 'байт', 'фото:', photoData.length);
             
             if (tg?.sendData) {
                 try {
@@ -1901,17 +1725,6 @@
             updateProgress();
         };
         
-        const handleScheduleToggle = () => {
-            const isEnabled = elements.scheduleToggle.checked;
-            elements.scheduleFieldsContainer.style.display = isEnabled ? 'block' : 'none';
-            
-            if (isEnabled) {
-                updateScheduleHint();
-            }
-            
-            haptic();
-        };
-        
         let ticking = false;
         const handleScroll = () => {
             if (!ticking) {
@@ -1924,8 +1737,6 @@
         };
         
         const init = () => {
-            initScheduleDate();
-            
             if (tg?.MainButton) {
                 try {
                     tg.MainButton.setText('Заполните форму');
@@ -1991,17 +1802,6 @@
                 }
             });
             
-            // Обработчики расписания
-            elements.scheduleToggle.addEventListener('change', handleScheduleToggle);
-            elements.scheduleToggleField.addEventListener('click', (e) => {
-                if (!e.target.closest('.toggle')) {
-                    elements.scheduleToggle.checked = !elements.scheduleToggle.checked;
-                    handleScheduleToggle();
-                }
-            });
-            elements.scheduleDate.addEventListener('change', updateScheduleHint);
-            elements.scheduleTime.addEventListener('change', updateScheduleHint);
-            
             elements.submitBtn.addEventListener('click', handleSubmit);
             elements.backToFormBtn.addEventListener('click', () => switchView('form'));
             
@@ -2024,4 +1824,3 @@
     </script>
 </body>
 </html>
-
