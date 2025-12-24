@@ -1161,59 +1161,59 @@
         const $ = (id) => document.getElementById(id);
 
         // Создаём панель отладки для админа
-        const createAdminDebugPanel = () => {
-            if (!isAdmin) return null;
-            
-            const panel = document.createElement('div');
-            panel.id = 'adminDebugPanel';
-            panel.style.cssText = `
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                max-height: 200px;
-                overflow-y: auto;
-                background: rgba(0, 0, 0, 0.95);
-                color: #0f0;
-                font-family: monospace;
-                font-size: 10px;
-                padding: 10px;
-                z-index: 9999;
-                border-top: 2px solid #0f0;
-                display: none;
-            `;
-            document.body.appendChild(panel);
-            return panel;
-        };
+    const createAdminDebugPanel = () => {
+        if (!isAdmin) return null;
+        
+        const panel = document.createElement('div');
+        panel.id = 'adminDebugPanel';
+        panel.style.cssText = `
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.95);
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            z-index: 9999;
+            border-top: 2px solid #0f0;
+            display: none;
+        `;
+        document.body.appendChild(panel);
+        return panel;
+    };
 
-        const debugLog = (message, type = 'info') => {
-            if (!isAdmin) return;
-            
-            const panel = document.getElementById('adminDebugPanel');
-            if (!panel) return;
-            
-            const colors = {
-                info: '#0ff',
-                success: '#0f0',
-                error: '#f00',
-                warning: '#ff0'
-            };
-            
-            const time = new Date().toLocaleTimeString();
-            const logEntry = document.createElement('div');
-            logEntry.style.color = colors[type] || colors.info;
-            logEntry.style.marginBottom = '2px';
-            logEntry.textContent = `[${time}] ${message}`;
-            
-            panel.appendChild(logEntry);
-            panel.style.display = 'block';
-            panel.scrollTop = panel.scrollHeight;
-            
-            // Показываем также через Telegram если доступно
-            if (type === 'error' && tg?.showAlert) {
-                tg.showAlert(`[DEBUG] ${message}`);
-            }
+    const debugLog = (message, type = 'info') => {
+        if (!isAdmin) return;
+        
+        const panel = document.getElementById('adminDebugPanel');
+        if (!panel) return;
+        
+        const colors = {
+            info: '#0ff',
+            success: '#0f0',
+            error: '#f00',
+            warning: '#ff0'
         };
+        
+        const time = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.style.color = colors[type] || colors.info;
+        logEntry.style.marginBottom = '2px';
+        logEntry.textContent = `[${time}] ${message}`;
+        
+        panel.appendChild(logEntry);
+        panel.style.display = 'block';
+        panel.scrollTop = panel.scrollHeight;
+        
+        // Показываем также через Telegram если доступно
+        if (type === 'error' && tg?.showAlert) {
+            tg.showAlert(`[DEBUG] ${message}`);
+        }
+    };
         
         const elements = {
             formView: $('formView'),
@@ -2018,18 +2018,15 @@
             initScheduleDate();
             
             if (tg?.initDataUnsafe?.user?.id) {
-                const userId = Number(tg.initDataUnsafe.user.id);
+                const userId = Number(tg.initDataUnsafe.user.id); // Конвертируем в число
                 isAdmin = ADMIN_IDS.includes(userId);
                 
-                // Показываем alert для диагностики
-                if (tg.showAlert) {
-                    tg.showAlert(`Debug:\nUserID: ${userId}\nType: ${typeof userId}\nIsAdmin: ${isAdmin}\nArray: [${ADMIN_IDS}]`);
-                }
-                
+                // Временный дебаг (потом удалите)
+                console.log('UserID:', userId, 'Type:', typeof userId, 'IsAdmin:', isAdmin);
                 if (isAdmin) {
                     createAdminDebugPanel();
                     debugLog('🔧 Admin mode enabled', 'success');
-                    debugLog(`User ID: ${userId}`, 'info');
+                    debugLog(`User ID: ${tg.initDataUnsafe.user.id}`, 'info');
                     debugLog(`API Key: ${IMGBB_API_KEY.slice(0, 15)}...`, 'info');
                 }
             }
