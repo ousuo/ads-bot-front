@@ -1034,6 +1034,58 @@
                         </div>
                     </article>
                     
+                    <article class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">⏰ Время публикации</h2>
+                        </header>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Когда опубликовать <span class="badge badge--optional">опционально</span>
+                                </label>
+                                
+                                <div class="toggle-field" id="scheduleToggleField">
+                                    <span class="toggle-label">📅 Отложенная публикация</span>
+                                    <label class="toggle">
+                                        <input type="checkbox" id="scheduleToggle">
+                                        <span class="toggle-track"></span>
+                                        <span class="toggle-thumb"></span>
+                                    </label>
+                                </div>
+                                
+                                <div id="scheduleFieldsContainer" style="display: none; margin-top: 12px;">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label" for="scheduleDate">Дата</label>
+                                            <input 
+                                                class="input" 
+                                                type="date" 
+                                                id="scheduleDate" 
+                                                name="scheduleDate"
+                                                min=""
+                                            >
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="scheduleTime">Время</label>
+                                            <input 
+                                                class="input" 
+                                                type="time" 
+                                                id="scheduleTime" 
+                                                name="scheduleTime"
+                                                value="12:00"
+                                            >
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="field-footer">
+                                        <span class="field-hint" id="scheduleHint">Выберите дату и время публикации</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
                     <div class="warning-banner">
                         <span style="font-size: 18px;">⚠️</span>
                         <div>
