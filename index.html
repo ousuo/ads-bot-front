@@ -1143,6 +1143,9 @@
         const IMGBB_API_KEY = 'e7020e01382f14a53e5bbe345450f788';
         const MAX_PHOTOS = 5;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+        const ADMIN_IDS = [6747158875]; // Замените на ваш ID
+        let isAdmin = false;
         
         const tg = window.Telegram?.WebApp;
         
@@ -1156,6 +1159,61 @@
         }
         
         const $ = (id) => document.getElementById(id);
+
+        // Создаём панель отладки для админа
+        const createAdminDebugPanel = () => {
+            if (!isAdmin) return null;
+            
+            const panel = document.createElement('div');
+            panel.id = 'adminDebugPanel';
+            panel.style.cssText = `
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-height: 200px;
+                overflow-y: auto;
+                background: rgba(0, 0, 0, 0.95);
+                color: #0f0;
+                font-family: monospace;
+                font-size: 10px;
+                padding: 10px;
+                z-index: 9999;
+                border-top: 2px solid #0f0;
+                display: none;
+            `;
+            document.body.appendChild(panel);
+            return panel;
+        };
+
+        const debugLog = (message, type = 'info') => {
+            if (!isAdmin) return;
+            
+            const panel = document.getElementById('adminDebugPanel');
+            if (!panel) return;
+            
+            const colors = {
+                info: '#0ff',
+                success: '#0f0',
+                error: '#f00',
+                warning: '#ff0'
+            };
+            
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = colors[type] || colors.info;
+            logEntry.style.marginBottom = '2px';
+            logEntry.textContent = `[${time}] ${message}`;
+            
+            panel.appendChild(logEntry);
+            panel.style.display = 'block';
+            panel.scrollTop = panel.scrollHeight;
+            
+            // Показываем также через Telegram если доступно
+            if (type === 'error' && tg?.showAlert) {
+                tg.showAlert(`[DEBUG] ${message}`);
+            }
+        };
         
         const elements = {
             formView: $('formView'),
@@ -1225,88 +1283,55 @@
             const formData = new FormData();
             formData.append('image', file);
             
-            const isAdmin = tg?.initDataUnsafe?.user?.id && [6747158875].includes(tg.initDataUnsafe.user.id); // Замените на ваш ID
-            
             try {
-                if (isAdmin) {
-                    console.log('🔧 [ADMIN DEBUG] Начало загрузки на ImgBB');
-                    console.log('📁 Файл:', file.name, 'Размер:', (file.size / 1024).toFixed(2), 'KB', 'Тип:', file.type);
-                }
+                debugLog(`📁 Загрузка: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, 'info');
                 
                 const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                     method: 'POST',
                     body: formData
                 });
                 
-                if (isAdmin) {
-                    console.log('📡 HTTP статус:', response.status, response.statusText);
-                    console.log('📋 Headers:', Object.fromEntries(response.headers.entries()));
-                }
+                debugLog(`📡 HTTP: ${response.status} ${response.statusText}`, 'info');
                 
                 const data = await response.json();
                 
-                if (isAdmin) {
-                    console.log('📦 Полный ответ API:', JSON.stringify(data, null, 2));
-                }
-                
                 if (!response.ok) {
                     const errorMsg = data.error?.message || `HTTP ${response.status}`;
-                    
-                    if (isAdmin) {
-                        console.error('❌ [ADMIN DEBUG] Ошибка HTTP:');
-                        console.error('   Статус:', response.status);
-                        console.error('   Сообщение:', errorMsg);
-                        console.error('   Полный ответ:', data);
-                    }
-                    
+                    debugLog(`❌ HTTP Error: ${errorMsg}`, 'error');
+                    debugLog(`Response: ${JSON.stringify(data)}`, 'error');
                     throw new Error(errorMsg);
                 }
                 
                 if (!data.success) {
                     const errorMsg = data.error?.message || 'Upload failed';
-                    
-                    if (isAdmin) {
-                        console.error('❌ [ADMIN DEBUG] API вернул success: false');
-                        console.error('   Код ошибки:', data.error?.code);
-                        console.error('   Сообщение:', errorMsg);
-                        console.error('   Полный объект error:', data.error);
-                    }
-                    
+                    debugLog(`❌ API Error: ${errorMsg}`, 'error');
+                    debugLog(`Error code: ${data.error?.code}`, 'error');
+                    debugLog(`Full error: ${JSON.stringify(data.error)}`, 'error');
                     throw new Error(errorMsg);
                 }
                 
-                const result = {
+                debugLog(`✅ Success: ${data.data.id}`, 'success');
+                debugLog(`URL: ${data.data.url}`, 'success');
+                
+                return {
                     url: data.data.url,
                     thumb: data.data.thumb?.url || data.data.medium?.url || data.data.url,
                     delete_url: data.data.delete_url
                 };
                 
-                if (isAdmin) {
-                    console.log('✅ [ADMIN DEBUG] Успешная загрузка:');
-                    console.log('   ID:', data.data.id);
-                    console.log('   URL:', result.url);
-                    console.log('   Thumb:', result.thumb);
-                    console.log('   Размер на сервере:', data.data.size, 'bytes');
-                    console.log('   Время загрузки:', new Date(data.data.time * 1000).toLocaleString());
-                    console.log('   Expiration:', data.data.expiration || 'permanent');
-                }
-                
-                return result;
-                
             } catch (error) {
-                if (isAdmin) {
-                    console.error('💥 [ADMIN DEBUG] Исключение при загрузке:');
-                    console.error('   Тип ошибки:', error.name);
-                    console.error('   Сообщение:', error.message);
-                    console.error('   Stack:', error.stack);
+                debugLog(`💥 Exception: ${error.message}`, 'error');
+                
+                if (error.message === 'Failed to fetch') {
+                    debugLog(`🔍 Причины: CORS / Network / API key`, 'warning');
                     
-                    // Дополнительная диагностика
-                    if (error.message === 'Failed to fetch') {
-                        console.error('🔍 [ADMIN DEBUG] Возможные причины:');
-                        console.error('   1. CORS блокировка');
-                        console.error('   2. Сеть недоступна');
-                        console.error('   3. ImgBB API недоступен');
-                        console.error('   4. Неверный API ключ');
+                    // Показываем алерт с деталями
+                    if (tg?.showPopup) {
+                        tg.showPopup({
+                            title: '🔧 Admin Debug',
+                            message: `Failed to fetch\n\nВозможные причины:\n• CORS блокировка\n• Неверный API ключ\n• Сеть недоступна\n• ImgBB API down\n\nAPI Key: ${IMGBB_API_KEY.slice(0, 10)}...`,
+                            buttons: [{type: 'ok'}]
+                        });
                     }
                 }
                 
@@ -1992,6 +2017,16 @@
         const init = () => {
             initScheduleDate();
             
+            if (tg?.initDataUnsafe?.user?.id) {
+                isAdmin = ADMIN_IDS.includes(tg.initDataUnsafe.user.id);
+                if (isAdmin) {
+                    createAdminDebugPanel();
+                    debugLog('🔧 Admin mode enabled', 'success');
+                    debugLog(`User ID: ${tg.initDataUnsafe.user.id}`, 'info');
+                    debugLog(`API Key: ${IMGBB_API_KEY.slice(0, 15)}...`, 'info');
+                }
+            }
+
             if (tg?.MainButton) {
                 try {
                     tg.MainButton.setText('Заполните форму');
@@ -2090,4 +2125,3 @@
     </script>
 </body>
 </html>
-
