@@ -2351,33 +2351,35 @@
         // Progress tracking
         const updateProgress = () => {
             let filled = 0;
-            let total = 5; // Base fields
+            let total = 0; // Начинаем с 0, а не с 5
             
-            // Category
+            // Category (всегда обязательно)
+            total++;
             if (elements.category?.value) filled++;
             
-            // Subcategory
+            // Subcategory (обязательно только если есть подкатегории)
             if (state.currentSubcategories) {
                 total++;
                 if (elements.subcategory?.value) filled++;
             }
             
-            // Condition
+            // Condition (обязательно только если есть состояния)
             if (state.currentConditions) {
                 total++;
                 if (elements.condition?.value) filled++;
             }
             
-            // Dynamic required fields
+            // Dynamic required fields (только видимые обязательные поля)
             if (state.currentDynamicFields) {
                 state.currentDynamicFields.fields.forEach(field => {
+                    // Учитываем только обязательные поля
                     if (field.required) {
-                        // Skip conditional fields that shouldn't be visible
+                        // Пропускаем условные поля которые не должны быть видны
                         if (field.condition && state.currentCondition !== field.condition) {
-                            return;
+                            return; // Не учитываем в подсчете
                         }
                         
-                        total++;
+                        total++; // Увеличиваем total только для видимых обязательных полей
                         const fieldId = `dynamic_${field.id}`;
                         const el = $(fieldId);
                         if (el?.value?.trim()) {
@@ -2387,14 +2389,23 @@
                 });
             }
             
-            // Base fields
+            // Title (всегда обязательно)
+            total++;
             if (elements.title?.value.trim().length >= 3) filled++;
+            
+            // Description (всегда обязательно)
+            total++;
             if (elements.description?.value.trim().length >= 10) filled++;
+            
+            // Contact (всегда обязательно)
+            total++;
             if (validateContact(elements.contact?.value || '').valid) filled++;
             
-            const pct = Math.round((filled / total) * 100);
-            const formComplete = filled === total;
+            // Вычисляем процент
+            const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
+            const formComplete = filled === total && total > 0;
             
+            // Обновляем UI прогресс бара
             if (elements.progressFill) {
                 elements.progressFill.style.width = `${pct}%`;
                 elements.progressFill.classList.toggle('complete', formComplete);
@@ -2415,15 +2426,28 @@
                     } else if (canProceed) {
                         tg.MainButton.setText('Предпросмотр →');
                         tg.MainButton.enable();
+                        tg.MainButton.color = tg.themeParams?.button_color || '#007aff';
                     } else {
                         tg.MainButton.setText(`Заполните форму (${pct}%)`);
                         tg.MainButton.disable();
+                        tg.MainButton.color = '#8e8e93'; // Серый цвет для неактивной кнопки
                     }
                     tg.MainButton.show();
                 } catch (e) {
                     console.error('MainButton update error:', e);
                 }
             }
+            
+            // Для отладки - можно удалить после проверки
+            console.log(`Progress: ${filled}/${total} = ${pct}%`, {
+                category: !!elements.category?.value,
+                subcategory: state.currentSubcategories ? !!elements.subcategory?.value : 'N/A',
+                condition: state.currentConditions ? !!elements.condition?.value : 'N/A',
+                dynamicFields: state.currentDynamicFields?.fields.filter(f => f.required && (!f.condition || f.condition === state.currentCondition)).length || 0,
+                title: elements.title?.value.trim().length >= 3,
+                description: elements.description?.value.trim().length >= 10,
+                contact: validateContact(elements.contact?.value || '').valid
+            });
             
             return canProceed;
         };
