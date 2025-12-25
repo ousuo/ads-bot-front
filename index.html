@@ -61,7 +61,7 @@
         }
         
         .header.scrolled {
-            background: transparent;
+            background: rgba(242, 242, 247, 0.8);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             box-shadow: 0 1px 0 rgba(0,0,0,0.08);
@@ -69,18 +69,23 @@
         
         @media (prefers-color-scheme: dark) {
             .header.scrolled {
-                background: rgba(0, 0, 0, 0.3);
+                background: rgba(0, 0, 0, 0.5);
             }
         }
         
         .header-content {
             max-width: 600px;
             margin: 0 auto;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
         
         .header-content.changing {
-            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: headerFade 0.3s ease;
+        }
+        
+        @keyframes headerFade {
+            0%, 100% { opacity: 1; transform: translateY(0); }
+            50% { opacity: 0.5; transform: translateY(-5px); }
         }
         
         .header h1 {
@@ -113,8 +118,9 @@
             height: 100%;
             background: var(--tg-button);
             border-radius: 100px;
-            transition: width 0.4s ease-out;
+            transition: width 0.4s ease-out, background-color 0.3s ease;
             width: 0%;
+            will-change: width;
         }
         
         .progress-fill.complete {
@@ -249,7 +255,7 @@
             margin-bottom: 12px;
             box-shadow: var(--shadow);
             overflow: visible;
-            transition: all var(--transition);
+            transition: box-shadow var(--transition);
         }
         
         .card.expanding {
@@ -293,7 +299,6 @@
             grid-column: span 2;
         }
         
-        /* Стили для динамических секций */
         .dynamic-section {
             max-height: 0;
             overflow: hidden;
@@ -312,7 +317,6 @@
             animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Стили для подкатегории */
         .subcategory-wrapper {
             max-height: 0;
             overflow: hidden;
@@ -331,7 +335,6 @@
             animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Стили для дополнительных опций (состояние товара и т.п.) */
         .condition-wrapper {
             max-height: 0;
             overflow: hidden;
@@ -344,6 +347,10 @@
             opacity: 1;
             margin-top: 10px;
             animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .condition-wrapper.hiding {
+            animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .form-label {
@@ -435,6 +442,7 @@
             font-size: 18px;
             font-weight: 600;
             color: var(--tg-hint);
+            pointer-events: none;
         }
         
         .form-group.is-success .input,
@@ -475,6 +483,7 @@
             color: var(--color-error);
             font-size: 11px;
             margin-top: 4px;
+            padding-left: 2px;
             display: none;
         }
         
@@ -486,6 +495,7 @@
             font-size: 11px;
             color: var(--color-success);
             margin-top: 4px;
+            padding-left: 2px;
             display: none;
         }
         
@@ -502,6 +512,7 @@
             border-radius: var(--radius);
             cursor: pointer;
             margin-top: 10px;
+            user-select: none;
         }
         
         .toggle-label {
@@ -516,6 +527,7 @@
             position: relative;
             width: 48px;
             height: 28px;
+            flex-shrink: 0;
         }
         
         .toggle input {
@@ -553,7 +565,6 @@
             transform: translateX(20px);
         }
         
-        /* Photo Upload */
         .photo-upload-area {
             border: 2px dashed var(--tg-section-bg);
             border-radius: var(--radius);
@@ -627,9 +638,6 @@
             position: absolute;
             inset: 0;
             background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         
         .photo-preview-item .upload-spinner {
@@ -729,7 +737,6 @@
             color: var(--tg-text);
         }
         
-        /* PREVIEW STYLES */
         .preview-container {
             padding: 16px;
             max-width: 600px;
@@ -851,6 +858,7 @@
         
         .message-info-icon {
             font-size: 16px;
+            flex-shrink: 0;
         }
         
         .message-info-label {
@@ -880,12 +888,17 @@
             gap: 8px;
         }
         
+        .preview-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         .preview-button-primary {
             background: var(--tg-button);
             color: white;
         }
         
-        .preview-button-primary:active {
+        .preview-button-primary:active:not(:disabled) {
             transform: scale(0.98);
             opacity: 0.9;
         }
@@ -896,7 +909,7 @@
             border: 2px solid var(--tg-section-bg);
         }
         
-        .preview-button-secondary:active {
+        .preview-button-secondary:active:not(:disabled) {
             background: var(--tg-section-bg);
         }
         
@@ -940,7 +953,6 @@
     </header>
     
     <main>
-        <!-- FORM VIEW -->
         <div id="formView" class="view active">
             <div class="container">
                 <form id="adForm" novalidate>
@@ -970,7 +982,6 @@
                                 <p class="error-message">Выберите категорию</p>
                             </div>
                             
-                            <!-- Подкатегория (появляется динамически) -->
                             <div class="subcategory-wrapper" id="subcategoryWrapper">
                                 <div class="form-group" id="subcategoryGroup">
                                     <label class="form-label" for="subcategory">
@@ -983,7 +994,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Дополнительные опции (состояние товара и т.п.) -->
                             <div class="condition-wrapper" id="conditionWrapper">
                                 <div class="form-group" id="conditionGroup">
                                     <label class="form-label" for="condition">
@@ -998,7 +1008,6 @@
                         </div>
                     </article>
                     
-                    <!-- Динамические дополнительные поля -->
                     <div id="dynamicFieldsContainer"></div>
                     
                     <article class="card">
@@ -1040,7 +1049,6 @@
                         </div>
                     </article>
                     
-                    <!-- Фото -->
                     <article class="card">
                         <header class="card-header">
                             <h2 class="card-title">📸 Фотографии</h2>
@@ -1162,7 +1170,6 @@
                                                 type="date" 
                                                 id="scheduleDate" 
                                                 name="scheduleDate"
-                                                min=""
                                             >
                                         </div>
                                         
@@ -1204,7 +1211,6 @@
             </div>
         </div>
 
-        <!-- PREVIEW VIEW -->
         <div id="previewView" class="view">
             <div class="preview-container">
                 <div class="telegram-message" id="previewMessage">
@@ -1242,9 +1248,9 @@
         
         const IMGBB_API_KEY = 'e7020e01382f14a53e5bbe345450f788';
         const MAX_PHOTOS = 5;
-        const MAX_FILE_SIZE = 5 * 1024 * 1024;
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        const MAX_DATA_SIZE = 60000; // Telegram limit for sendData
         
-        // Конфигурация подкатегорий
         const SUBCATEGORIES = {
             'Работа': [
                 { value: 'Ищу_сотрудника', label: '👔 Ищу сотрудника' },
@@ -1321,7 +1327,6 @@
             ]
         };
         
-        // Конфигурация дополнительных опций (состояние товара)
         const CONDITIONS = {
             'Легковые': [
                 { value: 'Новый', label: '✨ Новый' },
@@ -1357,7 +1362,6 @@
             ]
         };
         
-        // Конфигурация динамических полей для разных подкатегорий
         const DYNAMIC_FIELDS = {
             'Ищу_сотрудника': {
                 title: '💼 Информация о вакансии',
@@ -1492,7 +1496,7 @@
                         type: 'number',
                         required: false,
                         placeholder: '50000',
-                        condition: 'С_пробегом' // Показывать только если выбрано "С пробегом"
+                        condition: 'С_пробегом'
                     },
                     {
                         id: 'car_engine',
@@ -1645,22 +1649,36 @@
         
         const tg = window.Telegram?.WebApp;
         
-        let photoData = [];
-        let uploadingCount = 0;
-        let currentView = 'form';
-        let currentSubcategories = null;
-        let currentConditions = null;
-        let currentDynamicFields = null;
-        let currentCondition = null;
-        let dynamicFieldsData = {};
+        // State
+        const state = {
+            photoData: [],
+            uploadingCount: 0,
+            currentView: 'form',
+            currentSubcategories: null,
+            currentConditions: null,
+            currentDynamicFields: null,
+            currentCondition: null,
+            dynamicFieldsData: {},
+            photoUrls: new Set(), // Track object URLs for cleanup
+            isTransitioning: false
+        };
         
+        // DOM helpers
+        const $ = (id) => document.getElementById(id);
+        const $$ = (selector, parent = document) => parent.querySelectorAll(selector);
+        
+        // Initialize Telegram WebApp
         if (tg) {
-            tg.ready();
-            tg.expand();
+            try {
+                tg.ready();
+                tg.expand();
+                tg.enableClosingConfirmation();
+            } catch (e) {
+                console.error('Telegram WebApp init error:', e);
+            }
         }
         
-        const $ = (id) => document.getElementById(id);
-        
+        // Cache DOM elements
         const elements = {
             formView: $('formView'),
             previewView: $('previewView'),
@@ -1714,469 +1732,52 @@
             backToFormBtn: $('backToFormBtn')
         };
         
+        // Validation patterns
         const patterns = {
-            username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
+            username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/,
+            phone: /^[\d\s+()-]{10,}$/
         };
         
-        // Функция создания динамических полей
-        const createDynamicFields = (config) => {
-            const card = document.createElement('article');
-            card.className = 'card dynamic-section';
-            card.id = 'dynamicFieldsCard';
-            
-            let fieldsHTML = `
-                <header class="card-header">
-                    <h2 class="card-title">${config.title}</h2>
-                </header>
-                <div class="card-body">
-            `;
-            
-            config.fields.forEach(field => {
-                const isRequired = field.required;
-                const fieldId = 'dynamic_' + field.id;
-                
-                fieldsHTML += `
-                    <div class="form-group ${field.condition ? 'conditional-field' : ''}" 
-                         id="${fieldId}Group" 
-                         ${field.condition ? `data-condition="${field.condition}"` : ''}>
-                        <label class="form-label" for="${fieldId}">
-                            ${field.label} 
-                            <span class="badge ${isRequired ? 'badge--required' : 'badge--optional'}">
-                                ${isRequired ? 'обязательно' : 'опционально'}
-                            </span>
-                        </label>
-                `;
-                
-                if (field.type === 'select') {
-                    fieldsHTML += `<select class="select placeholder" id="${fieldId}" name="${fieldId}" ${isRequired ? 'required' : ''}>`;
-                    field.options.forEach(opt => {
-                        fieldsHTML += `<option value="${opt.value}" ${opt.disabled ? 'disabled selected' : ''}>${opt.label}</option>`;
-                    });
-                    fieldsHTML += `</select>`;
-                } else if (field.type === 'textarea') {
-                    fieldsHTML += `<textarea class="textarea" id="${fieldId}" name="${fieldId}" 
-                        placeholder="${field.placeholder || ''}" ${isRequired ? 'required' : ''}></textarea>`;
-                } else {
-                    fieldsHTML += `<input class="input" type="${field.type}" id="${fieldId}" name="${fieldId}" 
-                        placeholder="${field.placeholder || ''}" 
-                        ${field.min !== undefined ? `min="${field.min}"` : ''} 
-                        ${field.max !== undefined ? `max="${field.max}"` : ''} 
-                        ${isRequired ? 'required' : ''}>`;
-                }
-                
-                if (isRequired) {
-                    fieldsHTML += `<p class="error-message">Заполните это поле</p>`;
-                }
-                
-                fieldsHTML += `</div>`;
-            });
-            
-            fieldsHTML += `</div>`;
-            card.innerHTML = fieldsHTML;
-            
-            return card;
-        };
-        
-        // Функция показа динамических полей
-        const showDynamicFields = (subcategory) => {
-            hideDynamicFields();
-            
-            if (DYNAMIC_FIELDS[subcategory]) {
-                currentDynamicFields = DYNAMIC_FIELDS[subcategory];
-                const card = createDynamicFields(currentDynamicFields);
-                elements.dynamicFieldsContainer.appendChild(card);
-                
-                // Добавляем обработчики для всех динамических полей
-                currentDynamicFields.fields.forEach(field => {
-                    const fieldId = 'dynamic_' + field.id;
-                    const el = $(fieldId);
-                    if (el) {
-                        el.addEventListener('input', handleDynamicFieldInput);
-                        el.addEventListener('change', handleDynamicFieldInput);
-                    }
-                });
-                
-                setTimeout(() => {
-                    card.classList.add('visible');
-                    updateConditionalFields();
-                }, 50);
-            }
-        };
-        
-        // Функция скрытия динамических полей
-        const hideDynamicFields = () => {
-            const existingCard = $('dynamicFieldsCard');
-            if (existingCard) {
-                existingCard.classList.add('hiding');
-                setTimeout(() => {
-                    existingCard.remove();
-                    currentDynamicFields = null;
-                    dynamicFieldsData = {};
-                }, 300);
-            }
-        };
-        
-        // Обновление видимости условных полей (например, пробег только для б/у авто)
-        const updateConditionalFields = () => {
-            if (!currentCondition) return;
-            
-            const conditionalFields = document.querySelectorAll('.conditional-field');
-            conditionalFields.forEach(field => {
-                const condition = field.dataset.condition;
-                if (condition) {
-                    if (currentCondition === condition) {
-                        field.style.display = 'block';
+        // Haptic feedback helper
+        const haptic = (type = 'light') => {
+            try {
+                if (tg?.HapticFeedback) {
+                    if (type === 'success' || type === 'error' || type === 'warning') {
+                        tg.HapticFeedback.notificationOccurred(type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'error');
                     } else {
-                        field.style.display = 'none';
-                        // Очищаем поле если оно скрыто
-                        const input = field.querySelector('.input, .select, .textarea');
-                        if (input) input.value = '';
+                        tg.HapticFeedback.impactOccurred(type);
                     }
                 }
-            });
-        };
-        
-        // Обработчик ввода в динамические поля
-        const handleDynamicFieldInput = (e) => {
-            const field = e.target;
-            const fieldId = field.id.replace('dynamic_', '');
-            dynamicFieldsData[fieldId] = field.value;
-            
-            // Валидация
-            const group = field.closest('.form-group');
-            if (field.hasAttribute('required')) {
-                if (field.value.trim()) {
-                    setFieldState(group, 'is-success');
-                } else {
-                    setFieldState(group, null);
-                }
-            }
-            
-            // Убираем placeholder класс у select
-            if (field.tagName === 'SELECT' && field.value) {
-                field.classList.remove('placeholder');
-            }
-            
-            updateProgress();
-            haptic('light');
-        };
-        
-        // Функция обработки изменения категории
-        const handleCategoryChange = () => {
-            const selectedCategory = elements.category.value;
-            
-            elements.category.classList.remove('placeholder');
-            setFieldState(elements.categoryGroup, 'is-success');
-            haptic();
-            
-            // Сброс подкатегории
-            elements.subcategory.value = '';
-            elements.subcategory.classList.add('placeholder');
-            setFieldState(elements.subcategoryGroup, null);
-            
-            // Сброс состояния
-            elements.condition.value = '';
-            elements.condition.classList.add('placeholder');
-            setFieldState(elements.conditionGroup, null);
-            currentCondition = null;
-            
-            // Скрываем динамические поля
-            hideDynamicFields();
-            hideConditionField();
-            
-            // Проверяем, есть ли подкатегории для выбранной категории
-            if (selectedCategory && SUBCATEGORIES[selectedCategory]) {
-                showSubcategoryField(selectedCategory);
-            } else {
-                hideSubcategoryField();
-            }
-            
-            updateProgress();
-        };
-        
-        // Показать поле подкатегории с анимацией
-        const showSubcategoryField = (category) => {
-            const subcats = SUBCATEGORIES[category];
-            
-            elements.subcategory.innerHTML = '<option value="" disabled selected>Выберите подкатегорию</option>';
-            subcats.forEach(subcat => {
-                const option = document.createElement('option');
-                option.value = subcat.value;
-                option.textContent = subcat.label;
-                elements.subcategory.appendChild(option);
-            });
-            
-            currentSubcategories = subcats;
-            
-            elements.subcategoryWrapper.classList.remove('hiding');
-            elements.subcategoryWrapper.classList.add('visible');
-            elements.categoryCard.classList.add('expanding');
-            
-            setTimeout(() => {
-                elements.categoryCard.classList.remove('expanding');
-            }, 300);
-        };
-        
-        // Скрыть поле подкатегории с анимацией
-        const hideSubcategoryField = () => {
-            if (elements.subcategoryWrapper.classList.contains('visible')) {
-                elements.subcategoryWrapper.classList.add('hiding');
-                
-                setTimeout(() => {
-                    elements.subcategoryWrapper.classList.remove('visible', 'hiding');
-                    currentSubcategories = null;
-                }, 200);
+            } catch (e) {
+                // Silently fail
             }
         };
         
-        // Показать поле состояния товара
-        const showConditionField = (subcategory) => {
-            const conditions = CONDITIONS[subcategory];
-            
-            elements.condition.innerHTML = '<option value="" disabled selected>Выберите состояние</option>';
-            conditions.forEach(cond => {
-                const option = document.createElement('option');
-                option.value = cond.value;
-                option.textContent = cond.label;
-                elements.condition.appendChild(option);
-            });
-            
-            currentConditions = conditions;
-            
-            elements.conditionWrapper.classList.remove('hiding');
-            elements.conditionWrapper.classList.add('visible');
+        // Field state management
+        const setFieldState = (group, state) => {
+            if (!group) return;
+            group.classList.remove('is-success', 'is-error');
+            if (state) group.classList.add(state);
         };
         
-        // Скрыть поле состояния товара
-        const hideConditionField = () => {
-            if (elements.conditionWrapper.classList.contains('visible')) {
-                elements.conditionWrapper.classList.add('hiding');
-                
-                setTimeout(() => {
-                    elements.conditionWrapper.classList.remove('visible', 'hiding');
-                    currentConditions = null;
-                }, 200);
-            }
+        // Character counter
+        const updateCharCounter = (el, current, max) => {
+            if (!el) return;
+            el.textContent = `${current}/${max}`;
+            el.classList.remove('is-warning', 'is-danger');
+            const ratio = current / max;
+            if (ratio >= 0.95) el.classList.add('is-danger');
+            else if (ratio >= 0.8) el.classList.add('is-warning');
         };
         
-        // Обработка изменения подкатегории
-        const handleSubcategoryChange = () => {
-            const subcategory = elements.subcategory.value;
-            
-            if (subcategory) {
-                elements.subcategory.classList.remove('placeholder');
-                setFieldState(elements.subcategoryGroup, 'is-success');
-                haptic();
-                
-                // Проверяем есть ли поле состояния для этой подкатегории
-                if (CONDITIONS[subcategory]) {
-                    showConditionField(subcategory);
-                } else {
-                    hideConditionField();
-                    elements.condition.value = '';
-                    currentCondition = null;
-                }
-                
-                // Показываем динамические поля если они есть
-                if (DYNAMIC_FIELDS[subcategory]) {
-                    showDynamicFields(subcategory);
-                } else {
-                    hideDynamicFields();
-                }
-            } else {
-                setFieldState(elements.subcategoryGroup, null);
-                hideConditionField();
-                hideDynamicFields();
-            }
-            
-            updateProgress();
-        };
-        
-        // Обработка изменения состояния товара
-        const handleConditionChange = () => {
-            if (elements.condition.value) {
-                elements.condition.classList.remove('placeholder');
-                setFieldState(elements.conditionGroup, 'is-success');
-                currentCondition = elements.condition.value;
-                haptic();
-                
-                // Обновляем видимость условных полей
-                updateConditionalFields();
-            } else {
-                setFieldState(elements.conditionGroup, null);
-                currentCondition = null;
-            }
-            updateProgress();
-        };
-        
-        // Инициализация минимальной даты
-        const initScheduleDate = () => {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            const todayStr = today.toISOString().split('T')[0];
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
-            
-            elements.scheduleDate.min = todayStr;
-            elements.scheduleDate.value = tomorrowStr;
-        };
-        
-        const uploadToImgBB = async (file) => {
-            const formData = new FormData();
-            formData.append('image', file);
-            
-            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.error?.message || 'Upload failed');
-            }
-            
-            return {
-                url: data.data.url,
-                thumb: data.data.thumb?.url || data.data.medium?.url || data.data.url,
-                delete_url: data.data.delete_url
-            };
-        };
-
-        const handlePhotoSelect = async (files) => {
-            const fileArray = Array.from(files);
-            
-            for (const file of fileArray) {
-                if (photoData.length + uploadingCount >= MAX_PHOTOS) {
-                    setPhotoStatus(`Максимум ${MAX_PHOTOS} фото`, 'error');
-                    haptic('error');
-                    break;
-                }
-                
-                if (!file.type.startsWith('image/')) {
-                    continue;
-                }
-                
-                if (file.size > MAX_FILE_SIZE) {
-                    setPhotoStatus('Файл слишком большой (макс. 5 МБ)', 'error');
-                    haptic('error');
-                    continue;
-                }
-                
-                const tempId = 'temp_' + Date.now() + '_' + Math.random();
-                const localUrl = URL.createObjectURL(file);
-                addPhotoPreview(localUrl, tempId, true);
-                uploadingCount++;
-                updateUploadArea();
-                updateProgress();
-                
-                try {
-                    setPhotoStatus(`Загрузка ${uploadingCount}...`, '');
-                    const result = await uploadToImgBB(file);
-                    
-                    photoData.push({
-                        url: result.url,
-                        thumb: result.thumb
-                    });
-                    
-                    updatePhotoPreview(tempId, result.url, result.thumb);
-                    
-                    setPhotoStatus(`Загружено ${photoData.length} из ${MAX_PHOTOS}`, 'success');
-                    haptic('success');
-                    
-                } catch (err) {
-                    console.error('Upload error:', err);
-                    removePhotoPreview(tempId);
-                    setPhotoStatus(`Ошибка загрузки: ${err.message}`, 'error');
-                    haptic('error');
-                } finally {
-                    uploadingCount--;
-                    URL.revokeObjectURL(localUrl);
-                    updateUploadArea();
-                    updateProgress();
-                }
-            }
-        };
-        
-        const addPhotoPreview = (url, id, isUploading = false) => {
-            const item = document.createElement('div');
-            item.className = 'photo-preview-item' + (isUploading ? ' uploading' : '');
-            item.dataset.id = id;
-            item.innerHTML = `
-                <img src="${url}" alt="Фото">
-                ${isUploading ? '<div class="upload-spinner"></div>' : `<button type="button" class="photo-remove-btn" data-id="${id}">×</button>`}
-            `;
-            elements.photoPreviewGrid.appendChild(item);
-            
-            if (!isUploading) {
-                item.querySelector('.photo-remove-btn')?.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    removePhoto(id);
-                });
-            }
-        };
-        
-        const updatePhotoPreview = (tempId, url, thumbUrl) => {
-            const item = elements.photoPreviewGrid.querySelector(`[data-id="${tempId}"]`);
-            if (item) {
-                item.classList.remove('uploading');
-                item.dataset.id = url;
-                item.innerHTML = `
-                    <img src="${thumbUrl}" alt="Фото">
-                    <button type="button" class="photo-remove-btn" data-id="${url}">×</button>
-                `;
-                item.querySelector('.photo-remove-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    removePhoto(url);
-                });
-            }
-        };
-        
-        const removePhotoPreview = (id) => {
-            const item = elements.photoPreviewGrid.querySelector(`[data-id="${id}"]`);
-            if (item) {
-                item.remove();
-            }
-        };
-        
-        const removePhoto = (url) => {
-            photoData = photoData.filter(p => p.url !== url);
-            removePhotoPreview(url);
-            updateUploadArea();
-            updateProgress();
-            setPhotoStatus(photoData.length > 0 ? `${photoData.length} из ${MAX_PHOTOS} фото` : '', '');
-            haptic('light');
-        };
-
-        const updateUploadArea = () => {
-            const area = elements.photoUploadArea;
-            const total = photoData.length + uploadingCount;
-            
-            if (total >= MAX_PHOTOS) {
-                area.querySelector('.upload-text').textContent = 'Достигнут лимит фото';
-                area.classList.add('has-photos');
-            } else if (total > 0) {
-                area.querySelector('.upload-text').textContent = 'Добавить ещё фото';
-                area.classList.add('has-photos');
-            } else {
-                area.querySelector('.upload-text').textContent = 'Нажмите для выбора фото';
-                area.classList.remove('has-photos');
-            }
-            
-            area.classList.toggle('uploading', uploadingCount > 0);
-        };
-        
-        const setPhotoStatus = (text, type) => {
+        // Photo status
+        const setPhotoStatus = (text, type = '') => {
+            if (!elements.photoStatus) return;
             elements.photoStatus.textContent = text;
             elements.photoStatus.className = 'photo-status' + (type ? ' ' + type : '');
         };
         
+        // Contact validation
         const validateContact = (value) => {
             const v = value.trim();
             
@@ -2203,13 +1804,491 @@
             return { valid: false, type: null, message: 'Введите @username или номер' };
         };
         
+        // Clean up object URLs
+        const cleanupPhotoUrls = () => {
+            state.photoUrls.forEach(url => {
+                try {
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+            state.photoUrls.clear();
+        };
+        
+        // Upload to ImgBB with retry
+        const uploadToImgBB = async (file, retries = 2) => {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            for (let i = 0; i <= retries; i++) {
+                try {
+                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.error?.message || 'Upload failed');
+                    }
+                    
+                    return {
+                        url: data.data.url,
+                        thumb: data.data.thumb?.url || data.data.medium?.url || data.data.url,
+                        delete_url: data.data.delete_url
+                    };
+                } catch (err) {
+                    if (i === retries) throw err;
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                }
+            }
+        };
+        
+        // Photo handling
+        const handlePhotoSelect = async (files) => {
+            const fileArray = Array.from(files);
+            
+            for (const file of fileArray) {
+                if (state.photoData.length + state.uploadingCount >= MAX_PHOTOS) {
+                    setPhotoStatus(`Максимум ${MAX_PHOTOS} фото`, 'error');
+                    haptic('error');
+                    break;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    continue;
+                }
+                
+                if (file.size > MAX_FILE_SIZE) {
+                    setPhotoStatus('Файл слишком большой (макс. 5 МБ)', 'error');
+                    haptic('error');
+                    continue;
+                }
+                
+                const tempId = `temp_${Date.now()}_${Math.random()}`;
+                const localUrl = URL.createObjectURL(file);
+                state.photoUrls.add(localUrl);
+                
+                addPhotoPreview(localUrl, tempId, true);
+                state.uploadingCount++;
+                updateUploadArea();
+                updateProgress();
+                
+                try {
+                    setPhotoStatus(`Загрузка ${state.uploadingCount}...`, '');
+                    const result = await uploadToImgBB(file);
+                    
+                    state.photoData.push({
+                        url: result.url,
+                        thumb: result.thumb
+                    });
+                    
+                    updatePhotoPreview(tempId, result.url, result.thumb);
+                    setPhotoStatus(`Загружено ${state.photoData.length} из ${MAX_PHOTOS}`, 'success');
+                    haptic('success');
+                    
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    removePhotoPreview(tempId);
+                    setPhotoStatus(`Ошибка загрузки: ${err.message}`, 'error');
+                    haptic('error');
+                } finally {
+                    state.uploadingCount--;
+                    URL.revokeObjectURL(localUrl);
+                    state.photoUrls.delete(localUrl);
+                    updateUploadArea();
+                    updateProgress();
+                }
+            }
+        };
+        
+        const addPhotoPreview = (url, id, isUploading = false) => {
+            if (!elements.photoPreviewGrid) return;
+            
+            const item = document.createElement('div');
+            item.className = 'photo-preview-item' + (isUploading ? ' uploading' : '');
+            item.dataset.id = id;
+            item.innerHTML = `
+                <img src="${url}" alt="Фото" loading="lazy">
+                ${isUploading ? '<div class="upload-spinner"></div>' : `<button type="button" class="photo-remove-btn" data-id="${id}" aria-label="Удалить фото">×</button>`}
+            `;
+            elements.photoPreviewGrid.appendChild(item);
+            
+            if (!isUploading) {
+                const btn = item.querySelector('.photo-remove-btn');
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removePhoto(id);
+                    });
+                }
+            }
+        };
+        
+        const updatePhotoPreview = (tempId, url, thumbUrl) => {
+            if (!elements.photoPreviewGrid) return;
+            
+            const item = elements.photoPreviewGrid.querySelector(`[data-id="${tempId}"]`);
+            if (item) {
+                item.classList.remove('uploading');
+                item.dataset.id = url;
+                item.innerHTML = `
+                    <img src="${thumbUrl}" alt="Фото" loading="lazy">
+                    <button type="button" class="photo-remove-btn" data-id="${url}" aria-label="Удалить фото">×</button>
+                `;
+                const btn = item.querySelector('.photo-remove-btn');
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removePhoto(url);
+                    });
+                }
+            }
+        };
+        
+        const removePhotoPreview = (id) => {
+            if (!elements.photoPreviewGrid) return;
+            const item = elements.photoPreviewGrid.querySelector(`[data-id="${id}"]`);
+            if (item) item.remove();
+        };
+        
+        const removePhoto = (url) => {
+            state.photoData = state.photoData.filter(p => p.url !== url);
+            removePhotoPreview(url);
+            updateUploadArea();
+            updateProgress();
+            setPhotoStatus(state.photoData.length > 0 ? `${state.photoData.length} из ${MAX_PHOTOS} фото` : '', '');
+            haptic('light');
+        };
+        
+        const updateUploadArea = () => {
+            if (!elements.photoUploadArea) return;
+            
+            const total = state.photoData.length + state.uploadingCount;
+            const uploadText = elements.photoUploadArea.querySelector('.upload-text');
+            
+            if (total >= MAX_PHOTOS) {
+                if (uploadText) uploadText.textContent = 'Достигнут лимит фото';
+                elements.photoUploadArea.classList.add('has-photos');
+            } else if (total > 0) {
+                if (uploadText) uploadText.textContent = 'Добавить ещё фото';
+                elements.photoUploadArea.classList.add('has-photos');
+            } else {
+                if (uploadText) uploadText.textContent = 'Нажмите для выбора фото';
+                elements.photoUploadArea.classList.remove('has-photos');
+            }
+            
+            elements.photoUploadArea.classList.toggle('uploading', state.uploadingCount > 0);
+        };
+        
+        // Dynamic fields management
+        const createDynamicFields = (config) => {
+            const card = document.createElement('article');
+            card.className = 'card dynamic-section';
+            card.id = 'dynamicFieldsCard';
+            
+            let fieldsHTML = `
+                <header class="card-header">
+                    <h2 class="card-title">${config.title}</h2>
+                </header>
+                <div class="card-body">
+            `;
+            
+            config.fields.forEach(field => {
+                const isRequired = field.required;
+                const fieldId = `dynamic_${field.id}`;
+                const isConditional = !!field.condition;
+                
+                fieldsHTML += `
+                    <div class="form-group ${isConditional ? 'conditional-field' : ''}" 
+                         id="${fieldId}Group" 
+                         ${isConditional ? `data-condition="${field.condition}"` : ''}
+                         style="${isConditional ? 'display: none;' : ''}">
+                        <label class="form-label" for="${fieldId}">
+                            ${field.label} 
+                            <span class="badge ${isRequired ? 'badge--required' : 'badge--optional'}">
+                                ${isRequired ? 'обязательно' : 'опционально'}
+                            </span>
+                        </label>
+                `;
+                
+                if (field.type === 'select') {
+                    fieldsHTML += `<select class="select placeholder" id="${fieldId}" name="${fieldId}" ${isRequired ? 'required' : ''}>`;
+                    field.options.forEach(opt => {
+                        fieldsHTML += `<option value="${opt.value}" ${opt.disabled ? 'disabled selected' : ''}>${opt.label}</option>`;
+                    });
+                    fieldsHTML += `</select>`;
+                } else if (field.type === 'textarea') {
+                    fieldsHTML += `<textarea class="textarea" id="${fieldId}" name="${fieldId}" 
+                        placeholder="${field.placeholder || ''}" ${isRequired ? 'required' : ''}></textarea>`;
+                } else {
+                    const attrs = [
+                        `type="${field.type}"`,
+                        `id="${fieldId}"`,
+                        `name="${fieldId}"`,
+                        `placeholder="${field.placeholder || ''}"`,
+                        field.min !== undefined ? `min="${field.min}"` : '',
+                        field.max !== undefined ? `max="${field.max}"` : '',
+                        isRequired ? 'required' : ''
+                    ].filter(Boolean).join(' ');
+                    
+                    fieldsHTML += `<input class="input" ${attrs}>`;
+                }
+                
+                if (isRequired) {
+                    fieldsHTML += `<p class="error-message">Заполните это поле</p>`;
+                }
+                
+                fieldsHTML += `</div>`;
+            });
+            
+            fieldsHTML += `</div>`;
+            card.innerHTML = fieldsHTML;
+            
+            return card;
+        };
+        
+        const showDynamicFields = (subcategory) => {
+            hideDynamicFields();
+            
+            if (DYNAMIC_FIELDS[subcategory]) {
+                state.currentDynamicFields = DYNAMIC_FIELDS[subcategory];
+                const card = createDynamicFields(state.currentDynamicFields);
+                elements.dynamicFieldsContainer.appendChild(card);
+                
+                // Add event listeners
+                state.currentDynamicFields.fields.forEach(field => {
+                    const fieldId = `dynamic_${field.id}`;
+                    const el = $(fieldId);
+                    if (el) {
+                        el.addEventListener('input', handleDynamicFieldInput);
+                        el.addEventListener('change', handleDynamicFieldInput);
+                        el.addEventListener('focus', () => haptic());
+                    }
+                });
+                
+                requestAnimationFrame(() => {
+                    card.classList.add('visible');
+                    updateConditionalFields();
+                });
+            }
+        };
+        
+        const hideDynamicFields = () => {
+            const existingCard = $('dynamicFieldsCard');
+            if (existingCard) {
+                existingCard.classList.add('hiding');
+                setTimeout(() => {
+                    existingCard.remove();
+                    state.currentDynamicFields = null;
+                    state.dynamicFieldsData = {};
+                }, 300);
+            }
+        };
+        
+        const updateConditionalFields = () => {
+            if (!state.currentCondition) return;
+            
+            const conditionalFields = $$('.conditional-field');
+            conditionalFields.forEach(field => {
+                const condition = field.dataset.condition;
+                if (condition) {
+                    const shouldShow = state.currentCondition === condition;
+                    field.style.display = shouldShow ? 'block' : 'none';
+                    
+                    if (!shouldShow) {
+                        const input = field.querySelector('.input, .select, .textarea');
+                        if (input) input.value = '';
+                    }
+                }
+            });
+        };
+        
+        const handleDynamicFieldInput = (e) => {
+            const field = e.target;
+            const fieldId = field.id.replace('dynamic_', '');
+            state.dynamicFieldsData[fieldId] = field.value;
+            
+            const group = field.closest('.form-group');
+            if (field.hasAttribute('required')) {
+                setFieldState(group, field.value.trim() ? 'is-success' : null);
+            }
+            
+            if (field.tagName === 'SELECT' && field.value) {
+                field.classList.remove('placeholder');
+            }
+            
+            updateProgress();
+            haptic('light');
+        };
+        
+        // Category management
+        const handleCategoryChange = () => {
+            const selectedCategory = elements.category.value;
+            
+            elements.category.classList.remove('placeholder');
+            setFieldState(elements.categoryGroup, 'is-success');
+            haptic();
+            
+            // Reset subcategory
+            elements.subcategory.value = '';
+            elements.subcategory.classList.add('placeholder');
+            setFieldState(elements.subcategoryGroup, null);
+            
+            // Reset condition
+            elements.condition.value = '';
+            elements.condition.classList.add('placeholder');
+            setFieldState(elements.conditionGroup, null);
+            state.currentCondition = null;
+            
+            hideDynamicFields();
+            hideConditionField();
+            
+            if (selectedCategory && SUBCATEGORIES[selectedCategory]) {
+                showSubcategoryField(selectedCategory);
+            } else {
+                hideSubcategoryField();
+            }
+            
+            updateProgress();
+        };
+        
+        const showSubcategoryField = (category) => {
+            const subcats = SUBCATEGORIES[category];
+            
+            elements.subcategory.innerHTML = '<option value="" disabled selected>Выберите подкатегорию</option>';
+            subcats.forEach(subcat => {
+                const option = document.createElement('option');
+                option.value = subcat.value;
+                option.textContent = subcat.label;
+                elements.subcategory.appendChild(option);
+            });
+            
+            state.currentSubcategories = subcats;
+            
+            elements.subcategoryWrapper.classList.remove('hiding');
+            requestAnimationFrame(() => {
+                elements.subcategoryWrapper.classList.add('visible');
+                elements.categoryCard.classList.add('expanding');
+            });
+            
+            setTimeout(() => {
+                elements.categoryCard.classList.remove('expanding');
+            }, 300);
+        };
+        
+        const hideSubcategoryField = () => {
+            if (elements.subcategoryWrapper.classList.contains('visible')) {
+                elements.subcategoryWrapper.classList.add('hiding');
+                setTimeout(() => {
+                    elements.subcategoryWrapper.classList.remove('visible', 'hiding');
+                    state.currentSubcategories = null;
+                }, 200);
+            }
+        };
+        
+        const showConditionField = (subcategory) => {
+            const conditions = CONDITIONS[subcategory];
+            
+            elements.condition.innerHTML = '<option value="" disabled selected>Выберите состояние</option>';
+            conditions.forEach(cond => {
+                const option = document.createElement('option');
+                option.value = cond.value;
+                option.textContent = cond.label;
+                elements.condition.appendChild(option);
+            });
+            
+            state.currentConditions = conditions;
+            
+            elements.conditionWrapper.classList.remove('hiding');
+            requestAnimationFrame(() => {
+                elements.conditionWrapper.classList.add('visible');
+            });
+        };
+        
+        const hideConditionField = () => {
+            if (elements.conditionWrapper.classList.contains('visible')) {
+                elements.conditionWrapper.classList.add('hiding');
+                setTimeout(() => {
+                    elements.conditionWrapper.classList.remove('visible', 'hiding');
+                    state.currentConditions = null;
+                }, 200);
+            }
+        };
+        
+        const handleSubcategoryChange = () => {
+            const subcategory = elements.subcategory.value;
+            
+            if (subcategory) {
+                elements.subcategory.classList.remove('placeholder');
+                setFieldState(elements.subcategoryGroup, 'is-success');
+                haptic();
+                
+                if (CONDITIONS[subcategory]) {
+                    showConditionField(subcategory);
+                } else {
+                    hideConditionField();
+                    elements.condition.value = '';
+                    state.currentCondition = null;
+                }
+                
+                if (DYNAMIC_FIELDS[subcategory]) {
+                    showDynamicFields(subcategory);
+                } else {
+                    hideDynamicFields();
+                }
+            } else {
+                setFieldState(elements.subcategoryGroup, null);
+                hideConditionField();
+                hideDynamicFields();
+            }
+            
+            updateProgress();
+        };
+        
+        const handleConditionChange = () => {
+            if (elements.condition.value) {
+                elements.condition.classList.remove('placeholder');
+                setFieldState(elements.conditionGroup, 'is-success');
+                state.currentCondition = elements.condition.value;
+                haptic();
+                updateConditionalFields();
+            } else {
+                setFieldState(elements.conditionGroup, null);
+                state.currentCondition = null;
+            }
+            updateProgress();
+        };
+        
+        // Schedule management
+        const initScheduleDate = () => {
+            if (!elements.scheduleDate) return;
+            
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const todayStr = today.toISOString().split('T')[0];
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            
+            elements.scheduleDate.min = todayStr;
+            elements.scheduleDate.value = tomorrowStr;
+        };
+        
         const getScheduledTime = () => {
-            if (!elements.scheduleToggle.checked) {
+            if (!elements.scheduleToggle?.checked) {
                 return 'now';
             }
             
-            const date = elements.scheduleDate.value;
-            const time = elements.scheduleTime.value;
+            const date = elements.scheduleDate?.value;
+            const time = elements.scheduleTime?.value;
             
             if (!date || !time) {
                 return 'now';
@@ -2219,10 +2298,10 @@
         };
         
         const updateScheduleHint = () => {
-            if (!elements.scheduleToggle.checked) return;
+            if (!elements.scheduleToggle?.checked || !elements.scheduleHint) return;
             
-            const date = elements.scheduleDate.value;
-            const time = elements.scheduleTime.value;
+            const date = elements.scheduleDate?.value;
+            const time = elements.scheduleTime?.value;
             
             if (date && time) {
                 try {
@@ -2239,9 +2318,9 @@
                         
                         let hint = 'Публикация через ';
                         if (diffDays > 0) {
-                            hint += `${diffDays} ${diffDays === 1 ? 'день' : 'дней'}`;
+                            hint += `${diffDays} ${diffDays === 1 ? 'день' : diffDays < 5 ? 'дня' : 'дней'}`;
                         } else if (diffHours > 0) {
-                            hint += `${diffHours} ${diffHours === 1 ? 'час' : 'часов'}`;
+                            hint += `${diffHours} ${diffHours === 1 ? 'час' : diffHours < 5 ? 'часа' : 'часов'}`;
                         } else {
                             hint += 'менее часа';
                         }
@@ -2256,113 +2335,105 @@
             }
         };
         
-        const setFieldState = (group, state) => {
-            if (!group) return;
-            group.classList.remove('is-success', 'is-error');
-            if (state) group.classList.add(state);
+        const handleScheduleToggle = () => {
+            const isEnabled = elements.scheduleToggle?.checked;
+            if (elements.scheduleFieldsContainer) {
+                elements.scheduleFieldsContainer.style.display = isEnabled ? 'block' : 'none';
+            }
+            
+            if (isEnabled) {
+                updateScheduleHint();
+            }
+            
+            haptic();
         };
         
-        const updateCharCounter = (el, current, max) => {
-            el.textContent = `${current}/${max}`;
-            el.classList.remove('is-warning', 'is-danger');
-            if (current / max >= 0.95) el.classList.add('is-danger');
-            else if (current / max >= 0.8) el.classList.add('is-warning');
-        };
-        
-        const haptic = (type = 'light') => {
-            try {
-                if (tg?.HapticFeedback) {
-                    if (type === 'success') {
-                        tg.HapticFeedback.notificationOccurred('success');
-                    } else if (type === 'error') {
-                        tg.HapticFeedback.notificationOccurred('error');
-                    } else {
-                        tg.HapticFeedback.impactOccurred(type);
-                    }
-                }
-            } catch (e) {}
-        };
-        
-        let formComplete = false;
-        
+        // Progress tracking
         const updateProgress = () => {
             let filled = 0;
-            let total = 5; // Базовые поля
+            let total = 5; // Base fields
             
-            // Категория
-            if (elements.category.value) filled++;
+            // Category
+            if (elements.category?.value) filled++;
             
-            // Подкатегория (если требуется)
-            if (currentSubcategories) {
+            // Subcategory
+            if (state.currentSubcategories) {
                 total++;
-                if (elements.subcategory.value) filled++;
+                if (elements.subcategory?.value) filled++;
             }
             
-            // Состояние товара (если требуется)
-            if (currentConditions) {
+            // Condition
+            if (state.currentConditions) {
                 total++;
-                if (elements.condition.value) filled++;
+                if (elements.condition?.value) filled++;
             }
             
-            // Динамические обязательные поля
-            if (currentDynamicFields) {
-                currentDynamicFields.fields.forEach(field => {
+            // Dynamic required fields
+            if (state.currentDynamicFields) {
+                state.currentDynamicFields.fields.forEach(field => {
                     if (field.required) {
-                        total++;
-                        const fieldId = 'dynamic_' + field.id;
-                        const el = $(fieldId);
-                        
-                        // Проверяем условные поля
-                        if (field.condition && currentCondition !== field.condition) {
-                            total--; // Не учитываем скрытые поля
+                        // Skip conditional fields that shouldn't be visible
+                        if (field.condition && state.currentCondition !== field.condition) {
                             return;
                         }
                         
-                        if (el && el.value && el.value.trim()) {
+                        total++;
+                        const fieldId = `dynamic_${field.id}`;
+                        const el = $(fieldId);
+                        if (el?.value?.trim()) {
                             filled++;
                         }
                     }
                 });
             }
             
-            // Базовые поля
-            if (elements.title.value.trim().length >= 3) filled++;
-            if (elements.description.value.trim().length >= 10) filled++;
-            if (validateContact(elements.contact.value).valid) filled++;
+            // Base fields
+            if (elements.title?.value.trim().length >= 3) filled++;
+            if (elements.description?.value.trim().length >= 10) filled++;
+            if (validateContact(elements.contact?.value || '').valid) filled++;
             
             const pct = Math.round((filled / total) * 100);
-            formComplete = filled === total;
+            const formComplete = filled === total;
             
-            elements.progressFill.style.width = pct + '%';
-            elements.progressFill.classList.toggle('complete', formComplete);
-            elements.progressText.textContent = pct + '%';
+            if (elements.progressFill) {
+                elements.progressFill.style.width = `${pct}%`;
+                elements.progressFill.classList.toggle('complete', formComplete);
+            }
             
-            const canProceed = formComplete && uploadingCount === 0;
+            if (elements.progressText) {
+                elements.progressText.textContent = `${pct}%`;
+            }
             
-            if (tg?.MainButton) {
+            const canProceed = formComplete && state.uploadingCount === 0;
+            
+            // Update main button
+            if (tg?.MainButton && state.currentView === 'form') {
                 try {
-                    if (currentView === 'form') {
-                        if (uploadingCount > 0) {
-                            tg.MainButton.setText('Загрузка фото...');
-                            tg.MainButton.disable();
-                        } else if (canProceed) {
-                            tg.MainButton.setText('Предпросмотр →');
-                            tg.MainButton.enable();
-                        } else {
-                            tg.MainButton.setText('Заполните форму (' + pct + '%)');
-                            tg.MainButton.disable();
-                        }
+                    if (state.uploadingCount > 0) {
+                        tg.MainButton.setText('Загрузка фото...');
+                        tg.MainButton.disable();
+                    } else if (canProceed) {
+                        tg.MainButton.setText('Предпросмотр →');
+                        tg.MainButton.enable();
+                    } else {
+                        tg.MainButton.setText(`Заполните форму (${pct}%)`);
+                        tg.MainButton.disable();
                     }
                     tg.MainButton.show();
-                } catch (e) {}
+                } catch (e) {
+                    console.error('MainButton update error:', e);
+                }
             }
             
             return canProceed;
         };
         
+        // Form validation
         const validateForm = () => {
             let valid = true;
+            const errors = [];
             
+            // Reset states
             setFieldState(elements.categoryGroup, null);
             setFieldState(elements.subcategoryGroup, null);
             setFieldState(elements.conditionGroup, null);
@@ -2370,137 +2441,180 @@
             setFieldState(elements.descriptionGroup, null);
             setFieldState(elements.contactGroup, null);
             
-            if (!elements.category.value) {
+            // Validate category
+            if (!elements.category?.value) {
                 setFieldState(elements.categoryGroup, 'is-error');
+                errors.push('• Категория');
                 valid = false;
             }
             
-            if (currentSubcategories && !elements.subcategory.value) {
+            // Validate subcategory
+            if (state.currentSubcategories && !elements.subcategory?.value) {
                 setFieldState(elements.subcategoryGroup, 'is-error');
+                errors.push('• Подкатегория');
                 valid = false;
             }
             
-            if (currentConditions && !elements.condition.value) {
+            // Validate condition
+            if (state.currentConditions && !elements.condition?.value) {
                 setFieldState(elements.conditionGroup, 'is-error');
+                errors.push('• Состояние');
                 valid = false;
             }
             
-            // Валидация динамических полей
-            if (currentDynamicFields) {
-                currentDynamicFields.fields.forEach(field => {
+            // Validate dynamic fields
+            if (state.currentDynamicFields) {
+                state.currentDynamicFields.fields.forEach(field => {
                     if (field.required) {
-                        const fieldId = 'dynamic_' + field.id;
-                        const el = $(fieldId);
-                        const group = $(fieldId + 'Group');
-                        
-                        // Пропускаем условные поля которые не должны показываться
-                        if (field.condition && currentCondition !== field.condition) {
+                        // Skip conditional fields
+                        if (field.condition && state.currentCondition !== field.condition) {
                             return;
                         }
                         
-                        if (!el || !el.value || !el.value.trim()) {
+                        const fieldId = `dynamic_${field.id}`;
+                        const el = $(fieldId);
+                        const group = $(`${fieldId}Group`);
+                        
+                        if (!el?.value?.trim()) {
                             setFieldState(group, 'is-error');
+                            errors.push(`• ${field.label}`);
                             valid = false;
                         }
                     }
                 });
             }
             
-            if (elements.title.value.trim().length < 3) {
+            // Validate title
+            if ((elements.title?.value.trim().length || 0) < 3) {
                 setFieldState(elements.titleGroup, 'is-error');
+                errors.push('• Заголовок (мин. 3 символа)');
                 valid = false;
             }
             
-            if (elements.description.value.trim().length < 10) {
+            // Validate description
+            if ((elements.description?.value.trim().length || 0) < 10) {
                 setFieldState(elements.descriptionGroup, 'is-error');
+                errors.push('• Описание (мин. 10 символов)');
                 valid = false;
             }
             
-            const contactResult = validateContact(elements.contact.value);
+            // Validate contact
+            const contactResult = validateContact(elements.contact?.value || '');
             if (!contactResult.valid) {
-                elements.contactError.textContent = contactResult.message;
+                if (elements.contactError) {
+                    elements.contactError.textContent = contactResult.message;
+                }
                 setFieldState(elements.contactGroup, 'is-error');
+                errors.push('• Контакт для связи');
                 valid = false;
             }
             
-            if (elements.scheduleToggle.checked) {
-                const date = elements.scheduleDate.value;
-                const time = elements.scheduleTime.value;
+            // Validate schedule
+            if (elements.scheduleToggle?.checked) {
+                const date = elements.scheduleDate?.value;
+                const time = elements.scheduleTime?.value;
                 
                 if (date && time) {
-                    const scheduledDt = new Date(`${date}T${time}`);
-                    const now = new Date();
-                    
-                    if (scheduledDt <= now) {
-                        valid = false;
-                        if (tg?.showPopup) {
-                            tg.showPopup({
-                                title: 'Ошибка',
-                                message: 'Время публикации должно быть в будущем',
-                                buttons: [{ type: 'ok' }]
-                            });
+                    try {
+                        const scheduledDt = new Date(`${date}T${time}`);
+                        const now = new Date();
+                        
+                        if (scheduledDt <= now) {
+                            errors.push('• Время публикации должно быть в будущем');
+                            valid = false;
                         }
+                    } catch (e) {
+                        errors.push('• Некорректная дата/время');
+                        valid = false;
                     }
+                }
+            }
+            
+            // Show errors
+            if (!valid && errors.length > 0) {
+                const errorMsg = 'Заполните все обязательные поля:\n\n' + errors.join('\n');
+                
+                if (tg?.showPopup) {
+                    tg.showPopup({
+                        title: 'Проверьте данные',
+                        message: errorMsg,
+                        buttons: [{ type: 'ok' }]
+                    });
+                } else {
+                    alert(errorMsg);
                 }
             }
             
             return valid;
         };
         
+        // View switching
         const switchView = (view) => {
-            const fromView = currentView;
-            currentView = view;
+            if (state.isTransitioning) return;
+            
+            state.isTransitioning = true;
+            const fromView = state.currentView;
+            state.currentView = view;
             
             const fromElement = fromView === 'form' ? elements.formView : elements.previewView;
             const toElement = view === 'form' ? elements.formView : elements.previewView;
             
             const isForward = view === 'preview';
             
+            // Clear animation classes
             fromElement.classList.remove('slide-in-right', 'slide-out-left', 'slide-in-left', 'slide-out-right');
             toElement.classList.remove('slide-in-right', 'slide-out-left', 'slide-in-left', 'slide-out-right');
             
-            if (isForward) {
-                fromElement.classList.add('slide-out-left');
-            } else {
-                fromElement.classList.add('slide-out-right');
-            }
+            // Add exit animation
+            fromElement.classList.add(isForward ? 'slide-out-left' : 'slide-out-right');
             
             setTimeout(() => {
                 fromElement.classList.remove('active');
                 toElement.classList.add('active');
                 
-                if (isForward) {
-                    toElement.classList.add('slide-in-right');
-                } else {
-                    toElement.classList.add('slide-in-left');
+                // Add enter animation
+                toElement.classList.add(isForward ? 'slide-in-right' : 'slide-in-left');
+                
+                // Update header
+                const headerContent = elements.header?.querySelector('.header-content');
+                if (headerContent) {
+                    headerContent.classList.add('changing');
                 }
                 
-                const headerContent = elements.header.querySelector('.header-content');
-                headerContent.classList.add('changing');
-                
                 if (view === 'form') {
-                    elements.headerTitle.textContent = 'Новое объявление';
-                    elements.headerSubtitle.textContent = 'Заполните информацию о товаре';
+                    if (elements.headerTitle) elements.headerTitle.textContent = 'Новое объявление';
+                    if (elements.headerSubtitle) elements.headerSubtitle.textContent = 'Заполните информацию о товаре';
                     
                     if (tg?.MainButton) {
-                        tg.MainButton.offClick(showPreview);
-                        tg.MainButton.onClick(showPreview);
+                        try {
+                            tg.MainButton.offClick(showPreview);
+                            tg.MainButton.onClick(showPreview);
+                        } catch (e) {
+                            console.error('MainButton setup error:', e);
+                        }
                     }
                     
                     updateProgress();
                 } else if (view === 'preview') {
-                    elements.headerTitle.textContent = 'Предпросмотр';
-                    elements.headerSubtitle.textContent = 'Так будет выглядеть объявление';
+                    if (elements.headerTitle) elements.headerTitle.textContent = 'Предпросмотр';
+                    if (elements.headerSubtitle) elements.headerSubtitle.textContent = 'Так будет выглядеть объявление';
                     
                     if (tg?.MainButton) {
-                        tg.MainButton.hide();
+                        try {
+                            tg.MainButton.hide();
+                        } catch (e) {
+                            // Ignore
+                        }
                     }
                     
                     renderPreview();
                 }
                 
                 setTimeout(() => {
-                    headerContent.classList.remove('changing');
+                    if (headerContent) {
+                        headerContent.classList.remove('changing');
+                    }
+                    state.isTransitioning = false;
                 }, 300);
                 
             }, 50);
@@ -2512,7 +2626,7 @@
         const showPreview = () => {
             haptic('medium');
             
-            if (uploadingCount > 0) {
+            if (state.uploadingCount > 0) {
                 if (tg?.showPopup) {
                     tg.showPopup({
                         title: 'Подождите',
@@ -2525,88 +2639,66 @@
             
             if (!validateForm()) {
                 haptic('error');
-                
-                let errorMsg = 'Заполните все обязательные поля:\n\n';
-                if (!elements.category.value) errorMsg += '• Категория\n';
-                if (currentSubcategories && !elements.subcategory.value) errorMsg += '• Подкатегория\n';
-                if (currentConditions && !elements.condition.value) errorMsg += '• Состояние\n';
-                if (elements.title.value.trim().length < 3) errorMsg += '• Заголовок (мин. 3 символа)\n';
-                if (elements.description.value.trim().length < 10) errorMsg += '• Описание (мин. 10 символов)\n';
-                if (!validateContact(elements.contact.value).valid) errorMsg += '• Контакт для связи\n';
-                
-                // Добавляем динамические поля в сообщение об ошибке
-                if (currentDynamicFields) {
-                    currentDynamicFields.fields.forEach(field => {
-                        if (field.required) {
-                            const fieldId = 'dynamic_' + field.id;
-                            const el = $(fieldId);
-                            if (field.condition && currentCondition !== field.condition) {
-                                return;
-                            }
-                            if (!el || !el.value || !el.value.trim()) {
-                                errorMsg += `• ${field.label}\n`;
-                            }
-                        }
-                    });
-                }
-                
-                if (tg?.showPopup) {
-                    tg.showPopup({
-                        title: 'Проверьте данные',
-                        message: errorMsg,
-                        buttons: [{ type: 'ok' }]
-                    });
-                } else {
-                    alert(errorMsg);
-                }
                 return;
             }
             
             switchView('preview');
         };
         
+        // Preview rendering
         const renderPreview = () => {
+            if (!elements.previewMessage) return;
+            
+            // Reset animations
             const resetAnimation = (element) => {
                 if (element) {
                     element.style.animation = 'none';
-                    setTimeout(() => {
+                    requestAnimationFrame(() => {
                         element.style.animation = '';
-                    }, 10);
+                    });
                 }
             };
             
             resetAnimation(elements.previewMessage);
             resetAnimation(elements.previewPhotos);
-            resetAnimation(elements.previewMessage.querySelector('.message-content'));
             
-            // Формируем хэштеги
-            const category = elements.category.value.replace(/\s+/g, '_').replace(/[()]/g, '');
-            let hashtags = `#${category}`;
+            // Build hashtags
+            const category = elements.category?.value.replace(/\s+/g, '_').replace(/[()]/g, '') || '';
+            let hashtags = category ? `#${category}` : '';
             
-            if (currentSubcategories && elements.subcategory.value) {
-                const subcategory = elements.subcategory.value;
-                hashtags += ` #${subcategory}`;
+            if (state.currentSubcategories && elements.subcategory?.value) {
+                hashtags += ` #${elements.subcategory.value}`;
             }
             
-            if (currentConditions && elements.condition.value) {
-                const condition = elements.condition.value;
-                hashtags += ` #${condition}`;
+            if (state.currentConditions && elements.condition?.value) {
+                hashtags += ` #${elements.condition.value}`;
             }
             
-            elements.previewHashtags.textContent = hashtags;
+            if (elements.previewHashtags) {
+                elements.previewHashtags.textContent = hashtags;
+            }
             
-            elements.previewTitle.textContent = elements.title.value.trim();
-            elements.previewDescription.textContent = elements.description.value.trim();
+            // Set title and description
+            if (elements.previewTitle) {
+                elements.previewTitle.textContent = elements.title?.value.trim() || '';
+            }
             
-            const priceVal = elements.price.value;
-            const isNegotiable = elements.negotiable.checked;
+            if (elements.previewDescription) {
+                elements.previewDescription.textContent = elements.description?.value.trim() || '';
+            }
+            
+            // Build price
+            const priceVal = elements.price?.value || '';
+            const isNegotiable = elements.negotiable?.checked || false;
             let priceText = priceVal || '0';
+            
             if (isNegotiable) {
-                priceText = priceVal ? priceVal + ' ₽ (торг)' : 'Договорная';
+                priceText = priceVal ? `${priceVal} ₽ (торг)` : 'Договорная';
             } else {
-                priceText = priceVal ? priceVal + ' ₽' : 'Договорная';
+                priceText = priceVal ? `${priceVal} ₽` : 'Договорная';
             }
             
+            // Build info HTML
             let infoHTML = `
                 <div class="message-info-item">
                     <span class="message-info-icon">💰</span>
@@ -2614,35 +2706,36 @@
                 </div>
             `;
             
-            // Добавляем динамические поля в предпросмотр
-            if (currentDynamicFields) {
-                currentDynamicFields.fields.forEach(field => {
-                    const fieldId = 'dynamic_' + field.id;
+            // Add dynamic fields
+            if (state.currentDynamicFields) {
+                state.currentDynamicFields.fields.forEach(field => {
+                    const fieldId = `dynamic_${field.id}`;
                     const el = $(fieldId);
                     
-                    // Пропускаем условные поля которые не заполнены
-                    if (field.condition && currentCondition !== field.condition) {
+                    // Skip conditional hidden fields
+                    if (field.condition && state.currentCondition !== field.condition) {
                         return;
                     }
                     
-                    if (el && el.value && el.value.trim()) {
+                    if (el?.value?.trim()) {
                         let displayValue = el.value.trim();
                         
-                        // Для select берем текст опции
+                        // For select, get option text
                         if (el.tagName === 'SELECT') {
                             const selectedOption = el.options[el.selectedIndex];
-                            displayValue = selectedOption ? selectedOption.textContent : displayValue;
+                            displayValue = selectedOption?.textContent || displayValue;
                         }
                         
-                        // Определяем иконку по типу поля
+                        // Determine icon
                         let icon = '📋';
-                        if (field.id.includes('brand') || field.id.includes('model')) icon = '🏷️';
-                        else if (field.id.includes('year')) icon = '📅';
-                        else if (field.id.includes('mileage')) icon = '🛣️';
-                        else if (field.id.includes('sphere') || field.id.includes('position')) icon = '💼';
-                        else if (field.id.includes('schedule')) icon = '⏰';
-                        else if (field.id.includes('salary')) icon = '💰';
-                        else if (field.id.includes('area') || field.id.includes('rooms')) icon = '📐';
+                        const fieldIdLower = field.id.toLowerCase();
+                        if (fieldIdLower.includes('brand') || fieldIdLower.includes('model')) icon = '🏷️';
+                        else if (fieldIdLower.includes('year')) icon = '📅';
+                        else if (fieldIdLower.includes('mileage')) icon = '🛣️';
+                        else if (fieldIdLower.includes('sphere') || fieldIdLower.includes('position')) icon = '💼';
+                        else if (fieldIdLower.includes('schedule')) icon = '⏰';
+                        else if (fieldIdLower.includes('salary')) icon = '💰';
+                        else if (fieldIdLower.includes('area') || fieldIdLower.includes('rooms')) icon = '📐';
                         
                         infoHTML += `
                             <div class="message-info-item">
@@ -2654,7 +2747,8 @@
                 });
             }
             
-            if (elements.location.value.trim()) {
+            // Add location
+            if (elements.location?.value.trim()) {
                 infoHTML += `
                     <div class="message-info-item">
                         <span class="message-info-icon">📍</span>
@@ -2663,16 +2757,18 @@
                 `;
             }
             
+            // Add contact
             infoHTML += `
                 <div class="message-info-item">
                     <span class="message-info-icon">👤</span>
-                    <span><span class="message-info-label">Контакт:</span> ${elements.contact.value.trim()}</span>
+                    <span><span class="message-info-label">Контакт:</span> ${elements.contact?.value.trim() || ''}</span>
                 </div>
             `;
             
-            if (elements.scheduleToggle.checked) {
-                const date = elements.scheduleDate.value;
-                const time = elements.scheduleTime.value;
+            // Add schedule
+            if (elements.scheduleToggle?.checked) {
+                const date = elements.scheduleDate?.value;
+                const time = elements.scheduleTime?.value;
                 
                 if (date && time) {
                     try {
@@ -2691,76 +2787,102 @@
                                 <span><span class="message-info-label">Публикация:</span> ${formatted}</span>
                             </div>
                         `;
-                    } catch (e) {}
+                    } catch (e) {
+                        // Ignore
+                    }
                 }
             }
             
-            elements.previewInfo.innerHTML = infoHTML;
+            if (elements.previewInfo) {
+                elements.previewInfo.innerHTML = infoHTML;
+            }
             
-            elements.previewPhotos.innerHTML = '';
-            
-            if (photoData.length > 0) {
-                const count = photoData.length;
+            // Render photos
+            if (elements.previewPhotos) {
+                elements.previewPhotos.innerHTML = '';
                 
-                if (count === 1) {
-                    elements.previewPhotos.className = 'message-photos single-photo';
-                    elements.previewPhotos.innerHTML = `
-                        <div class="message-photo">
-                            <img src="${photoData[0].thumb}" alt="Фото" loading="lazy">
-                        </div>
-                    `;
+                if (state.photoData.length > 0) {
+                    const count = state.photoData.length;
+                    
+                    if (count === 1) {
+                        elements.previewPhotos.className = 'message-photos single-photo';
+                        elements.previewPhotos.innerHTML = `
+                            <div class="message-photo">
+                                <img src="${state.photoData[0].thumb}" alt="Фото" loading="lazy">
+                            </div>
+                        `;
+                    } else {
+                        elements.previewPhotos.className = `message-photos multiple-photos count-${count}`;
+                        state.photoData.forEach(photo => {
+                            const photoDiv = document.createElement('div');
+                            photoDiv.className = 'message-photo';
+                            photoDiv.innerHTML = `<img src="${photo.thumb}" alt="Фото" loading="lazy">`;
+                            elements.previewPhotos.appendChild(photoDiv);
+                        });
+                    }
+                    
+                    elements.previewPhotos.style.display = 'grid';
                 } else {
-                    elements.previewPhotos.className = `message-photos multiple-photos count-${count}`;
-                    photoData.forEach(photo => {
-                        const photoDiv = document.createElement('div');
-                        photoDiv.className = 'message-photo';
-                        photoDiv.innerHTML = `<img src="${photo.thumb}" alt="Фото" loading="lazy">`;
-                        elements.previewPhotos.appendChild(photoDiv);
-                    });
+                    elements.previewPhotos.style.display = 'none';
                 }
-                
-                elements.previewPhotos.style.display = 'grid';
-            } else {
-                elements.previewPhotos.style.display = 'none';
             }
         };
         
+        // Form submission
         const handleSubmit = () => {
             haptic('medium');
             
-            const priceVal = elements.price.value;
-            const isNegotiable = elements.negotiable.checked;
+            const priceVal = elements.price?.value || '';
+            const isNegotiable = elements.negotiable?.checked || false;
             let priceText = priceVal || '0';
+            
             if (isNegotiable) {
-                priceText = priceVal ? priceVal + ' (торг)' : 'Договорная';
+                priceText = priceVal ? `${priceVal} (торг)` : 'Договорная';
             }
             
             const scheduledTime = getScheduledTime();
             
             const data = {
-                category: elements.category.value,
-                subcategory: currentSubcategories ? elements.subcategory.value : null,
-                condition: currentConditions ? elements.condition.value : null,
-                dynamicFields: dynamicFieldsData,
-                title: elements.title.value.trim(),
-                description: elements.description.value.trim(),
+                category: elements.category?.value || '',
+                subcategory: state.currentSubcategories ? (elements.subcategory?.value || null) : null,
+                condition: state.currentConditions ? (elements.condition?.value || null) : null,
+                dynamicFields: state.dynamicFieldsData,
+                title: elements.title?.value.trim() || '',
+                description: elements.description?.value.trim() || '',
                 price: priceText,
-                contact: elements.contact.value.trim(),
-                location: elements.location.value.trim() || null,
+                contact: elements.contact?.value.trim() || '',
+                location: elements.location?.value.trim() || null,
                 negotiable: isNegotiable,
-                photos: photoData.map(p => p.url),
-                photoCount: photoData.length,
+                photos: state.photoData.map(p => p.url),
+                photoCount: state.photoData.length,
                 scheduledTime: scheduledTime,
                 timestamp: Date.now()
             };
             
-            if (tg?.MainButton) {
-                tg.MainButton.showProgress(true);
+            const jsonData = JSON.stringify(data);
+            
+            // Check size
+            if (jsonData.length > MAX_DATA_SIZE) {
+                if (tg?.showPopup) {
+                    tg.showPopup({
+                        title: 'Ошибка',
+                        message: 'Данные слишком большие. Попробуйте сократить описание или уменьшить количество фото.',
+                        buttons: [{ type: 'ok' }]
+                    });
+                }
+                haptic('error');
+                return;
             }
             
-            const jsonData = JSON.stringify(data);
-            console.log('Отправка данных:', jsonData.length, 'байт');
-            console.log('Данные:', data);
+            if (tg?.MainButton) {
+                try {
+                    tg.MainButton.showProgress(true);
+                } catch (e) {
+                    // Ignore
+                }
+            }
+            
+            console.log('Sending data:', jsonData.length, 'bytes');
             
             if (tg?.sendData) {
                 try {
@@ -2769,7 +2891,11 @@
                 } catch (e) {
                     console.error('sendData error:', e);
                     if (tg?.MainButton) {
-                        tg.MainButton.hideProgress();
+                        try {
+                            tg.MainButton.hideProgress();
+                        } catch (e2) {
+                            // Ignore
+                        }
                     }
                     if (tg?.showPopup) {
                         tg.showPopup({
@@ -2782,68 +2908,206 @@
                 }
             } else {
                 if (tg?.MainButton) {
-                    tg.MainButton.hideProgress();
+                    try {
+                        tg.MainButton.hideProgress();
+                    } catch (e) {
+                        // Ignore
+                    }
                 }
-                alert('Режим отладки\n\nДанные:\n' + JSON.stringify(data, null, 2));
+                console.log('Debug mode - data:', data);
+                alert('Режим отладки\n\nДанные готовы к отправке:\n' + jsonData.length + ' bytes');
             }
         };
         
+        // Input handlers
         const handleTitleInput = () => {
-            const len = elements.title.value.length;
+            const len = elements.title?.value.length || 0;
             updateCharCounter(elements.titleCounter, len, 100);
             setFieldState(elements.titleGroup, len >= 3 ? 'is-success' : null);
             updateProgress();
         };
         
         const handleDescInput = () => {
-            const len = elements.description.value.trim().length;
-            updateCharCounter(elements.descCounter, elements.description.value.length, 1000);
-            setFieldState(elements.descriptionGroup, len >= 10 ? 'is-success' : null);
+            const trimLen = elements.description?.value.trim().length || 0;
+            const len = elements.description?.value.length || 0;
+            updateCharCounter(elements.descCounter, len, 1000);
+            setFieldState(elements.descriptionGroup, trimLen >= 10 ? 'is-success' : null);
             updateProgress();
         };
         
         const handleContactInput = () => {
-            const result = validateContact(elements.contact.value);
+            const result = validateContact(elements.contact?.value || '');
             
-            elements.contactType.classList.remove('is-visible');
+            if (elements.contactType) {
+                elements.contactType.classList.remove('is-visible');
+            }
             setFieldState(elements.contactGroup, null);
             
             if (result.valid) {
-                elements.contactType.textContent = result.message;
-                elements.contactType.classList.add('is-visible');
+                if (elements.contactType) {
+                    elements.contactType.textContent = result.message;
+                    elements.contactType.classList.add('is-visible');
+                }
                 setFieldState(elements.contactGroup, 'is-success');
-            } else if (elements.contact.value.trim()) {
-                elements.contactError.textContent = result.message;
+            } else if (elements.contact?.value.trim()) {
+                if (elements.contactError) {
+                    elements.contactError.textContent = result.message;
+                }
             }
             
             updateProgress();
         };
         
-        const handleScheduleToggle = () => {
-            const isEnabled = elements.scheduleToggle.checked;
-            elements.scheduleFieldsContainer.style.display = isEnabled ? 'block' : 'none';
-            
-            if (isEnabled) {
-                updateScheduleHint();
-            }
-            
-            haptic();
-        };
-        
-        let ticking = false;
+        // Scroll handler
+        let scrollTicking = false;
         const handleScroll = () => {
-            if (!ticking) {
+            if (!scrollTicking) {
                 requestAnimationFrame(() => {
-                    elements.header.classList.toggle('scrolled', window.scrollY > 20);
-                    ticking = false;
+                    if (elements.header) {
+                        elements.header.classList.toggle('scrolled', window.scrollY > 20);
+                    }
+                    scrollTicking = false;
                 });
-                ticking = true;
+                scrollTicking = true;
             }
         };
         
+        // Event listeners setup
+        const setupEventListeners = () => {
+            // Photo upload
+            if (elements.photoUploadArea && elements.photoInput) {
+                elements.photoUploadArea.addEventListener('click', () => {
+                    if (state.photoData.length + state.uploadingCount < MAX_PHOTOS) {
+                        elements.photoInput.click();
+                        haptic('light');
+                    }
+                });
+                
+                elements.photoInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handlePhotoSelect(e.target.files);
+                        e.target.value = '';
+                    }
+                });
+                
+                // Drag and drop
+                elements.photoUploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    elements.photoUploadArea.classList.add('dragover');
+                });
+                
+                elements.photoUploadArea.addEventListener('dragleave', () => {
+                    elements.photoUploadArea.classList.remove('dragover');
+                });
+                
+                elements.photoUploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    elements.photoUploadArea.classList.remove('dragover');
+                    if (e.dataTransfer.files.length > 0) {
+                        handlePhotoSelect(e.dataTransfer.files);
+                    }
+                });
+            }
+            
+            // Category
+            if (elements.category) {
+                elements.category.addEventListener('change', handleCategoryChange);
+            }
+            
+            if (elements.subcategory) {
+                elements.subcategory.addEventListener('change', handleSubcategoryChange);
+            }
+            
+            if (elements.condition) {
+                elements.condition.addEventListener('change', handleConditionChange);
+            }
+            
+            // Form inputs
+            if (elements.title) {
+                elements.title.addEventListener('input', handleTitleInput);
+            }
+            
+            if (elements.description) {
+                elements.description.addEventListener('input', handleDescInput);
+            }
+            
+            if (elements.contact) {
+                elements.contact.addEventListener('input', handleContactInput);
+            }
+            
+            if (elements.price) {
+                elements.price.addEventListener('input', updateProgress);
+            }
+            
+            if (elements.location) {
+                elements.location.addEventListener('input', updateProgress);
+            }
+            
+            if (elements.negotiable) {
+                elements.negotiable.addEventListener('change', () => haptic());
+            }
+            
+            // Toggle fields
+            if (elements.negotiableField) {
+                elements.negotiableField.addEventListener('click', (e) => {
+                    if (!e.target.closest('.toggle') && elements.negotiable) {
+                        elements.negotiable.checked = !elements.negotiable.checked;
+                        haptic();
+                    }
+                });
+            }
+            
+            // Schedule
+            if (elements.scheduleToggle) {
+                elements.scheduleToggle.addEventListener('change', handleScheduleToggle);
+            }
+            
+            if (elements.scheduleToggleField) {
+                elements.scheduleToggleField.addEventListener('click', (e) => {
+                    if (!e.target.closest('.toggle') && elements.scheduleToggle) {
+                        elements.scheduleToggle.checked = !elements.scheduleToggle.checked;
+                        handleScheduleToggle();
+                    }
+                });
+            }
+            
+            if (elements.scheduleDate) {
+                elements.scheduleDate.addEventListener('change', updateScheduleHint);
+            }
+            
+            if (elements.scheduleTime) {
+                elements.scheduleTime.addEventListener('change', updateScheduleHint);
+            }
+            
+            // Preview buttons
+            if (elements.submitBtn) {
+                elements.submitBtn.addEventListener('click', handleSubmit);
+            }
+            
+            if (elements.backToFormBtn) {
+                elements.backToFormBtn.addEventListener('click', () => switchView('form'));
+            }
+            
+            // Scroll
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            
+            // Focus haptic
+            $$('.input, .textarea, .select').forEach(el => {
+                el.addEventListener('focus', () => haptic());
+            });
+        };
+        
+        // Cleanup on unload
+        const cleanup = () => {
+            cleanupPhotoUrls();
+        };
+        
+        // Initialize
         const init = () => {
             initScheduleDate();
+            setupEventListeners();
             
+            // Setup Telegram Main Button
             if (tg?.MainButton) {
                 try {
                     tg.MainButton.setText('Заполните форму');
@@ -2855,83 +3119,24 @@
                     });
                     tg.MainButton.onClick(showPreview);
                     tg.MainButton.show();
-                } catch (e) {}
+                } catch (e) {
+                    console.error('MainButton init error:', e);
+                }
             }
             
-            if (tg?.initDataUnsafe?.user?.username) {
-                elements.contact.value = '@' + tg.initDataUnsafe.user.username;
+            // Auto-fill username
+            if (tg?.initDataUnsafe?.user?.username && elements.contact) {
+                elements.contact.value = `@${tg.initDataUnsafe.user.username}`;
                 handleContactInput();
             }
             
-            elements.photoUploadArea.addEventListener('click', () => {
-                if (photoData.length + uploadingCount < MAX_PHOTOS) {
-                    elements.photoInput.click();
-                    haptic('light');
-                }
-            });
-            
-            elements.photoInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handlePhotoSelect(e.target.files);
-                    e.target.value = '';
-                }
-            });
-            
-            elements.photoUploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                elements.photoUploadArea.classList.add('dragover');
-            });
-            
-            elements.photoUploadArea.addEventListener('dragleave', () => {
-                elements.photoUploadArea.classList.remove('dragover');
-            });
-            
-            elements.photoUploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                elements.photoUploadArea.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) {
-                    handlePhotoSelect(e.dataTransfer.files);
-                }
-            });
-            
-            elements.category.addEventListener('change', handleCategoryChange);
-            elements.subcategory.addEventListener('change', handleSubcategoryChange);
-            elements.condition.addEventListener('change', handleConditionChange);
-            elements.title.addEventListener('input', handleTitleInput);
-            elements.description.addEventListener('input', handleDescInput);
-            elements.contact.addEventListener('input', handleContactInput);
-            elements.price.addEventListener('input', updateProgress);
-            elements.location.addEventListener('input', updateProgress);
-            elements.negotiable.addEventListener('change', () => haptic());
-            elements.negotiableField.addEventListener('click', (e) => {
-                if (!e.target.closest('.toggle')) {
-                    elements.negotiable.checked = !elements.negotiable.checked;
-                    haptic();
-                }
-            });
-            
-            elements.scheduleToggle.addEventListener('change', handleScheduleToggle);
-            elements.scheduleToggleField.addEventListener('click', (e) => {
-                if (!e.target.closest('.toggle')) {
-                    elements.scheduleToggle.checked = !elements.scheduleToggle.checked;
-                    handleScheduleToggle();
-                }
-            });
-            elements.scheduleDate.addEventListener('change', updateScheduleHint);
-            elements.scheduleTime.addEventListener('change', updateScheduleHint);
-            
-            elements.submitBtn.addEventListener('click', handleSubmit);
-            elements.backToFormBtn.addEventListener('click', () => switchView('form'));
-            
-            window.addEventListener('scroll', handleScroll, { passive: true });
-            
-            document.querySelectorAll('.input, .textarea, .select').forEach(el => {
-                el.addEventListener('focus', () => haptic());
-            });
-            
             updateProgress();
+            
+            // Cleanup on unload
+            window.addEventListener('beforeunload', cleanup);
         };
         
+        // Start
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
