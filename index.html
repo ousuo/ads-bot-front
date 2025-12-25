@@ -225,7 +225,7 @@
             }
             to {
                 opacity: 1;
-                max-height: 200px;
+                max-height: 2000px;
                 transform: translateY(0);
             }
         }
@@ -233,7 +233,7 @@
         @keyframes slideUp {
             from {
                 opacity: 1;
-                max-height: 200px;
+                max-height: 2000px;
                 transform: translateY(0);
             }
             to {
@@ -248,7 +248,7 @@
             border-radius: var(--radius-lg);
             margin-bottom: 12px;
             box-shadow: var(--shadow);
-            overflow: hidden;
+            overflow: visible;
             transition: all var(--transition);
         }
         
@@ -293,6 +293,25 @@
             grid-column: span 2;
         }
         
+        /* Стили для динамических секций */
+        .dynamic-section {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+        }
+        
+        .dynamic-section.visible {
+            max-height: 3000px;
+            opacity: 1;
+            animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .dynamic-section.hiding {
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
         /* Стили для подкатегории */
         .subcategory-wrapper {
             max-height: 0;
@@ -310,6 +329,21 @@
         
         .subcategory-wrapper.hiding {
             animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Стили для дополнительных опций (состояние товара и т.п.) */
+        .condition-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .condition-wrapper.visible {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 10px;
+            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .form-label {
@@ -948,8 +982,24 @@
                                     <p class="error-message">Выберите подкатегорию</p>
                                 </div>
                             </div>
+                            
+                            <!-- Дополнительные опции (состояние товара и т.п.) -->
+                            <div class="condition-wrapper" id="conditionWrapper">
+                                <div class="form-group" id="conditionGroup">
+                                    <label class="form-label" for="condition">
+                                        Состояние <span class="badge badge--required">обязательно</span>
+                                    </label>
+                                    <select class="select placeholder" id="condition" name="condition">
+                                        <option value="" disabled selected>Выберите состояние</option>
+                                    </select>
+                                    <p class="error-message">Выберите состояние</p>
+                                </div>
+                            </div>
                         </div>
                     </article>
+                    
+                    <!-- Динамические дополнительные поля -->
+                    <div id="dynamicFieldsContainer"></div>
                     
                     <article class="card">
                         <header class="card-header">
@@ -1271,12 +1321,338 @@
             ]
         };
         
+        // Конфигурация дополнительных опций (состояние товара)
+        const CONDITIONS = {
+            'Легковые': [
+                { value: 'Новый', label: '✨ Новый' },
+                { value: 'С_пробегом', label: '🔄 С пробегом' }
+            ],
+            'Грузовики': [
+                { value: 'Новый', label: '✨ Новый' },
+                { value: 'С_пробегом', label: '🔄 С пробегом' }
+            ],
+            'Мотоциклы': [
+                { value: 'Новый', label: '✨ Новый' },
+                { value: 'С_пробегом', label: '🔄 С пробегом' }
+            ],
+            'Спецтехника': [
+                { value: 'Новая', label: '✨ Новая' },
+                { value: 'С_пробегом', label: '🔄 С пробегом' }
+            ],
+            'Телефоны': [
+                { value: 'Новый', label: '✨ Новый' },
+                { value: 'Как_новый', label: '⭐ Как новый' },
+                { value: 'Хорошее', label: '👍 Хорошее' },
+                { value: 'Удовлетворительное', label: '📦 Удовлетворительное' }
+            ],
+            'Ноутбуки': [
+                { value: 'Новый', label: '✨ Новый' },
+                { value: 'Б/У_отличное', label: '⭐ Б/У отличное' },
+                { value: 'Б/У_хорошее', label: '👍 Б/У хорошее' }
+            ],
+            'Компьютеры': [
+                { value: 'Новый', label: '✨ Новый' },
+                { value: 'Б/У_отличное', label: '⭐ Б/У отличное' },
+                { value: 'Б/У_хорошее', label: '👍 Б/У хорошее' }
+            ]
+        };
+        
+        // Конфигурация динамических полей для разных подкатегорий
+        const DYNAMIC_FIELDS = {
+            'Ищу_сотрудника': {
+                title: '💼 Информация о вакансии',
+                fields: [
+                    {
+                        id: 'company_sphere',
+                        label: 'Сфера деятельности компании',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите сферу', disabled: true },
+                            { value: 'IT', label: '💻 IT и разработка' },
+                            { value: 'Торговля', label: '🛒 Торговля и продажи' },
+                            { value: 'Производство', label: '🏭 Производство' },
+                            { value: 'Строительство', label: '🏗️ Строительство' },
+                            { value: 'Образование', label: '🎓 Образование' },
+                            { value: 'Медицина', label: '⚕️ Медицина' },
+                            { value: 'Финансы', label: '💰 Финансы и банки' },
+                            { value: 'Маркетинг', label: '📊 Маркетинг и реклама' },
+                            { value: 'Логистика', label: '🚚 Логистика и транспорт' },
+                            { value: 'HoReCa', label: '🍽️ HoReCa' },
+                            { value: 'Другое', label: '📦 Другое' }
+                        ]
+                    },
+                    {
+                        id: 'work_schedule',
+                        label: 'График работы',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите график', disabled: true },
+                            { value: 'Полный_день', label: '🕐 Полный день (5/2)' },
+                            { value: 'Сменный', label: '🔄 Сменный график' },
+                            { value: 'Гибкий', label: '⏰ Гибкий график' },
+                            { value: 'Удаленная', label: '🏠 Удаленная работа' },
+                            { value: 'Вахта', label: '🏗️ Вахтовый метод' },
+                            { value: 'Частичная', label: '⏱️ Частичная занятость' }
+                        ]
+                    },
+                    {
+                        id: 'employment_type',
+                        label: 'Условия для кандидата',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите тип оформления', disabled: true },
+                            { value: 'Трудовой_договор', label: '📋 Трудовой договор' },
+                            { value: 'ГПХ_ИП', label: '💼 Договор ГПХ с ИП' },
+                            { value: 'ГПХ_Самозанятый', label: '📝 Договор ГПХ с самозанятым' },
+                            { value: 'Без_оформления', label: '🤝 Без оформления' },
+                            { value: 'По_договоренности', label: '💬 По договоренности' }
+                        ]
+                    },
+                    {
+                        id: 'salary_range',
+                        label: 'Зарплата (диапазон)',
+                        type: 'text',
+                        required: false,
+                        placeholder: 'Например: 50 000 - 80 000 ₽'
+                    }
+                ]
+            },
+            'Ищу_работу': {
+                title: '💼 О соискателе',
+                fields: [
+                    {
+                        id: 'desired_position',
+                        label: 'Желаемая должность',
+                        type: 'text',
+                        required: true,
+                        placeholder: 'Например: Frontend разработчик'
+                    },
+                    {
+                        id: 'experience_years',
+                        label: 'Опыт работы',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите опыт', disabled: true },
+                            { value: 'Без_опыта', label: '🌱 Без опыта' },
+                            { value: 'До_1_года', label: '📅 До 1 года' },
+                            { value: '1-3_года', label: '📊 1-3 года' },
+                            { value: '3-5_лет', label: '⭐ 3-5 лет' },
+                            { value: 'Более_5_лет', label: '🏆 Более 5 лет' }
+                        ]
+                    },
+                    {
+                        id: 'desired_schedule',
+                        label: 'Предпочитаемый график',
+                        type: 'select',
+                        required: false,
+                        options: [
+                            { value: '', label: 'Выберите график', disabled: true },
+                            { value: 'Полный_день', label: '🕐 Полный день' },
+                            { value: 'Гибкий', label: '⏰ Гибкий график' },
+                            { value: 'Удаленная', label: '🏠 Удаленная работа' },
+                            { value: 'Частичная', label: '⏱️ Частичная занятость' },
+                            { value: 'Любой', label: '✨ Любой' }
+                        ]
+                    }
+                ]
+            },
+            'Легковые': {
+                title: '🚗 Характеристики автомобиля',
+                fields: [
+                    {
+                        id: 'car_brand',
+                        label: 'Марка',
+                        type: 'text',
+                        required: true,
+                        placeholder: 'Например: Toyota'
+                    },
+                    {
+                        id: 'car_model',
+                        label: 'Модель',
+                        type: 'text',
+                        required: true,
+                        placeholder: 'Например: Camry'
+                    },
+                    {
+                        id: 'car_year',
+                        label: 'Год выпуска',
+                        type: 'number',
+                        required: true,
+                        placeholder: '2020',
+                        min: 1950,
+                        max: new Date().getFullYear() + 1
+                    },
+                    {
+                        id: 'car_mileage',
+                        label: 'Пробег (км)',
+                        type: 'number',
+                        required: false,
+                        placeholder: '50000',
+                        condition: 'С_пробегом' // Показывать только если выбрано "С пробегом"
+                    },
+                    {
+                        id: 'car_engine',
+                        label: 'Объем двигателя (л)',
+                        type: 'text',
+                        required: false,
+                        placeholder: '2.0'
+                    },
+                    {
+                        id: 'car_transmission',
+                        label: 'Коробка передач',
+                        type: 'select',
+                        required: false,
+                        options: [
+                            { value: '', label: 'Выберите КПП', disabled: true },
+                            { value: 'МКПП', label: '⚙️ Механическая' },
+                            { value: 'АКПП', label: '🔄 Автоматическая' },
+                            { value: 'Робот', label: '🤖 Робот' },
+                            { value: 'Вариатор', label: '⚡ Вариатор' }
+                        ]
+                    }
+                ]
+            },
+            'Продажа_жилья': {
+                title: '🏡 Параметры жилья',
+                fields: [
+                    {
+                        id: 'property_type',
+                        label: 'Тип жилья',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите тип', disabled: true },
+                            { value: 'Квартира', label: '🏢 Квартира' },
+                            { value: 'Дом', label: '🏡 Дом' },
+                            { value: 'Таунхаус', label: '🏘️ Таунхаус' },
+                            { value: 'Часть_дома', label: '🏠 Часть дома' },
+                            { value: 'Комната', label: '🚪 Комната' }
+                        ]
+                    },
+                    {
+                        id: 'rooms_count',
+                        label: 'Количество комнат',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите', disabled: true },
+                            { value: 'Студия', label: '🛋️ Студия' },
+                            { value: '1', label: '1 комната' },
+                            { value: '2', label: '2 комнаты' },
+                            { value: '3', label: '3 комнаты' },
+                            { value: '4', label: '4 комнаты' },
+                            { value: '5+', label: '5+ комнат' }
+                        ]
+                    },
+                    {
+                        id: 'total_area',
+                        label: 'Общая площадь (м²)',
+                        type: 'number',
+                        required: true,
+                        placeholder: '65',
+                        min: 1
+                    },
+                    {
+                        id: 'floor',
+                        label: 'Этаж / Этажность',
+                        type: 'text',
+                        required: false,
+                        placeholder: 'Например: 5/9'
+                    }
+                ]
+            },
+            'Аренда_жилья': {
+                title: '🏠 Параметры жилья',
+                fields: [
+                    {
+                        id: 'property_type',
+                        label: 'Тип жилья',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите тип', disabled: true },
+                            { value: 'Квартира', label: '🏢 Квартира' },
+                            { value: 'Дом', label: '🏡 Дом' },
+                            { value: 'Комната', label: '🚪 Комната' }
+                        ]
+                    },
+                    {
+                        id: 'rooms_count',
+                        label: 'Количество комнат',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите', disabled: true },
+                            { value: 'Студия', label: '🛋️ Студия' },
+                            { value: '1', label: '1 комната' },
+                            { value: '2', label: '2 комнаты' },
+                            { value: '3', label: '3 комнаты' },
+                            { value: '4+', label: '4+ комнат' }
+                        ]
+                    },
+                    {
+                        id: 'rent_period',
+                        label: 'Срок аренды',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите срок', disabled: true },
+                            { value: 'Длительно', label: '📅 Длительно' },
+                            { value: 'Посуточно', label: '🌙 Посуточно' },
+                            { value: 'Помесячно', label: '📆 Помесячно' }
+                        ]
+                    }
+                ]
+            },
+            'Телефоны': {
+                title: '📱 Характеристики',
+                fields: [
+                    {
+                        id: 'phone_brand',
+                        label: 'Бренд',
+                        type: 'text',
+                        required: true,
+                        placeholder: 'Apple, Samsung...'
+                    },
+                    {
+                        id: 'phone_model',
+                        label: 'Модель',
+                        type: 'text',
+                        required: true,
+                        placeholder: 'iPhone 14 Pro'
+                    },
+                    {
+                        id: 'phone_memory',
+                        label: 'Память',
+                        type: 'select',
+                        required: false,
+                        options: [
+                            { value: '', label: 'Выберите', disabled: true },
+                            { value: '64GB', label: '64 ГБ' },
+                            { value: '128GB', label: '128 ГБ' },
+                            { value: '256GB', label: '256 ГБ' },
+                            { value: '512GB', label: '512 ГБ' },
+                            { value: '1TB', label: '1 ТБ' }
+                        ]
+                    }
+                ]
+            }
+        };
+        
         const tg = window.Telegram?.WebApp;
         
         let photoData = [];
         let uploadingCount = 0;
         let currentView = 'form';
         let currentSubcategories = null;
+        let currentConditions = null;
+        let currentDynamicFields = null;
+        let currentCondition = null;
+        let dynamicFieldsData = {};
         
         if (tg) {
             tg.ready();
@@ -1301,11 +1677,15 @@
             location: $('location'),
             category: $('category'),
             subcategory: $('subcategory'),
+            condition: $('condition'),
             negotiable: $('negotiable'),
             categoryCard: $('categoryCard'),
             categoryGroup: $('categoryGroup'),
             subcategoryGroup: $('subcategoryGroup'),
             subcategoryWrapper: $('subcategoryWrapper'),
+            conditionGroup: $('conditionGroup'),
+            conditionWrapper: $('conditionWrapper'),
+            dynamicFieldsContainer: $('dynamicFieldsContainer'),
             titleGroup: $('titleGroup'),
             descriptionGroup: $('descriptionGroup'),
             contactGroup: $('contactGroup'),
@@ -1338,6 +1718,149 @@
             username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
         };
         
+        // Функция создания динамических полей
+        const createDynamicFields = (config) => {
+            const card = document.createElement('article');
+            card.className = 'card dynamic-section';
+            card.id = 'dynamicFieldsCard';
+            
+            let fieldsHTML = `
+                <header class="card-header">
+                    <h2 class="card-title">${config.title}</h2>
+                </header>
+                <div class="card-body">
+            `;
+            
+            config.fields.forEach(field => {
+                const isRequired = field.required;
+                const fieldId = 'dynamic_' + field.id;
+                
+                fieldsHTML += `
+                    <div class="form-group ${field.condition ? 'conditional-field' : ''}" 
+                         id="${fieldId}Group" 
+                         ${field.condition ? `data-condition="${field.condition}"` : ''}>
+                        <label class="form-label" for="${fieldId}">
+                            ${field.label} 
+                            <span class="badge ${isRequired ? 'badge--required' : 'badge--optional'}">
+                                ${isRequired ? 'обязательно' : 'опционально'}
+                            </span>
+                        </label>
+                `;
+                
+                if (field.type === 'select') {
+                    fieldsHTML += `<select class="select placeholder" id="${fieldId}" name="${fieldId}" ${isRequired ? 'required' : ''}>`;
+                    field.options.forEach(opt => {
+                        fieldsHTML += `<option value="${opt.value}" ${opt.disabled ? 'disabled selected' : ''}>${opt.label}</option>`;
+                    });
+                    fieldsHTML += `</select>`;
+                } else if (field.type === 'textarea') {
+                    fieldsHTML += `<textarea class="textarea" id="${fieldId}" name="${fieldId}" 
+                        placeholder="${field.placeholder || ''}" ${isRequired ? 'required' : ''}></textarea>`;
+                } else {
+                    fieldsHTML += `<input class="input" type="${field.type}" id="${fieldId}" name="${fieldId}" 
+                        placeholder="${field.placeholder || ''}" 
+                        ${field.min !== undefined ? `min="${field.min}"` : ''} 
+                        ${field.max !== undefined ? `max="${field.max}"` : ''} 
+                        ${isRequired ? 'required' : ''}>`;
+                }
+                
+                if (isRequired) {
+                    fieldsHTML += `<p class="error-message">Заполните это поле</p>`;
+                }
+                
+                fieldsHTML += `</div>`;
+            });
+            
+            fieldsHTML += `</div>`;
+            card.innerHTML = fieldsHTML;
+            
+            return card;
+        };
+        
+        // Функция показа динамических полей
+        const showDynamicFields = (subcategory) => {
+            hideDynamicFields();
+            
+            if (DYNAMIC_FIELDS[subcategory]) {
+                currentDynamicFields = DYNAMIC_FIELDS[subcategory];
+                const card = createDynamicFields(currentDynamicFields);
+                elements.dynamicFieldsContainer.appendChild(card);
+                
+                // Добавляем обработчики для всех динамических полей
+                currentDynamicFields.fields.forEach(field => {
+                    const fieldId = 'dynamic_' + field.id;
+                    const el = $(fieldId);
+                    if (el) {
+                        el.addEventListener('input', handleDynamicFieldInput);
+                        el.addEventListener('change', handleDynamicFieldInput);
+                    }
+                });
+                
+                setTimeout(() => {
+                    card.classList.add('visible');
+                    updateConditionalFields();
+                }, 50);
+            }
+        };
+        
+        // Функция скрытия динамических полей
+        const hideDynamicFields = () => {
+            const existingCard = $('dynamicFieldsCard');
+            if (existingCard) {
+                existingCard.classList.add('hiding');
+                setTimeout(() => {
+                    existingCard.remove();
+                    currentDynamicFields = null;
+                    dynamicFieldsData = {};
+                }, 300);
+            }
+        };
+        
+        // Обновление видимости условных полей (например, пробег только для б/у авто)
+        const updateConditionalFields = () => {
+            if (!currentCondition) return;
+            
+            const conditionalFields = document.querySelectorAll('.conditional-field');
+            conditionalFields.forEach(field => {
+                const condition = field.dataset.condition;
+                if (condition) {
+                    if (currentCondition === condition) {
+                        field.style.display = 'block';
+                    } else {
+                        field.style.display = 'none';
+                        // Очищаем поле если оно скрыто
+                        const input = field.querySelector('.input, .select, .textarea');
+                        if (input) input.value = '';
+                    }
+                }
+            });
+        };
+        
+        // Обработчик ввода в динамические поля
+        const handleDynamicFieldInput = (e) => {
+            const field = e.target;
+            const fieldId = field.id.replace('dynamic_', '');
+            dynamicFieldsData[fieldId] = field.value;
+            
+            // Валидация
+            const group = field.closest('.form-group');
+            if (field.hasAttribute('required')) {
+                if (field.value.trim()) {
+                    setFieldState(group, 'is-success');
+                } else {
+                    setFieldState(group, null);
+                }
+            }
+            
+            // Убираем placeholder класс у select
+            if (field.tagName === 'SELECT' && field.value) {
+                field.classList.remove('placeholder');
+            }
+            
+            updateProgress();
+            haptic('light');
+        };
+        
         // Функция обработки изменения категории
         const handleCategoryChange = () => {
             const selectedCategory = elements.category.value;
@@ -1350,6 +1873,16 @@
             elements.subcategory.value = '';
             elements.subcategory.classList.add('placeholder');
             setFieldState(elements.subcategoryGroup, null);
+            
+            // Сброс состояния
+            elements.condition.value = '';
+            elements.condition.classList.add('placeholder');
+            setFieldState(elements.conditionGroup, null);
+            currentCondition = null;
+            
+            // Скрываем динамические поля
+            hideDynamicFields();
+            hideConditionField();
             
             // Проверяем, есть ли подкатегории для выбранной категории
             if (selectedCategory && SUBCATEGORIES[selectedCategory]) {
@@ -1365,7 +1898,6 @@
         const showSubcategoryField = (category) => {
             const subcats = SUBCATEGORIES[category];
             
-            // Заполняем options
             elements.subcategory.innerHTML = '<option value="" disabled selected>Выберите подкатегорию</option>';
             subcats.forEach(subcat => {
                 const option = document.createElement('option');
@@ -1376,7 +1908,6 @@
             
             currentSubcategories = subcats;
             
-            // Анимация появления
             elements.subcategoryWrapper.classList.remove('hiding');
             elements.subcategoryWrapper.classList.add('visible');
             elements.categoryCard.classList.add('expanding');
@@ -1398,19 +1929,87 @@
             }
         };
         
+        // Показать поле состояния товара
+        const showConditionField = (subcategory) => {
+            const conditions = CONDITIONS[subcategory];
+            
+            elements.condition.innerHTML = '<option value="" disabled selected>Выберите состояние</option>';
+            conditions.forEach(cond => {
+                const option = document.createElement('option');
+                option.value = cond.value;
+                option.textContent = cond.label;
+                elements.condition.appendChild(option);
+            });
+            
+            currentConditions = conditions;
+            
+            elements.conditionWrapper.classList.remove('hiding');
+            elements.conditionWrapper.classList.add('visible');
+        };
+        
+        // Скрыть поле состояния товара
+        const hideConditionField = () => {
+            if (elements.conditionWrapper.classList.contains('visible')) {
+                elements.conditionWrapper.classList.add('hiding');
+                
+                setTimeout(() => {
+                    elements.conditionWrapper.classList.remove('visible', 'hiding');
+                    currentConditions = null;
+                }, 200);
+            }
+        };
+        
         // Обработка изменения подкатегории
         const handleSubcategoryChange = () => {
-            if (elements.subcategory.value) {
+            const subcategory = elements.subcategory.value;
+            
+            if (subcategory) {
                 elements.subcategory.classList.remove('placeholder');
                 setFieldState(elements.subcategoryGroup, 'is-success');
                 haptic();
+                
+                // Проверяем есть ли поле состояния для этой подкатегории
+                if (CONDITIONS[subcategory]) {
+                    showConditionField(subcategory);
+                } else {
+                    hideConditionField();
+                    elements.condition.value = '';
+                    currentCondition = null;
+                }
+                
+                // Показываем динамические поля если они есть
+                if (DYNAMIC_FIELDS[subcategory]) {
+                    showDynamicFields(subcategory);
+                } else {
+                    hideDynamicFields();
+                }
             } else {
                 setFieldState(elements.subcategoryGroup, null);
+                hideConditionField();
+                hideDynamicFields();
+            }
+            
+            updateProgress();
+        };
+        
+        // Обработка изменения состояния товара
+        const handleConditionChange = () => {
+            if (elements.condition.value) {
+                elements.condition.classList.remove('placeholder');
+                setFieldState(elements.conditionGroup, 'is-success');
+                currentCondition = elements.condition.value;
+                haptic();
+                
+                // Обновляем видимость условных полей
+                updateConditionalFields();
+            } else {
+                setFieldState(elements.conditionGroup, null);
+                currentCondition = null;
             }
             updateProgress();
         };
         
-        // Инициализация минимальной даты (сегодня)
+        // Инициализация минимальной даты
         const initScheduleDate = () => {
             const today = new Date();
             const tomorrow = new Date(today);
@@ -1688,17 +2287,45 @@
         
         const updateProgress = () => {
             let filled = 0;
-            const total = 5;
+            let total = 5; // Базовые поля
             
+            // Категория
             if (elements.category.value) filled++;
             
-            // Проверяем подкатегорию только если она требуется для выбранной категории
+            // Подкатегория (если требуется)
             if (currentSubcategories) {
+                total++;
                 if (elements.subcategory.value) filled++;
-            } else {
-                filled++; // Подкатегория не требуется, засчитываем как заполненную
             }
             
+            // Состояние товара (если требуется)
+            if (currentConditions) {
+                total++;
+                if (elements.condition.value) filled++;
+            }
+            
+            // Динамические обязательные поля
+            if (currentDynamicFields) {
+                currentDynamicFields.fields.forEach(field => {
+                    if (field.required) {
+                        total++;
+                        const fieldId = 'dynamic_' + field.id;
+                        const el = $(fieldId);
+                        
+                        // Проверяем условные поля
+                        if (field.condition && currentCondition !== field.condition) {
+                            total--; // Не учитываем скрытые поля
+                            return;
+                        }
+                        
+                        if (el && el.value && el.value.trim()) {
+                            filled++;
+                        }
+                    }
+                });
+            }
+            
+            // Базовые поля
             if (elements.title.value.trim().length >= 3) filled++;
             if (elements.description.value.trim().length >= 10) filled++;
             if (validateContact(elements.contact.value).valid) filled++;
@@ -1738,6 +2365,7 @@
             
             setFieldState(elements.categoryGroup, null);
             setFieldState(elements.subcategoryGroup, null);
+            setFieldState(elements.conditionGroup, null);
             setFieldState(elements.titleGroup, null);
             setFieldState(elements.descriptionGroup, null);
             setFieldState(elements.contactGroup, null);
@@ -1747,10 +2375,35 @@
                 valid = false;
             }
             
-            // Валидация подкатегории только если она отображается
             if (currentSubcategories && !elements.subcategory.value) {
                 setFieldState(elements.subcategoryGroup, 'is-error');
                 valid = false;
+            }
+            
+            if (currentConditions && !elements.condition.value) {
+                setFieldState(elements.conditionGroup, 'is-error');
+                valid = false;
+            }
+            
+            // Валидация динамических полей
+            if (currentDynamicFields) {
+                currentDynamicFields.fields.forEach(field => {
+                    if (field.required) {
+                        const fieldId = 'dynamic_' + field.id;
+                        const el = $(fieldId);
+                        const group = $(fieldId + 'Group');
+                        
+                        // Пропускаем условные поля которые не должны показываться
+                        if (field.condition && currentCondition !== field.condition) {
+                            return;
+                        }
+                        
+                        if (!el || !el.value || !el.value.trim()) {
+                            setFieldState(group, 'is-error');
+                            valid = false;
+                        }
+                    }
+                });
             }
             
             if (elements.title.value.trim().length < 3) {
@@ -1876,9 +2529,26 @@
                 let errorMsg = 'Заполните все обязательные поля:\n\n';
                 if (!elements.category.value) errorMsg += '• Категория\n';
                 if (currentSubcategories && !elements.subcategory.value) errorMsg += '• Подкатегория\n';
+                if (currentConditions && !elements.condition.value) errorMsg += '• Состояние\n';
                 if (elements.title.value.trim().length < 3) errorMsg += '• Заголовок (мин. 3 символа)\n';
                 if (elements.description.value.trim().length < 10) errorMsg += '• Описание (мин. 10 символов)\n';
                 if (!validateContact(elements.contact.value).valid) errorMsg += '• Контакт для связи\n';
+                
+                // Добавляем динамические поля в сообщение об ошибке
+                if (currentDynamicFields) {
+                    currentDynamicFields.fields.forEach(field => {
+                        if (field.required) {
+                            const fieldId = 'dynamic_' + field.id;
+                            const el = $(fieldId);
+                            if (field.condition && currentCondition !== field.condition) {
+                                return;
+                            }
+                            if (!el || !el.value || !el.value.trim()) {
+                                errorMsg += `• ${field.label}\n`;
+                            }
+                        }
+                    });
+                }
                 
                 if (tg?.showPopup) {
                     tg.showPopup({
@@ -1909,13 +2579,18 @@
             resetAnimation(elements.previewPhotos);
             resetAnimation(elements.previewMessage.querySelector('.message-content'));
             
-            // Формируем хэштеги: #Категория #Подкатегория
+            // Формируем хэштеги
             const category = elements.category.value.replace(/\s+/g, '_').replace(/[()]/g, '');
             let hashtags = `#${category}`;
             
             if (currentSubcategories && elements.subcategory.value) {
                 const subcategory = elements.subcategory.value;
                 hashtags += ` #${subcategory}`;
+            }
+            
+            if (currentConditions && elements.condition.value) {
+                const condition = elements.condition.value;
+                hashtags += ` #${condition}`;
             }
             
             elements.previewHashtags.textContent = hashtags;
@@ -1938,6 +2613,46 @@
                     <span><span class="message-info-label">Цена:</span> ${priceText}</span>
                 </div>
             `;
+            
+            // Добавляем динамические поля в предпросмотр
+            if (currentDynamicFields) {
+                currentDynamicFields.fields.forEach(field => {
+                    const fieldId = 'dynamic_' + field.id;
+                    const el = $(fieldId);
+                    
+                    // Пропускаем условные поля которые не заполнены
+                    if (field.condition && currentCondition !== field.condition) {
+                        return;
+                    }
+                    
+                    if (el && el.value && el.value.trim()) {
+                        let displayValue = el.value.trim();
+                        
+                        // Для select берем текст опции
+                        if (el.tagName === 'SELECT') {
+                            const selectedOption = el.options[el.selectedIndex];
+                            displayValue = selectedOption ? selectedOption.textContent : displayValue;
+                        }
+                        
+                        // Определяем иконку по типу поля
+                        let icon = '📋';
+                        if (field.id.includes('brand') || field.id.includes('model')) icon = '🏷️';
+                        else if (field.id.includes('year')) icon = '📅';
+                        else if (field.id.includes('mileage')) icon = '🛣️';
+                        else if (field.id.includes('sphere') || field.id.includes('position')) icon = '💼';
+                        else if (field.id.includes('schedule')) icon = '⏰';
+                        else if (field.id.includes('salary')) icon = '💰';
+                        else if (field.id.includes('area') || field.id.includes('rooms')) icon = '📐';
+                        
+                        infoHTML += `
+                            <div class="message-info-item">
+                                <span class="message-info-icon">${icon}</span>
+                                <span><span class="message-info-label">${field.label}:</span> ${displayValue}</span>
+                            </div>
+                        `;
+                    }
+                });
+            }
             
             if (elements.location.value.trim()) {
                 infoHTML += `
@@ -2025,6 +2740,8 @@
             const data = {
                 category: elements.category.value,
                 subcategory: currentSubcategories ? elements.subcategory.value : null,
+                condition: currentConditions ? elements.condition.value : null,
+                dynamicFields: dynamicFieldsData,
                 title: elements.title.value.trim(),
                 description: elements.description.value.trim(),
                 price: priceText,
@@ -2042,7 +2759,8 @@
             }
             
             const jsonData = JSON.stringify(data);
-            console.log('Отправка данных:', jsonData.length, 'байт', 'фото:', photoData.length, 'время:', scheduledTime);
+            console.log('Отправка данных:', jsonData.length, 'байт');
+            console.log('Данные:', data);
             
             if (tg?.sendData) {
                 try {
@@ -2178,6 +2896,7 @@
             
             elements.category.addEventListener('change', handleCategoryChange);
             elements.subcategory.addEventListener('change', handleSubcategoryChange);
+            elements.condition.addEventListener('change', handleConditionChange);
             elements.title.addEventListener('input', handleTitleInput);
             elements.description.addEventListener('input', handleDescInput);
             elements.contact.addEventListener('input', handleContactInput);
