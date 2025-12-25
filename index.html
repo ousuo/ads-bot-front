@@ -612,8 +612,9 @@
         }
 
         @keyframes markerBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            0% { transform: translate(-50%, -100%) translateY(0); }
+            50% { transform: translate(-50%, -100%) translateY(-10px); }
+            100% { transform: translate(-50%, -100%) translateY(0); }
         }
 
         /* Leaflet popup custom style */
@@ -3674,24 +3675,47 @@
                     controls: [] // Убираем стандартные контролы
                 });
                 
-                // Create custom marker (placemark)
-                mapMarker = new ymaps.Placemark(mapCenter, {}, {
-                    iconLayout: 'default#image',
-                    iconImageHref: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><text x="20" y="32" font-size="32" text-anchor="middle">📍</text></svg>',
-                    iconImageSize: [40, 40],
-                    iconImageOffset: [-20, -40]
+                // Добавляем фиксированную метку в центр экрана через CSS
+                const mapContainer = map.container.getParentElement();
+                
+                // Создаем контейнер для центральной метки
+                const centerMarker = document.createElement('div');
+                centerMarker.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -100%);
+                    z-index: 1000;
+                    pointer-events: none;
+                    font-size: 40px;
+                    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+                    animation: markerBounce 0.5s ease;
+                `;
+                centerMarker.innerHTML = '📍';
+                centerMarker.id = 'centerMarker';
+                
+                mapContainer.appendChild(centerMarker);
+                
+                // Обновляем адрес при остановке карты
+                let updateTimeout;
+                map.events.add('boundschange', () => {
+                    // Добавляем небольшую анимацию подпрыгивания при движении
+                    const marker = document.getElementById('centerMarker');
+                    if (marker) {
+                        marker.style.animation = 'none';
+                        requestAnimationFrame(() => {
+                            marker.style.animation = 'markerBounce 0.3s ease';
+                        });
+                    }
+                    
+                    clearTimeout(updateTimeout);
+                    updateTimeout = setTimeout(() => {
+                        const center = map.getCenter();
+                        updateMapAddress(center[0], center[1]);
+                    }, 500); // Обновляем адрес через 500мс после остановки
                 });
                 
-                map.geoObjects.add(mapMarker);
-                
-                // Update marker position on map move
-                map.events.add('actionend', () => {
-                    const center = map.getCenter();
-                    mapMarker.geometry.setCoordinates(center);
-                    updateMapAddress(center[0], center[1]);
-                });
-                
-                // Try to get user's current location
+                // Получаем текущую позицию пользователя
                 getUserLocation();
             });
         };
@@ -4075,4 +4099,4 @@
     })();
     </script>
 </body>
-</html>
+</html>ы
