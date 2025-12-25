@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Новое объявление</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --tg-bg: var(--tg-theme-bg-color, #f2f2f7);
@@ -422,6 +425,207 @@
 
         .location-selected {
             color: var(--color-success) !important;
+        }
+
+        /* Map Modal */
+        .map-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--tg-bg);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .map-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .map-header {
+            padding: 16px;
+            background: var(--tg-secondary-bg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1001;
+        }
+
+        .map-header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .map-close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--tg-section-bg);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .map-close-btn:active {
+            transform: scale(0.9);
+            background: var(--tg-hint);
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #e0e0e0;
+        }
+
+        #locationMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .map-control-btn {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all var(--transition);
+        }
+
+        .map-control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .map-marker-hint {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .map-footer {
+            padding: 16px;
+            background: var(--tg-secondary-bg);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 1001;
+        }
+
+        .map-address {
+            font-size: 14px;
+            color: var(--tg-text);
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--tg-bg);
+            border-radius: var(--radius);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .map-address-loading {
+            color: var(--tg-hint);
+            font-style: italic;
+        }
+
+        .map-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .map-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+
+        .map-btn-primary {
+            background: var(--tg-button);
+            color: white;
+        }
+
+        .map-btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .map-btn-primary:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .map-btn-secondary {
+            background: var(--tg-section-bg);
+            color: var(--tg-text);
+        }
+
+        .map-btn-secondary:active {
+            background: var(--tg-hint);
+        }
+
+        /* Custom marker */
+        .location-marker {
+            width: 40px;
+            height: 40px;
+            font-size: 32px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            animation: markerBounce 0.5s ease;
+        }
+
+        @keyframes markerBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Leaflet popup custom style */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 8px;
+        }
+
+        .leaflet-popup-content {
+            margin: 8px 12px;
+            font-size: 14px;
         }
                 
         .textarea {
@@ -1257,6 +1461,42 @@
             </div>
         </div>
     </main>
+
+    <!-- Map Modal -->
+    <div class="map-modal" id="mapModal">
+        <div class="map-header">
+            <div class="map-header-title">📍 Выберите местоположение</div>
+            <button type="button" class="map-close-btn" id="mapCloseBtn">×</button>
+        </div>
+        
+        <div class="map-container">
+            <div id="locationMap"></div>
+            
+            <div class="map-controls">
+                <button type="button" class="map-control-btn" id="mapMyLocationBtn" title="Моё местоположение">
+                    📍
+                </button>
+            </div>
+            
+            <div class="map-marker-hint" id="mapMarkerHint">
+                Перетащите карту для выбора точки
+            </div>
+        </div>
+        
+        <div class="map-footer">
+            <div class="map-address" id="mapAddress">
+                <span class="map-address-loading">Выберите место на карте...</span>
+            </div>
+            <div class="map-buttons">
+                <button type="button" class="map-btn map-btn-secondary" id="mapCancelBtn">
+                    Отмена
+                </button>
+                <button type="button" class="map-btn map-btn-primary" id="mapConfirmBtn" disabled>
+                    Выбрать
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
     (function() {
@@ -3268,99 +3508,7 @@
         // Location handling
         const handleLocationClick = () => {
             haptic('medium');
-            
-            // Try Telegram API first
-            if (tg?.requestLocation) {
-                try {
-                    tg.requestLocation((location) => {
-                        if (location) {
-                            handleLocationReceived(location);
-                        }
-                    });
-                    return;
-                } catch (e) {
-                    console.error('Telegram location error:', e);
-                }
-            }
-            
-            // Fallback to browser Geolocation API
-            if (!navigator.geolocation) {
-                if (tg?.showPopup) {
-                    tg.showPopup({
-                        title: 'Недоступно',
-                        message: 'Геолокация не поддерживается в вашем браузере',
-                        buttons: [{ type: 'ok' }]
-                    });
-                } else {
-                    alert('Геолокация не поддерживается');
-                }
-                return;
-            }
-            
-            // Show loading
-            if (elements.location) {
-                elements.location.value = 'Определение местоположения...';
-                elements.location.classList.remove('location-selected');
-            }
-            
-            if (elements.locationHint) {
-                elements.locationHint.textContent = '⏳ Получение координат...';
-                elements.locationHint.classList.remove('location-selected');
-            }
-            
-            // Request location from browser
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    handleLocationReceived({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    });
-                },
-                (error) => {
-                    console.error('Geolocation error:', error);
-                    
-                    // Reset fields
-                    if (elements.location) {
-                        elements.location.value = '';
-                    }
-                    
-                    if (elements.locationHint) {
-                        elements.locationHint.textContent = 'Нажмите, чтобы выбрать на карте';
-                        elements.locationHint.classList.remove('location-selected');
-                    }
-                    
-                    let errorMessage = 'Не удалось получить местоположение';
-                    
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage = 'Вы запретили доступ к геолокации. Разрешите доступ в настройках браузера.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage = 'Информация о местоположении недоступна.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage = 'Превышено время ожидания запроса геолокации.';
-                            break;
-                    }
-                    
-                    if (tg?.showPopup) {
-                        tg.showPopup({
-                            title: 'Ошибка геолокации',
-                            message: errorMessage,
-                            buttons: [{ type: 'ok' }]
-                        });
-                    } else {
-                        alert(errorMessage);
-                    }
-                    
-                    haptic('error');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
+            openMapModal();
         };
 
         const handleLocationReceived = async (location) => {
@@ -3472,6 +3620,243 @@
             }
         };
         
+        // Map modal functionality
+        let map = null;
+        let mapMarker = null;
+        let mapCenter = { lat: 55.751244, lng: 37.618423 }; // Moscow default
+        let selectedLocation = null;
+
+        const openMapModal = () => {
+            const modal = $('mapModal');
+            if (!modal) return;
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Initialize map after modal is visible
+            setTimeout(() => {
+                initializeMap();
+            }, 100);
+            
+            haptic('light');
+        };
+
+        const closeMapModal = () => {
+            const modal = $('mapModal');
+            if (!modal) return;
+            
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // Destroy map to prevent memory leaks
+            if (map) {
+                map.remove();
+                map = null;
+                mapMarker = null;
+            }
+            
+            haptic('light');
+        };
+
+        const initializeMap = () => {
+            if (map) return; // Already initialized
+            
+            const mapElement = $('locationMap');
+            if (!mapElement) return;
+            
+            // Create map
+            map = L.map('locationMap', {
+                zoomControl: false // We'll add custom controls
+            }).setView([mapCenter.lat, mapCenter.lng], 13);
+            
+            // Add tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Create custom icon for marker
+            const customIcon = L.divIcon({
+                html: '<div class="location-marker">📍</div>',
+                className: 'custom-marker',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40]
+            });
+            
+            // Add marker at center
+            mapMarker = L.marker([mapCenter.lat, mapCenter.lng], {
+                icon: customIcon,
+                draggable: false
+            }).addTo(map);
+            
+            // Update marker position on map move
+            map.on('moveend', () => {
+                const center = map.getCenter();
+                mapMarker.setLatLng(center);
+                updateMapAddress(center.lat, center.lng);
+            });
+            
+            // Try to get user's current location
+            getUserLocation();
+        };
+
+        const getUserLocation = () => {
+            if (!navigator.geolocation) return;
+            
+            const mapAddress = $('mapAddress');
+            if (mapAddress) {
+                mapAddress.innerHTML = '<span class="map-address-loading">⏳ Определение вашего местоположения...</span>';
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    if (map) {
+                        map.setView([lat, lng], 15);
+                        mapMarker.setLatLng([lat, lng]);
+                        updateMapAddress(lat, lng);
+                    }
+                    
+                    haptic('success');
+                },
+                (error) => {
+                    console.log('Geolocation error:', error);
+                    // Just use default location, no error message
+                    updateMapAddress(mapCenter.lat, mapCenter.lng);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        };
+
+        const updateMapAddress = async (lat, lng) => {
+            const mapAddress = $('mapAddress');
+            const confirmBtn = $('mapConfirmBtn');
+            
+            if (mapAddress) {
+                mapAddress.innerHTML = '<span class="map-address-loading">🔍 Определение адреса...</span>';
+            }
+            
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+            }
+            
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ru`,
+                    {
+                        headers: {
+                            'User-Agent': 'TelegramWebApp/1.0'
+                        }
+                    }
+                );
+                
+                if (!response.ok) throw new Error('Geocoding failed');
+                
+                const data = await response.json();
+                
+                let addressParts = [];
+                const addr = data.address;
+                
+                // Build readable address
+                if (addr.city) {
+                    addressParts.push(addr.city);
+                } else if (addr.town) {
+                    addressParts.push(addr.town);
+                } else if (addr.village) {
+                    addressParts.push(addr.village);
+                }
+                
+                if (addr.suburb) {
+                    addressParts.push(addr.suburb);
+                } else if (addr.neighbourhood) {
+                    addressParts.push(addr.neighbourhood);
+                }
+                
+                if (addr.road) {
+                    let roadPart = addr.road;
+                    if (addr.house_number) {
+                        roadPart += ', ' + addr.house_number;
+                    }
+                    addressParts.push(roadPart);
+                }
+                
+                const addressText = addressParts.length > 0 
+                    ? addressParts.join(', ')
+                    : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                
+                selectedLocation = {
+                    address: addressText,
+                    lat: lat,
+                    lng: lng
+                };
+                
+                if (mapAddress) {
+                    mapAddress.innerHTML = `📍 ${addressText}`;
+                }
+                
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Reverse geocoding error:', error);
+                
+                // Fallback to coordinates
+                const coordsText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                
+                selectedLocation = {
+                    address: coordsText,
+                    lat: lat,
+                    lng: lng
+                };
+                
+                if (mapAddress) {
+                    mapAddress.innerHTML = `📍 ${coordsText}`;
+                }
+                
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                }
+            }
+        };
+
+        const confirmMapLocation = () => {
+            if (!selectedLocation) return;
+            
+            // Update form fields
+            if (elements.location) {
+                elements.location.value = selectedLocation.address;
+                elements.location.classList.add('location-selected');
+            }
+            
+            if (elements.locationLat) {
+                elements.locationLat.value = selectedLocation.lat;
+            }
+            
+            if (elements.locationLon) {
+                elements.locationLon.value = selectedLocation.lng;
+            }
+            
+            if (elements.locationHint) {
+                elements.locationHint.textContent = '✓ Местоположение выбрано';
+                elements.locationHint.classList.add('location-selected');
+            }
+            
+            closeMapModal();
+            haptic('success');
+        };
+
+        const centerMapToUserLocation = () => {
+            haptic('light');
+            getUserLocation();
+        };
+
         // Scroll handler
         let scrollTicking = false;
         const handleScroll = () => {
@@ -3614,10 +3999,32 @@
             // Scroll
             window.addEventListener('scroll', handleScroll, { passive: true });
             
-            // Focus haptic
+                        // Focus haptic
             $$('.input, .textarea, .select').forEach(el => {
                 el.addEventListener('focus', () => haptic());
             });
+            
+            // Map modal controls
+            const mapCloseBtn = $('mapCloseBtn');
+            const mapCancelBtn = $('mapCancelBtn');
+            const mapConfirmBtn = $('mapConfirmBtn');
+            const mapMyLocationBtn = $('mapMyLocationBtn');
+            
+            if (mapCloseBtn) {
+                mapCloseBtn.addEventListener('click', closeMapModal);
+            }
+            
+            if (mapCancelBtn) {
+                mapCancelBtn.addEventListener('click', closeMapModal);
+            }
+            
+            if (mapConfirmBtn) {
+                mapConfirmBtn.addEventListener('click', confirmMapLocation);
+            }
+            
+            if (mapMyLocationBtn) {
+                mapMyLocationBtn.addEventListener('click', centerMapToUserLocation);
+            }
         };
         
         // Cleanup on unload
