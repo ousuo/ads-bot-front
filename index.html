@@ -3269,34 +3269,98 @@
         const handleLocationClick = () => {
             haptic('medium');
             
-            if (!tg?.requestLocation) {
+            // Try Telegram API first
+            if (tg?.requestLocation) {
+                try {
+                    tg.requestLocation((location) => {
+                        if (location) {
+                            handleLocationReceived(location);
+                        }
+                    });
+                    return;
+                } catch (e) {
+                    console.error('Telegram location error:', e);
+                }
+            }
+            
+            // Fallback to browser Geolocation API
+            if (!navigator.geolocation) {
                 if (tg?.showPopup) {
                     tg.showPopup({
                         title: 'Недоступно',
-                        message: 'Выбор локации не поддерживается в этой версии Telegram',
+                        message: 'Геолокация не поддерживается в вашем браузере',
                         buttons: [{ type: 'ok' }]
                     });
+                } else {
+                    alert('Геолокация не поддерживается');
                 }
                 return;
             }
             
-            try {
-                tg.requestLocation((location) => {
-                    if (location) {
-                        handleLocationReceived(location);
-                    }
-                });
-            } catch (e) {
-                console.error('Location request error:', e);
-                
-                if (tg?.showPopup) {
-                    tg.showPopup({
-                        title: 'Ошибка',
-                        message: 'Не удалось запросить локацию. Убедитесь, что дали разрешение на доступ к геолокации.',
-                        buttons: [{ type: 'ok' }]
-                    });
-                }
+            // Show loading
+            if (elements.location) {
+                elements.location.value = 'Определение местоположения...';
+                elements.location.classList.remove('location-selected');
             }
+            
+            if (elements.locationHint) {
+                elements.locationHint.textContent = '⏳ Получение координат...';
+                elements.locationHint.classList.remove('location-selected');
+            }
+            
+            // Request location from browser
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    handleLocationReceived({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    
+                    // Reset fields
+                    if (elements.location) {
+                        elements.location.value = '';
+                    }
+                    
+                    if (elements.locationHint) {
+                        elements.locationHint.textContent = 'Нажмите, чтобы выбрать на карте';
+                        elements.locationHint.classList.remove('location-selected');
+                    }
+                    
+                    let errorMessage = 'Не удалось получить местоположение';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Вы запретили доступ к геолокации. Разрешите доступ в настройках браузера.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Информация о местоположении недоступна.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Превышено время ожидания запроса геолокации.';
+                            break;
+                    }
+                    
+                    if (tg?.showPopup) {
+                        tg.showPopup({
+                            title: 'Ошибка геолокации',
+                            message: errorMessage,
+                            buttons: [{ type: 'ok' }]
+                        });
+                    } else {
+                        alert(errorMessage);
+                    }
+                    
+                    haptic('error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
         };
 
         const handleLocationReceived = async (location) => {
