@@ -2089,7 +2089,7 @@
             try {
                 tg.ready();
                 tg.expand();
-                tg.enableClosingConfirmation();
+                // tg.enableClosingConfirmation();
             } catch (e) {
                 console.error('Telegram WebApp init error:', e);
             }
@@ -3648,6 +3648,12 @@
             modal.classList.remove('active');
             document.body.style.overflow = '';
             
+            // Удаляем центральную метку
+            const centerMarker = document.getElementById('centerMarker');
+            if (centerMarker) {
+                centerMarker.remove();
+            }
+            
             // Destroy map to prevent memory leaks
             if (map) {
                 map.destroy();
@@ -4100,4 +4106,3 @@
     </script>
 </body>
 </html>
-
