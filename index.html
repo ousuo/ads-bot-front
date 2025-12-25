@@ -2089,7 +2089,7 @@
             try {
                 tg.ready();
                 tg.expand();
-                // tg.enableClosingConfirmation();
+                tg.enableClosingConfirmation();
             } catch (e) {
                 console.error('Telegram WebApp init error:', e);
             }
@@ -4093,6 +4093,50 @@
             
             // Cleanup on unload
             window.addEventListener('beforeunload', cleanup);
+            
+            // Включаем подтверждение закрытия ТОЛЬКО если форма заполнена
+            const enableClosingConfirmation = () => {
+                // Проверяем, есть ли хоть какие-то данные
+                const hasData = 
+                    elements.category?.value ||
+                    elements.title?.value?.trim() ||
+                    elements.description?.value?.trim() ||
+                    elements.contact?.value?.trim() ||
+                    state.photoData.length > 0;
+                
+                try {
+                    if (hasData && tg?.enableClosingConfirmation) {
+                        tg.enableClosingConfirmation();
+                    } else if (!hasData && tg?.disableClosingConfirmation) {
+                        tg.disableClosingConfirmation();
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+            };
+            
+            // Отслеживаем изменения формы
+            const formInputs = [
+                elements.category,
+                elements.subcategory,
+                elements.condition,
+                elements.title,
+                elements.description,
+                elements.contact,
+                elements.price
+            ].filter(Boolean);
+            
+            formInputs.forEach(input => {
+                input.addEventListener('input', enableClosingConfirmation);
+                input.addEventListener('change', enableClosingConfirmation);
+            });
+            
+            // Отслеживаем загрузку фото
+            const originalHandlePhotoSelect = handlePhotoSelect;
+            window.handlePhotoSelect = async function(...args) {
+                await originalHandlePhotoSelect(...args);
+                enableClosingConfirmation();
+            };
         };
         
         // Start
