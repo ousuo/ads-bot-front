@@ -1076,7 +1076,7 @@
                         </div>
                     </article>
                     
-                    <article class="card">
+                    <article class="card" id="priceCard">
                         <header class="card-header">
                             <h2 class="card-title">💰 Стоимость</h2>
                         </header>
@@ -1416,11 +1416,20 @@
                         ]
                     },
                     {
-                        id: 'salary_range',
-                        label: 'Зарплата (диапазон)',
-                        type: 'text',
+                        id: 'salary_from',
+                        label: 'Зарплата от',
+                        type: 'number',
                         required: false,
-                        placeholder: 'Например: 50 000 - 80 000 ₽'
+                        placeholder: '50000',
+                        min: 0
+                    },
+                    {
+                        id: 'salary_to',
+                        label: 'Зарплата до',
+                        type: 'number',
+                        required: false,
+                        placeholder: '80000',
+                        min: 0
                     }
                 ]
             },
@@ -1461,6 +1470,108 @@
                             { value: 'Частичная', label: '⏱️ Частичная занятость' },
                             { value: 'Любой', label: '✨ Любой' }
                         ]
+                    },
+                    {
+                        id: 'desired_salary_from',
+                        label: 'Желаемая зарплата от',
+                        type: 'number',
+                        required: false,
+                        placeholder: '50000',
+                        min: 0
+                    },
+                    {
+                        id: 'desired_salary_to',
+                        label: 'Желаемая зарплата до',
+                        type: 'number',
+                        required: false,
+                        placeholder: '100000',
+                        min: 0
+                    }
+                ]
+            },
+            'Подработка': {
+                title: '⏰ Информация о подработке',
+                fields: [
+                    {
+                        id: 'work_type',
+                        label: 'Тип работы',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите тип', disabled: true },
+                            { value: 'Разовая', label: '📅 Разовая работа' },
+                            { value: 'Регулярная', label: '🔄 Регулярная подработка' },
+                            { value: 'Проектная', label: '📋 Проектная работа' },
+                            { value: 'Вечера_выходные', label: '🌙 Вечера/выходные' }
+                        ]
+                    },
+                    {
+                        id: 'work_schedule',
+                        label: 'График',
+                        type: 'select',
+                        required: false,
+                        options: [
+                            { value: '', label: 'Выберите график', disabled: true },
+                            { value: 'Гибкий', label: '⏰ Гибкий график' },
+                            { value: 'Вечера', label: '🌙 Вечернее время' },
+                            { value: 'Выходные', label: '📅 Выходные дни' },
+                            { value: 'Удаленно', label: '🏠 Удаленно' }
+                        ]
+                    },
+                    {
+                        id: 'payment_from',
+                        label: 'Оплата от',
+                        type: 'number',
+                        required: false,
+                        placeholder: '5000',
+                        min: 0
+                    },
+                    {
+                        id: 'payment_to',
+                        label: 'Оплата до',
+                        type: 'number',
+                        required: false,
+                        placeholder: '15000',
+                        min: 0
+                    }
+                ]
+            },
+            'Стажировка': {
+                title: '🎓 Информация о стажировке',
+                fields: [
+                    {
+                        id: 'internship_duration',
+                        label: 'Длительность стажировки',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите длительность', disabled: true },
+                            { value: '1_месяц', label: '📅 1 месяц' },
+                            { value: '2_месяца', label: '📅 2 месяца' },
+                            { value: '3_месяца', label: '📅 3 месяца' },
+                            { value: '6_месяцев', label: '📅 6 месяцев' },
+                            { value: 'Не_определено', label: '❓ Не определено' }
+                        ]
+                    },
+                    {
+                        id: 'internship_type',
+                        label: 'Тип стажировки',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите тип', disabled: true },
+                            { value: 'Оплачиваемая', label: '💰 Оплачиваемая' },
+                            { value: 'Неоплачиваемая', label: '🎓 Неоплачиваемая' },
+                            { value: 'С_последующим_трудоустройством', label: '✅ С последующим трудоустройством' }
+                        ]
+                    },
+                    {
+                        id: 'stipend_amount',
+                        label: 'Размер стипендии/оплаты',
+                        type: 'number',
+                        required: false,
+                        placeholder: '20000',
+                        min: 0
                     }
                 ]
             },
@@ -1569,6 +1680,56 @@
                     }
                 ]
             },
+            'Покупка_жилья': {
+                title: '🔍 Параметры поиска',
+                fields: [
+                    {
+                        id: 'property_type',
+                        label: 'Тип жилья',
+                        type: 'select',
+                        required: true,
+                        options: [
+                            { value: '', label: 'Выберите тип', disabled: true },
+                            { value: 'Квартира', label: '🏢 Квартира' },
+                            { value: 'Дом', label: '🏡 Дом' },
+                            { value: 'Таунхаус', label: '🏘️ Таунхаус' },
+                            { value: 'Часть_дома', label: '🏠 Часть дома' },
+                            { value: 'Комната', label: '🚪 Комната' }
+                        ]
+                    },
+                    {
+                        id: 'rooms_count',
+                        label: 'Количество комнат',
+                        type: 'select',
+                        required: false,
+                        options: [
+                            { value: '', label: 'Выберите', disabled: true },
+                            { value: 'Студия', label: '🛋️ Студия' },
+                            { value: '1', label: '1 комната' },
+                            { value: '2', label: '2 комнаты' },
+                            { value: '3', label: '3 комнаты' },
+                            { value: '4+', label: '4+ комнат' },
+                            { value: 'Не_важно', label: '✨ Не важно' }
+                        ]
+                    },
+                    {
+                        id: 'budget_from',
+                        label: 'Бюджет от',
+                        type: 'number',
+                        required: false,
+                        placeholder: '3000000',
+                        min: 0
+                    },
+                    {
+                        id: 'budget_to',
+                        label: 'Бюджет до',
+                        type: 'number',
+                        required: false,
+                        placeholder: '5000000',
+                        min: 0
+                    }
+                ]
+            },
             'Аренда_жилья': {
                 title: '🏠 Параметры жилья',
                 fields: [
@@ -1659,7 +1820,7 @@
             currentDynamicFields: null,
             currentCondition: null,
             dynamicFieldsData: {},
-            photoUrls: new Set(), // Track object URLs for cleanup
+            photoUrls: new Set(),
             isTransitioning: false
         };
         
@@ -1729,7 +1890,8 @@
             previewDescription: $('previewDescription'),
             previewInfo: $('previewInfo'),
             submitBtn: $('submitBtn'),
-            backToFormBtn: $('backToFormBtn')
+            backToFormBtn: $('backToFormBtn'),
+            priceCard: $('priceCard')
         };
         
         // Validation patterns
@@ -1802,6 +1964,51 @@
             }
             
             return { valid: false, type: null, message: 'Введите @username или номер' };
+        };
+        
+        // Check if price is needed for current category/subcategory
+        const isPriceNeeded = () => {
+            const category = elements.category?.value;
+            const subcategory = elements.subcategory?.value;
+            
+            // Categories where price is not needed at all
+            const noPriceCategories = ['Работа'];
+            
+            // Subcategories where price is not needed
+            const noPriceSubcategories = [
+                'Ищу_работу',
+                'Ищу_сотрудника',
+                'Подработка',
+                'Стажировка',
+                'Покупка_жилья'
+            ];
+            
+            if (noPriceCategories.includes(category)) {
+                return false;
+            }
+            
+            if (subcategory && noPriceSubcategories.includes(subcategory)) {
+                return false;
+            }
+            
+            return true;
+        };
+        
+        // Update price card visibility
+        const updatePriceCardVisibility = () => {
+            const priceCard = elements.priceCard;
+            if (!priceCard) return;
+            
+            const shouldShow = isPriceNeeded();
+            
+            if (shouldShow) {
+                priceCard.style.display = 'block';
+            } else {
+                priceCard.style.display = 'none';
+                // Reset price values when hidden
+                if (elements.price) elements.price.value = '';
+                if (elements.negotiable) elements.negotiable.checked = false;
+            }
         };
         
         // Clean up object URLs
@@ -2157,6 +2364,7 @@
                 hideSubcategoryField();
             }
             
+            updatePriceCardVisibility();
             updateProgress();
         };
         
@@ -2244,10 +2452,13 @@
                 } else {
                     hideDynamicFields();
                 }
+                
+                updatePriceCardVisibility();
             } else {
                 setFieldState(elements.subcategoryGroup, null);
                 hideConditionField();
                 hideDynamicFields();
+                updatePriceCardVisibility();
             }
             
             updateProgress();
@@ -2351,35 +2562,35 @@
         // Progress tracking
         const updateProgress = () => {
             let filled = 0;
-            let total = 0; // Начинаем с 0, а не с 5
+            let total = 0;
             
-            // Category (всегда обязательно)
+            // Category (always required)
             total++;
             if (elements.category?.value) filled++;
             
-            // Subcategory (обязательно только если есть подкатегории)
+            // Subcategory (required only if there are subcategories)
             if (state.currentSubcategories) {
                 total++;
                 if (elements.subcategory?.value) filled++;
             }
             
-            // Condition (обязательно только если есть состояния)
+            // Condition (required only if there are conditions)
             if (state.currentConditions) {
                 total++;
                 if (elements.condition?.value) filled++;
             }
             
-            // Dynamic required fields (только видимые обязательные поля)
+            // Dynamic required fields (only visible required fields)
             if (state.currentDynamicFields) {
                 state.currentDynamicFields.fields.forEach(field => {
-                    // Учитываем только обязательные поля
+                    // Only count required fields
                     if (field.required) {
-                        // Пропускаем условные поля которые не должны быть видны
+                        // Skip conditional fields that shouldn't be visible
                         if (field.condition && state.currentCondition !== field.condition) {
-                            return; // Не учитываем в подсчете
+                            return;
                         }
                         
-                        total++; // Увеличиваем total только для видимых обязательных полей
+                        total++;
                         const fieldId = `dynamic_${field.id}`;
                         const el = $(fieldId);
                         if (el?.value?.trim()) {
@@ -2389,23 +2600,23 @@
                 });
             }
             
-            // Title (всегда обязательно)
+            // Title (always required)
             total++;
             if (elements.title?.value.trim().length >= 3) filled++;
             
-            // Description (всегда обязательно)
+            // Description (always required)
             total++;
             if (elements.description?.value.trim().length >= 10) filled++;
             
-            // Contact (всегда обязательно)
+            // Contact (always required)
             total++;
             if (validateContact(elements.contact?.value || '').valid) filled++;
             
-            // Вычисляем процент
+            // Calculate percentage
             const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
             const formComplete = filled === total && total > 0;
             
-            // Обновляем UI прогресс бара
+            // Update UI progress bar
             if (elements.progressFill) {
                 elements.progressFill.style.width = `${pct}%`;
                 elements.progressFill.classList.toggle('complete', formComplete);
@@ -2430,24 +2641,13 @@
                     } else {
                         tg.MainButton.setText(`Заполните форму (${pct}%)`);
                         tg.MainButton.disable();
-                        tg.MainButton.color = '#8e8e93'; // Серый цвет для неактивной кнопки
+                        tg.MainButton.color = '#8e8e93';
                     }
                     tg.MainButton.show();
                 } catch (e) {
                     console.error('MainButton update error:', e);
                 }
             }
-            
-            // Для отладки - можно удалить после проверки
-            console.log(`Progress: ${filled}/${total} = ${pct}%`, {
-                category: !!elements.category?.value,
-                subcategory: state.currentSubcategories ? !!elements.subcategory?.value : 'N/A',
-                condition: state.currentConditions ? !!elements.condition?.value : 'N/A',
-                dynamicFields: state.currentDynamicFields?.fields.filter(f => f.required && (!f.condition || f.condition === state.currentCondition)).length || 0,
-                title: elements.title?.value.trim().length >= 3,
-                description: elements.description?.value.trim().length >= 10,
-                contact: validateContact(elements.contact?.value || '').valid
-            });
             
             return canProceed;
         };
@@ -2711,24 +2911,30 @@
                 elements.previewDescription.textContent = elements.description?.value.trim() || '';
             }
             
-            // Build price
-            const priceVal = elements.price?.value || '';
-            const isNegotiable = elements.negotiable?.checked || false;
-            let priceText = priceVal || '0';
-            
-            if (isNegotiable) {
-                priceText = priceVal ? `${priceVal} ₽ (торг)` : 'Договорная';
-            } else {
-                priceText = priceVal ? `${priceVal} ₽` : 'Договорная';
-            }
-            
             // Build info HTML
-            let infoHTML = `
-                <div class="message-info-item">
-                    <span class="message-info-icon">💰</span>
-                    <span><span class="message-info-label">Цена:</span> ${priceText}</span>
-                </div>
-            `;
+            let infoHTML = '';
+            
+            // Add price only if price card is visible
+            const showPrice = isPriceNeeded();
+            
+            if (showPrice) {
+                const priceVal = elements.price?.value || '';
+                const isNegotiable = elements.negotiable?.checked || false;
+                let priceText = priceVal || '0';
+                
+                if (isNegotiable) {
+                    priceText = priceVal ? `${priceVal} ₽ (торг)` : 'Договорная';
+                } else {
+                    priceText = priceVal ? `${priceVal} ₽` : 'Договорная';
+                }
+                
+                infoHTML += `
+                    <div class="message-info-item">
+                        <span class="message-info-icon">💰</span>
+                        <span><span class="message-info-label">Цена:</span> ${priceText}</span>
+                    </div>
+                `;
+            }
             
             // Add dynamic fields
             if (state.currentDynamicFields) {
@@ -2750,6 +2956,44 @@
                             displayValue = selectedOption?.textContent || displayValue;
                         }
                         
+                        // Handle salary/payment range fields
+                        if (field.id.includes('salary_from') || field.id.includes('desired_salary_from') || field.id.includes('payment_from')) {
+                            const toFieldId = field.id.replace('_from', '_to');
+                            const toEl = $(`dynamic_${toFieldId}`);
+                            const toValue = toEl?.value?.trim();
+                            
+                            if (toValue) {
+                                displayValue = `${displayValue} - ${toValue} ₽`;
+                            } else {
+                                displayValue = `от ${displayValue} ₽`;
+                            }
+                            
+                            let label = 'Зарплата';
+                            if (field.id.includes('desired_salary')) {
+                                label = 'Желаемая зарплата';
+                            } else if (field.id.includes('payment')) {
+                                label = 'Оплата';
+                            } else if (field.id.includes('stipend')) {
+                                label = 'Стипендия';
+                            } else if (field.id.includes('budget')) {
+                                label = 'Бюджет';
+                            }
+                            
+                            infoHTML += `
+                                <div class="message-info-item">
+                                    <span class="message-info-icon">💰</span>
+                                    <span><span class="message-info-label">${label}:</span> ${displayValue}</span>
+                                </div>
+                            `;
+                            
+                            return;
+                        }
+                        
+                        // Skip "_to" salary/payment fields as they're handled above
+                        if (field.id.includes('_to') && (field.id.includes('salary') || field.id.includes('payment') || field.id.includes('budget'))) {
+                            return;
+                        }
+                        
                         // Determine icon
                         let icon = '📋';
                         const fieldIdLower = field.id.toLowerCase();
@@ -2758,8 +3002,10 @@
                         else if (fieldIdLower.includes('mileage')) icon = '🛣️';
                         else if (fieldIdLower.includes('sphere') || fieldIdLower.includes('position')) icon = '💼';
                         else if (fieldIdLower.includes('schedule')) icon = '⏰';
-                        else if (fieldIdLower.includes('salary')) icon = '💰';
                         else if (fieldIdLower.includes('area') || fieldIdLower.includes('rooms')) icon = '📐';
+                        else if (fieldIdLower.includes('experience')) icon = '⭐';
+                        else if (fieldIdLower.includes('type') || fieldIdLower.includes('employment')) icon = '📝';
+                        else if (fieldIdLower.includes('duration')) icon = '⏱️';
                         
                         infoHTML += `
                             <div class="message-info-item">
@@ -2856,12 +3102,17 @@
         const handleSubmit = () => {
             haptic('medium');
             
-            const priceVal = elements.price?.value || '';
-            const isNegotiable = elements.negotiable?.checked || false;
-            let priceText = priceVal || '0';
+            let priceText = null;
             
-            if (isNegotiable) {
-                priceText = priceVal ? `${priceVal} (торг)` : 'Договорная';
+            if (isPriceNeeded()) {
+                const priceVal = elements.price?.value || '';
+                const isNegotiable = elements.negotiable?.checked || false;
+                
+                if (isNegotiable) {
+                    priceText = priceVal ? `${priceVal} (торг)` : 'Договорная';
+                } else {
+                    priceText = priceVal ? `${priceVal} ₽` : 'Договорная';
+                }
             }
             
             const scheduledTime = getScheduledTime();
@@ -2876,7 +3127,7 @@
                 price: priceText,
                 contact: elements.contact?.value.trim() || '',
                 location: elements.location?.value.trim() || null,
-                negotiable: isNegotiable,
+                negotiable: isPriceNeeded() ? (elements.negotiable?.checked || false) : false,
                 photos: state.photoData.map(p => p.url),
                 photoCount: state.photoData.length,
                 scheduledTime: scheduledTime,
@@ -3130,6 +3381,7 @@
         const init = () => {
             initScheduleDate();
             setupEventListeners();
+            updatePriceCardVisibility();
             
             // Setup Telegram Main Button
             if (tg?.MainButton) {
