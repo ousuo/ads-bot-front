@@ -3793,13 +3793,16 @@
                         throw new Error('Адрес не найден');
                     }
                     
-                    // Получаем компоненты адреса
-                    const address = firstGeoObject.getAddressLine();
+                    // Получаем полный адрес
+                    let address = firstGeoObject.getAddressLine();
                     
-                    // Можно также получить более детальную информацию:
-                    // const locality = firstGeoObject.getLocalities()[0] || '';
-                    // const thoroughfare = firstGeoObject.getThoroughfare() || '';
-                    // const premise = firstGeoObject.getPremiseNumber() || '';
+                    // Убираем "Республика Северная Осетия — Алания, " из начала адреса
+                    address = address.replace(/^Республика\s+[^,]+,\s*/i, '');
+                    
+                    // Также убираем другие варианты республик
+                    address = address.replace(/^Республика\s+[^,]+—[^,]+,\s*/i, '');
+                    address = address.replace(/^[А-Яа-я\s]+область,\s*/i, ''); // На случай областей
+                    address = address.replace(/^[А-Яа-я\s]+край,\s*/i, ''); // На случай краёв
                     
                     selectedLocation = {
                         address: address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
