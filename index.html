@@ -6,8 +6,7 @@
     <title>Новое объявление</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Leaflet Map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=YOUR_API_KEY&lang=ru_RU" type="text/javascript"></script>
     <style>
         :root {
             --tg-bg: var(--tg-theme-bg-color, #f2f2f7);
@@ -3623,7 +3622,7 @@
         // Map modal functionality
         let map = null;
         let mapMarker = null;
-        let mapCenter = { lat: 55.751244, lng: 37.618423 }; // Moscow default
+        let mapCenter = [55.751244, 37.618423]; // Moscow default [lat, lng]
         let selectedLocation = null;
 
         const openMapModal = () => {
@@ -3650,7 +3649,7 @@
             
             // Destroy map to prevent memory leaks
             if (map) {
-                map.remove();
+                map.destroy();
                 map = null;
                 mapMarker = null;
             }
@@ -3661,47 +3660,48 @@
         const initializeMap = () => {
             if (map) return; // Already initialized
             
-            const mapElement = $('locationMap');
-            if (!mapElement) return;
+            // Wait for Yandex Maps API to load
+            if (typeof ymaps === 'undefined') {
+                console.error('Yandex Maps API не загружен');
+                return;
+            }
             
-            // Create map
-            map = L.map('locationMap', {
-                zoomControl: false // We'll add custom controls
-            }).setView([mapCenter.lat, mapCenter.lng], 13);
-            
-            // Add tile layer (OpenStreetMap)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
-            
-            // Create custom icon for marker
-            const customIcon = L.divIcon({
-                html: '<div class="location-marker">📍</div>',
-                className: 'custom-marker',
-                iconSize: [40, 40],
-                iconAnchor: [20, 40]
+            ymaps.ready(() => {
+                // Create map
+                map = new ymaps.Map('locationMap', {
+                    center: mapCenter,
+                    zoom: 13,
+                    controls: [] // Убираем стандартные контролы
+                });
+                
+                // Create custom marker (placemark)
+                mapMarker = new ymaps.Placemark(mapCenter, {}, {
+                    iconLayout: 'default#image',
+                    iconImageHref: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><text x="20" y="32" font-size="32" text-anchor="middle">📍</text></svg>',
+                    iconImageSize: [40, 40],
+                    iconImageOffset: [-20, -40]
+                });
+                
+                map.geoObjects.add(mapMarker);
+                
+                // Update marker position on map move
+                map.events.add('actionend', () => {
+                    const center = map.getCenter();
+                    mapMarker.geometry.setCoordinates(center);
+                    updateMapAddress(center[0], center[1]);
+                });
+                
+                // Try to get user's current location
+                getUserLocation();
             });
-            
-            // Add marker at center
-            mapMarker = L.marker([mapCenter.lat, mapCenter.lng], {
-                icon: customIcon,
-                draggable: false
-            }).addTo(map);
-            
-            // Update marker position on map move
-            map.on('moveend', () => {
-                const center = map.getCenter();
-                mapMarker.setLatLng(center);
-                updateMapAddress(center.lat, center.lng);
-            });
-            
-            // Try to get user's current location
-            getUserLocation();
         };
 
         const getUserLocation = () => {
-            if (!navigator.geolocation) return;
+            if (!navigator.geolocation) {
+                // Fallback to default location
+                updateMapAddress(mapCenter[0], mapCenter[1]);
+                return;
+            }
             
             const mapAddress = $('mapAddress');
             if (mapAddress) {
@@ -3714,8 +3714,10 @@
                     const lng = position.coords.longitude;
                     
                     if (map) {
-                        map.setView([lat, lng], 15);
-                        mapMarker.setLatLng([lat, lng]);
+                        map.setCenter([lat, lng], 15, {
+                            duration: 300
+                        });
+                        mapMarker.geometry.setCoordinates([lat, lng]);
                         updateMapAddress(lat, lng);
                     }
                     
@@ -3723,8 +3725,8 @@
                 },
                 (error) => {
                     console.log('Geolocation error:', error);
-                    // Just use default location, no error message
-                    updateMapAddress(mapCenter.lat, mapCenter.lng);
+                    // Just use default location
+                    updateMapAddress(mapCenter[0], mapCenter[1]);
                 },
                 {
                     enableHighAccuracy: true,
@@ -3747,77 +3749,73 @@
             }
             
             try {
-                const response = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ru`,
-                    {
-                        headers: {
-                            'User-Agent': 'TelegramWebApp/1.0'
-                        }
+                // Use Yandex Geocoder
+                if (typeof ymaps === 'undefined') {
+                    throw new Error('Yandex Maps API недоступен');
+                }
+                
+                ymaps.geocode([lat, lng], {
+                    results: 1
+                }).then((res) => {
+                    const firstGeoObject = res.geoObjects.get(0);
+                    
+                    if (!firstGeoObject) {
+                        throw new Error('Адрес не найден');
                     }
-                );
-                
-                if (!response.ok) throw new Error('Geocoding failed');
-                
-                const data = await response.json();
-                
-                let addressParts = [];
-                const addr = data.address;
-                
-                // Build readable address
-                if (addr.city) {
-                    addressParts.push(addr.city);
-                } else if (addr.town) {
-                    addressParts.push(addr.town);
-                } else if (addr.village) {
-                    addressParts.push(addr.village);
-                }
-                
-                if (addr.suburb) {
-                    addressParts.push(addr.suburb);
-                } else if (addr.neighbourhood) {
-                    addressParts.push(addr.neighbourhood);
-                }
-                
-                if (addr.road) {
-                    let roadPart = addr.road;
-                    if (addr.house_number) {
-                        roadPart += ', ' + addr.house_number;
+                    
+                    // Получаем компоненты адреса
+                    const address = firstGeoObject.getAddressLine();
+                    
+                    // Можно также получить более детальную информацию:
+                    // const locality = firstGeoObject.getLocalities()[0] || '';
+                    // const thoroughfare = firstGeoObject.getThoroughfare() || '';
+                    // const premise = firstGeoObject.getPremiseNumber() || '';
+                    
+                    selectedLocation = {
+                        address: address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+                        lat: lat,
+                        lng: lng
+                    };
+                    
+                    if (mapAddress) {
+                        mapAddress.innerHTML = `📍 ${selectedLocation.address}`;
                     }
-                    addressParts.push(roadPart);
-                }
-                
-                const addressText = addressParts.length > 0 
-                    ? addressParts.join(', ')
-                    : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                
-                selectedLocation = {
-                    address: addressText,
-                    lat: lat,
-                    lng: lng
-                };
-                
-                if (mapAddress) {
-                    mapAddress.innerHTML = `📍 ${addressText}`;
-                }
-                
-                if (confirmBtn) {
-                    confirmBtn.disabled = false;
-                }
+                    
+                    if (confirmBtn) {
+                        confirmBtn.disabled = false;
+                    }
+                    
+                }).catch((error) => {
+                    console.error('Yandex geocoding error:', error);
+                    
+                    // Fallback to coordinates
+                    selectedLocation = {
+                        address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+                        lat: lat,
+                        lng: lng
+                    };
+                    
+                    if (mapAddress) {
+                        mapAddress.innerHTML = `📍 ${selectedLocation.address}`;
+                    }
+                    
+                    if (confirmBtn) {
+                        confirmBtn.disabled = false;
+                    }
+                });
                 
             } catch (error) {
-                console.error('Reverse geocoding error:', error);
+                console.error('Geocoding error:', error);
                 
                 // Fallback to coordinates
-                const coordsText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                
                 selectedLocation = {
-                    address: coordsText,
+                    address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
                     lat: lat,
                     lng: lng
                 };
                 
                 if (mapAddress) {
-                    mapAddress.innerHTML = `📍 ${coordsText}`;
+                    mapAddress.innerHTML = `📍 ${selectedLocation.address}`;
                 }
                 
                 if (confirmBtn) {
