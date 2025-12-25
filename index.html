@@ -217,12 +217,43 @@
             }
         }
         
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                max-height: 200px;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 1;
+                max-height: 200px;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                max-height: 0;
+                transform: translateY(-10px);
+            }
+        }
+        
         .card {
             background: var(--tg-secondary-bg);
             border-radius: var(--radius-lg);
             margin-bottom: 12px;
             box-shadow: var(--shadow);
             overflow: hidden;
+            transition: all var(--transition);
+        }
+        
+        .card.expanding {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .card-header {
@@ -256,6 +287,29 @@
         
         .form-group:last-child {
             margin-bottom: 0;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        /* Стили для подкатегории */
+        .subcategory-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .subcategory-wrapper.visible {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 10px;
+            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .subcategory-wrapper.hiding {
+            animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .form-label {
@@ -840,7 +894,7 @@
 <body>
     <header class="header" id="header">
         <div class="header-content">
-            <h1 id="headerTitle">Новое объявление (меню в разработке)</h1>
+            <h1 id="headerTitle">Новое объявление</h1>
             <p class="header-subtitle" id="headerSubtitle">Заполните информацию о товаре</p>
             <div class="progress-wrapper">
                 <div class="progress-bar">
@@ -856,46 +910,42 @@
         <div id="formView" class="view active">
             <div class="container">
                 <form id="adForm" novalidate>
-                    <article class="card">
+                    <article class="card" id="categoryCard">
                         <header class="card-header">
-                            <h2 class="card-title">📋 Тип и категория</h2>
+                            <h2 class="card-title">📋 Категория</h2>
                         </header>
                         <div class="card-body">
-                            <div class="form-row">
-                                <div class="form-group" id="adTypeGroup">
-                                    <label class="form-label" for="adType">
-                                        Тип <span class="badge badge--required">обязательно</span>
+                            <div class="form-group" id="categoryGroup">
+                                <label class="form-label" for="category">
+                                    Категория <span class="badge badge--required">обязательно</span>
+                                </label>
+                                <select class="select placeholder" id="category" name="category" required>
+                                    <option value="" disabled selected>Выберите категорию</option>
+                                    <option value="Работа">💼 Работа</option>
+                                    <option value="Транспорт">🚗 Транспорт</option>
+                                    <option value="Недвижимость">🏠 Недвижимость</option>
+                                    <option value="Электроника">📱 Электроника</option>
+                                    <option value="Одежда">👕 Одежда и обувь</option>
+                                    <option value="Дом">🏡 Дом и сад</option>
+                                    <option value="Детское">👶 Детские товары</option>
+                                    <option value="Хобби">🎨 Хобби и отдых</option>
+                                    <option value="Животные">🐾 Животные</option>
+                                    <option value="Услуги">🔧 Услуги</option>
+                                    <option value="Другое">📦 Другое</option>
+                                </select>
+                                <p class="error-message">Выберите категорию</p>
+                            </div>
+                            
+                            <!-- Подкатегория (появляется динамически) -->
+                            <div class="subcategory-wrapper" id="subcategoryWrapper">
+                                <div class="form-group" id="subcategoryGroup">
+                                    <label class="form-label" for="subcategory">
+                                        Подкатегория <span class="badge badge--required">обязательно</span>
                                     </label>
-                                    <select class="select placeholder" id="adType" name="adType" required>
-                                        <option value="" disabled selected>Выберите тип</option>
-                                        <option value="Продам">🏷️ Продам</option>
-                                        <option value="Куплю">🛒 Куплю</option>
-                                        <option value="Услуга">🔧 Услуга</option>
-                                        <option value="Вакансия">💼 Вакансия</option>
-                                        <option value="Аренда">🏠 Аренда</option>
-                                        <option value="Обмен">🔄 Обмен</option>
+                                    <select class="select placeholder" id="subcategory" name="subcategory">
+                                        <option value="" disabled selected>Выберите подкатегорию</option>
                                     </select>
-                                    <p class="error-message">Выберите тип объявления</p>
-                                </div>
-                                
-                                <div class="form-group" id="categoryGroup">
-                                    <label class="form-label" for="category">
-                                        Категория <span class="badge badge--required">обязательно</span>
-                                    </label>
-                                    <select class="select placeholder" id="category" name="category" required>
-                                        <option value="" disabled selected>Выберите категорию</option>
-                                        <option value="Электроника">📱 Электроника</option>
-                                        <option value="Одежда">👕 Одежда</option>
-                                        <option value="Авто">🚗 Авто</option>
-                                        <option value="Недвижимость">🏠 Недвижимость</option>
-                                        <option value="Работа">💼 Работа</option>
-                                        <option value="Услуги">🔧 Услуги</option>
-                                        <option value="Дом">🏡 Дом и сад</option>
-                                        <option value="Детское">👶 Детское</option>
-                                        <option value="Хобби">🎨 Хобби</option>
-                                        <option value="Другое">📦 Другое</option>
-                                    </select>
-                                    <p class="error-message">Выберите категорию</p>
+                                    <p class="error-message">Выберите подкатегорию</p>
                                 </div>
                             </div>
                         </div>
@@ -1144,11 +1194,89 @@
         const MAX_PHOTOS = 5;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
         
+        // Конфигурация подкатегорий
+        const SUBCATEGORIES = {
+            'Работа': [
+                { value: 'Ищу_сотрудника', label: '👔 Ищу сотрудника' },
+                { value: 'Ищу_работу', label: '💼 Ищу работу' },
+                { value: 'Подработка', label: '⏰ Подработка' },
+                { value: 'Стажировка', label: '🎓 Стажировка' }
+            ],
+            'Транспорт': [
+                { value: 'Легковые', label: '🚗 Легковые автомобили' },
+                { value: 'Грузовики', label: '🚚 Грузовики' },
+                { value: 'Мотоциклы', label: '🏍️ Мотоциклы' },
+                { value: 'Спецтехника', label: '🚜 Спецтехника' },
+                { value: 'Запчасти', label: '🔧 Запчасти' }
+            ],
+            'Недвижимость': [
+                { value: 'Продажа_жилья', label: '🏡 Продажа жилья' },
+                { value: 'Покупка_жилья', label: '🔍 Покупка жилья' },
+                { value: 'Аренда_жилья', label: '🏠 Аренда жилья' },
+                { value: 'Коммерческая', label: '🏢 Коммерческая недвижимость' },
+                { value: 'Земля', label: '🌿 Земельные участки' }
+            ],
+            'Электроника': [
+                { value: 'Телефоны', label: '📱 Телефоны' },
+                { value: 'Компьютеры', label: '💻 Компьютеры' },
+                { value: 'Ноутбуки', label: '💻 Ноутбуки' },
+                { value: 'Планшеты', label: '📲 Планшеты' },
+                { value: 'ТВ_Аудио', label: '📺 ТВ и Аудио' },
+                { value: 'Фото_Видео', label: '📷 Фото и Видео' },
+                { value: 'Игровые', label: '🎮 Игровые приставки' }
+            ],
+            'Одежда': [
+                { value: 'Женская', label: '👗 Женская одежда' },
+                { value: 'Мужская', label: '👔 Мужская одежда' },
+                { value: 'Обувь', label: '👟 Обувь' },
+                { value: 'Аксессуары', label: '👜 Аксессуары' },
+                { value: 'Детская', label: '👶 Детская одежда' }
+            ],
+            'Дом': [
+                { value: 'Мебель', label: '🛋️ Мебель' },
+                { value: 'Бытовая_техника', label: '🔌 Бытовая техника' },
+                { value: 'Посуда', label: '🍽️ Посуда' },
+                { value: 'Текстиль', label: '🛏️ Текстиль' },
+                { value: 'Сад', label: '🌱 Сад и огород' },
+                { value: 'Инструменты', label: '🔨 Инструменты' }
+            ],
+            'Детское': [
+                { value: 'Игрушки', label: '🧸 Игрушки' },
+                { value: 'Коляски', label: '🍼 Коляски' },
+                { value: 'Одежда', label: '👶 Одежда' },
+                { value: 'Мебель', label: '🛏️ Детская мебель' },
+                { value: 'Книги', label: '📚 Детские книги' }
+            ],
+            'Хобби': [
+                { value: 'Спорт', label: '⚽ Спорт' },
+                { value: 'Музыка', label: '🎸 Музыка' },
+                { value: 'Книги', label: '📚 Книги' },
+                { value: 'Коллекции', label: '🎨 Коллекции' },
+                { value: 'Рукоделие', label: '🧵 Рукоделие' }
+            ],
+            'Животные': [
+                { value: 'Собаки', label: '🐕 Собаки' },
+                { value: 'Кошки', label: '🐈 Кошки' },
+                { value: 'Птицы', label: '🦜 Птицы' },
+                { value: 'Аквариум', label: '🐠 Аквариум' },
+                { value: 'Товары', label: '🦴 Товары для животных' }
+            ],
+            'Услуги': [
+                { value: 'Ремонт', label: '🔧 Ремонт' },
+                { value: 'Красота', label: '💇 Красота и здоровье' },
+                { value: 'Обучение', label: '📖 Обучение' },
+                { value: 'Уборка', label: '🧹 Уборка' },
+                { value: 'Перевозки', label: '🚚 Перевозки' },
+                { value: 'Другие', label: '⚙️ Другие услуги' }
+            ]
+        };
+        
         const tg = window.Telegram?.WebApp;
         
         let photoData = [];
         let uploadingCount = 0;
         let currentView = 'form';
+        let currentSubcategories = null;
         
         if (tg) {
             tg.ready();
@@ -1171,11 +1299,13 @@
             price: $('price'),
             contact: $('contact'),
             location: $('location'),
-            adType: $('adType'),
             category: $('category'),
+            subcategory: $('subcategory'),
             negotiable: $('negotiable'),
-            adTypeGroup: $('adTypeGroup'),
+            categoryCard: $('categoryCard'),
             categoryGroup: $('categoryGroup'),
+            subcategoryGroup: $('subcategoryGroup'),
+            subcategoryWrapper: $('subcategoryWrapper'),
             titleGroup: $('titleGroup'),
             descriptionGroup: $('descriptionGroup'),
             contactGroup: $('contactGroup'),
@@ -1206,6 +1336,78 @@
         
         const patterns = {
             username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/
+        };
+        
+        // Функция обработки изменения категории
+        const handleCategoryChange = () => {
+            const selectedCategory = elements.category.value;
+            
+            elements.category.classList.remove('placeholder');
+            setFieldState(elements.categoryGroup, 'is-success');
+            haptic();
+            
+            // Сброс подкатегории
+            elements.subcategory.value = '';
+            elements.subcategory.classList.add('placeholder');
+            setFieldState(elements.subcategoryGroup, null);
+            
+            // Проверяем, есть ли подкатегории для выбранной категории
+            if (selectedCategory && SUBCATEGORIES[selectedCategory]) {
+                showSubcategoryField(selectedCategory);
+            } else {
+                hideSubcategoryField();
+            }
+            
+            updateProgress();
+        };
+        
+        // Показать поле подкатегории с анимацией
+        const showSubcategoryField = (category) => {
+            const subcats = SUBCATEGORIES[category];
+            
+            // Заполняем options
+            elements.subcategory.innerHTML = '<option value="" disabled selected>Выберите подкатегорию</option>';
+            subcats.forEach(subcat => {
+                const option = document.createElement('option');
+                option.value = subcat.value;
+                option.textContent = subcat.label;
+                elements.subcategory.appendChild(option);
+            });
+            
+            currentSubcategories = subcats;
+            
+            // Анимация появления
+            elements.subcategoryWrapper.classList.remove('hiding');
+            elements.subcategoryWrapper.classList.add('visible');
+            elements.categoryCard.classList.add('expanding');
+            
+            setTimeout(() => {
+                elements.categoryCard.classList.remove('expanding');
+            }, 300);
+        };
+        
+        // Скрыть поле подкатегории с анимацией
+        const hideSubcategoryField = () => {
+            if (elements.subcategoryWrapper.classList.contains('visible')) {
+                elements.subcategoryWrapper.classList.add('hiding');
+                
+                setTimeout(() => {
+                    elements.subcategoryWrapper.classList.remove('visible', 'hiding');
+                    currentSubcategories = null;
+                }, 200);
+            }
+        };
+        
+        // Обработка изменения подкатегории
+        const handleSubcategoryChange = () => {
+            if (elements.subcategory.value) {
+                elements.subcategory.classList.remove('placeholder');
+                setFieldState(elements.subcategoryGroup, 'is-success');
+                haptic();
+            } else {
+                setFieldState(elements.subcategoryGroup, null);
+            }
+            updateProgress();
         };
         
         // Инициализация минимальной даты (сегодня)
@@ -1414,7 +1616,6 @@
                 return 'now';
             }
             
-            // Формат ISO: "2025-12-25T14:30:00"
             return `${date}T${time}:00`;
         };
         
@@ -1489,8 +1690,15 @@
             let filled = 0;
             const total = 5;
             
-            if (elements.adType.value) filled++;
             if (elements.category.value) filled++;
+            
+            // Проверяем подкатегорию только если она требуется для выбранной категории
+            if (currentSubcategories) {
+                if (elements.subcategory.value) filled++;
+            } else {
+                filled++; // Подкатегория не требуется, засчитываем как заполненную
+            }
+            
             if (elements.title.value.trim().length >= 3) filled++;
             if (elements.description.value.trim().length >= 10) filled++;
             if (validateContact(elements.contact.value).valid) filled++;
@@ -1528,19 +1736,20 @@
         const validateForm = () => {
             let valid = true;
             
-            setFieldState(elements.adTypeGroup, null);
             setFieldState(elements.categoryGroup, null);
+            setFieldState(elements.subcategoryGroup, null);
             setFieldState(elements.titleGroup, null);
             setFieldState(elements.descriptionGroup, null);
             setFieldState(elements.contactGroup, null);
             
-            if (!elements.adType.value) {
-                setFieldState(elements.adTypeGroup, 'is-error');
+            if (!elements.category.value) {
+                setFieldState(elements.categoryGroup, 'is-error');
                 valid = false;
             }
             
-            if (!elements.category.value) {
-                setFieldState(elements.categoryGroup, 'is-error');
+            // Валидация подкатегории только если она отображается
+            if (currentSubcategories && !elements.subcategory.value) {
+                setFieldState(elements.subcategoryGroup, 'is-error');
                 valid = false;
             }
             
@@ -1561,7 +1770,6 @@
                 valid = false;
             }
             
-            // Валидация времени если включена отложенная публикация
             if (elements.scheduleToggle.checked) {
                 const date = elements.scheduleDate.value;
                 const time = elements.scheduleTime.value;
@@ -1666,8 +1874,8 @@
                 haptic('error');
                 
                 let errorMsg = 'Заполните все обязательные поля:\n\n';
-                if (!elements.adType.value) errorMsg += '• Тип объявления\n';
                 if (!elements.category.value) errorMsg += '• Категория\n';
+                if (currentSubcategories && !elements.subcategory.value) errorMsg += '• Подкатегория\n';
                 if (elements.title.value.trim().length < 3) errorMsg += '• Заголовок (мин. 3 символа)\n';
                 if (elements.description.value.trim().length < 10) errorMsg += '• Описание (мин. 10 символов)\n';
                 if (!validateContact(elements.contact.value).valid) errorMsg += '• Контакт для связи\n';
@@ -1701,9 +1909,16 @@
             resetAnimation(elements.previewPhotos);
             resetAnimation(elements.previewMessage.querySelector('.message-content'));
             
-            const adType = elements.adType.value.replace(/\s+/g, '_').replace(/[()]/g, '');
+            // Формируем хэштеги: #Категория #Подкатегория
             const category = elements.category.value.replace(/\s+/g, '_').replace(/[()]/g, '');
-            elements.previewHashtags.textContent = `#${adType} #${category}`;
+            let hashtags = `#${category}`;
+            
+            if (currentSubcategories && elements.subcategory.value) {
+                const subcategory = elements.subcategory.value;
+                hashtags += ` #${subcategory}`;
+            }
+            
+            elements.previewHashtags.textContent = hashtags;
             
             elements.previewTitle.textContent = elements.title.value.trim();
             elements.previewDescription.textContent = elements.description.value.trim();
@@ -1740,7 +1955,6 @@
                 </div>
             `;
             
-            // Показываем время публикации если установлено
             if (elements.scheduleToggle.checked) {
                 const date = elements.scheduleDate.value;
                 const time = elements.scheduleTime.value;
@@ -1809,8 +2023,8 @@
             const scheduledTime = getScheduledTime();
             
             const data = {
-                adType: elements.adType.value,
                 category: elements.category.value,
+                subcategory: currentSubcategories ? elements.subcategory.value : null,
                 title: elements.title.value.trim(),
                 description: elements.description.value.trim(),
                 price: priceText,
@@ -1854,20 +2068,6 @@
                 }
                 alert('Режим отладки\n\nДанные:\n' + JSON.stringify(data, null, 2));
             }
-        };
-        
-        const handleAdTypeChange = () => {
-            elements.adType.classList.remove('placeholder');
-            setFieldState(elements.adTypeGroup, 'is-success');
-            haptic();
-            updateProgress();
-        };
-        
-        const handleCategoryChange = () => {
-            elements.category.classList.remove('placeholder');
-            setFieldState(elements.categoryGroup, 'is-success');
-            haptic();
-            updateProgress();
         };
         
         const handleTitleInput = () => {
@@ -1976,8 +2176,8 @@
                 }
             });
             
-            elements.adType.addEventListener('change', handleAdTypeChange);
             elements.category.addEventListener('change', handleCategoryChange);
+            elements.subcategory.addEventListener('change', handleSubcategoryChange);
             elements.title.addEventListener('input', handleTitleInput);
             elements.description.addEventListener('input', handleDescInput);
             elements.contact.addEventListener('input', handleContactInput);
@@ -1991,7 +2191,6 @@
                 }
             });
             
-            // Обработчики расписания
             elements.scheduleToggle.addEventListener('change', handleScheduleToggle);
             elements.scheduleToggleField.addEventListener('click', (e) => {
                 if (!e.target.closest('.toggle')) {
@@ -2024,5 +2223,3 @@
     </script>
 </body>
 </html>
-
-
