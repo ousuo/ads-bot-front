@@ -226,7 +226,8 @@
         }
         
         @keyframes spin {
-            to { transform: translate(-50%, -50%) rotate(360deg); }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
         @keyframes markerBounce {
@@ -603,7 +604,8 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            margin-top: -12px;
+            margin-left: -12px;
             width: 24px;
             height: 24px;
             border: 3px solid rgba(255,255,255,0.3);
@@ -892,7 +894,7 @@
             background: var(--tg-secondary-bg);
             border-radius: var(--radius-lg);
             padding: 4px;
-            margin: 16px 16px 0;
+            margin: 16px 16px 16px;
             gap: 4px;
             position: sticky;
             top: 0;
@@ -1048,6 +1050,7 @@
         .loading-spinner {
             display: flex;
             justify-content: center;
+            align-items: center;
             padding: 40px;
         }
 
@@ -1058,6 +1061,7 @@
             border-top-color: var(--tg-button);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
         }
 
         /* Map Modal */
