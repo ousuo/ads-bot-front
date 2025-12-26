@@ -101,6 +101,47 @@
             margin-bottom: 12px;
         }
         
+        .slots-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--tg-secondary-bg);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+        
+        .slots-indicator.warning {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning);
+        }
+        
+        .slots-indicator.full {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+        }
+        
+        .cooldown-warning {
+            display: none;
+            padding: 12px;
+            background: rgba(255, 149, 0, 0.1);
+            border-left: 3px solid var(--color-warning);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: var(--tg-text);
+        }
+        
+        .cooldown-warning.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
         .progress-wrapper {
             display: flex;
             align-items: center;
@@ -425,7 +466,6 @@
             color: var(--color-success) !important;
         }
 
-        /* Map Modal */
         .map-modal {
             position: fixed;
             top: 0;
@@ -601,7 +641,6 @@
             background: var(--tg-hint);
         }
 
-        /* Custom marker */
         .location-marker {
             width: 40px;
             height: 40px;
@@ -942,6 +981,40 @@
             color: var(--tg-text);
         }
         
+        .limits-info {
+            background: rgba(0, 122, 255, 0.1);
+            border-left: 3px solid var(--tg-button);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            margin-top: 12px;
+            font-size: 12px;
+        }
+        
+        .limits-info-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .limits-info-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .limits-info-list li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .limits-info-list li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+        }
+        
         .preview-container {
             padding: 16px;
             max-width: 600px;
@@ -1148,6 +1221,17 @@
         <div class="header-content">
             <h1 id="headerTitle">Новое объявление</h1>
             <p class="header-subtitle" id="headerSubtitle">Выберите категорию и заполните форму</p>
+            
+            <!-- Индикатор слотов -->
+            <div class="slots-indicator" id="slotsIndicator">
+                🎯 Доступно слотов: <span id="slotsCount">5/5</span>
+            </div>
+            
+            <!-- Предупреждение о кулдауне -->
+            <div class="cooldown-warning" id="cooldownWarning">
+                <strong>⏱ Внимание!</strong> Следующая публикация будет доступна через <span id="cooldownTime">—</span>
+            </div>
+            
             <div class="progress-wrapper">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
@@ -1394,6 +1478,18 @@
                             </div>
                         </div>
                     </article>
+
+                    <!-- Информация о лимитах -->
+                    <div class="limits-info">
+                        <div class="limits-info-title">🎯 Лимиты и правила:</div>
+                        <ul class="limits-info-list">
+                            <li>Максимум 5 активных объявлений</li>
+                            <li>Кулдаун между публикациями: 3 часа</li>
+                            <li>Срок жизни объявления: 30 дней</li>
+                            <li>Повтор того же товара: через 7 дней</li>
+                            <li>Защита от дубликатов (схожесть >80%)</li>
+                        </ul>
+                    </div>
 
                     <div class="warning-banner">
                         <span style="font-size: 18px;">⚠️</span>
@@ -1882,7 +1978,10 @@
             currentCondition: null,
             dynamicFieldsData: {},
             photoUrls: new Set(),
-            isTransitioning: false
+            isTransitioning: false,
+            availableSlots: 5,
+            usedSlots: 0,
+            cooldownRemaining: null
         };
         
         const $ = (id) => document.getElementById(id);
@@ -1906,6 +2005,10 @@
             headerSubtitle: $('headerSubtitle'),
             progressFill: $('progressFill'),
             progressText: $('progressText'),
+            slotsIndicator: $('slotsIndicator'),
+            slotsCount: $('slotsCount'),
+            cooldownWarning: $('cooldownWarning'),
+            cooldownTime: $('cooldownTime'),
             form: $('adForm'),
             title: $('title'),
             description: $('description'),
@@ -1970,6 +2073,123 @@
                     }
                 }
             } catch (e) {}
+        };
+        
+        const updateSlotsIndicator = () => {
+            if (!elements.slotsIndicator || !elements.slotsCount) return;
+            
+            const available = state.availableSlots - state.usedSlots;
+            elements.slotsCount.textContent = `${available}/${state.availableSlots}`;
+            
+            elements.slotsIndicator.classList.remove('warning', 'full');
+            
+            if (available === 0) {
+                elements.slotsIndicator.classList.add('full');
+            } else if (available <= 2) {
+                elements.slotsIndicator.classList.add('warning');
+            }
+        };
+        
+        const updateCooldownWarning = () => {
+            if (!elements.cooldownWarning || !elements.cooldownTime) return;
+            
+            if (state.cooldownRemaining && state.cooldownRemaining > 0) {
+                const hours = Math.floor(state.cooldownRemaining / 60);
+                const minutes = state.cooldownRemaining % 60;
+                
+                let timeText = '';
+                if (hours > 0) {
+                    timeText = `${hours} ч ${minutes} мин`;
+                } else {
+                    timeText = `${minutes} мин`;
+                }
+                
+                elements.cooldownTime.textContent = timeText;
+                elements.cooldownWarning.classList.add('visible');
+            } else {
+                elements.cooldownWarning.classList.remove('visible');
+            }
+        };
+        
+        // Остальной код идентичен предыдущей версии...
+        // (Все функции валидации, загрузки фото, работы с формой, модальными окнами и т.д.)
+        
+        // Важное изменение только в функции init():
+        
+        const init = () => {
+            // Симуляция получения данных о слотах (в реальности придет от бота)
+            // state.usedSlots = 2; // Пример
+            // state.cooldownRemaining = 45; // минут
+            
+            updateSlotsIndicator();
+            updateCooldownWarning();
+            
+            initScheduleDate();
+            setupEventListeners();
+            updatePriceCardVisibility();
+            
+            if (tg?.MainButton) {
+                try {
+                    tg.MainButton.setText('Заполните форму');
+                    tg.MainButton.setParams({
+                        color: tg.themeParams?.button_color || '#007aff',
+                        text_color: tg.themeParams?.button_text_color || '#ffffff',
+                        is_active: false,
+                        is_visible: true
+                    });
+                    tg.MainButton.onClick(showPreview);
+                    tg.MainButton.show();
+                } catch (e) {
+                    console.error('MainButton init error:', e);
+                }
+            }
+            
+            if (tg?.initDataUnsafe?.user?.username && elements.contact) {
+                elements.contact.value = `@${tg.initDataUnsafe.user.username}`;
+                handleContactInput();
+            }
+            
+            updateProgress();
+            
+            window.addEventListener('beforeunload', cleanup);
+            
+            const enableClosingConfirmation = () => {
+                const hasData = 
+                    elements.category?.value ||
+                    elements.title?.value?.trim() ||
+                    elements.description?.value?.trim() ||
+                    elements.contact?.value?.trim() ||
+                    state.photoData.length > 0;
+                
+                try {
+                    if (hasData && tg?.enableClosingConfirmation) {
+                        tg.enableClosingConfirmation();
+                    } else if (!hasData && tg?.disableClosingConfirmation) {
+                        tg.disableClosingConfirmation();
+                    }
+                } catch (e) {}
+            };
+            
+            const formInputs = [
+                elements.category,
+                elements.subcategory,
+                elements.condition,
+                elements.title,
+                elements.description,
+                elements.contact,
+                elements.price
+            ].filter(Boolean);
+            
+            formInputs.forEach(input => {
+                input.addEventListener('input', enableClosingConfirmation);
+                input.addEventListener('change', enableClosingConfirmation);
+            });
+            
+            const originalHandlePhotoSelect = handlePhotoSelect;
+            window.handlePhotoSelect = async function(...args) {
+                await originalHandlePhotoSelect(...args);
+                enableClosingConfirmation();
+            };
         };
         
         const setFieldState = (group, state) => {
@@ -2065,6 +2285,10 @@
                 } catch (e) {}
             });
             state.photoUrls.clear();
+        };
+        
+        const cleanup = () => {
+            cleanupPhotoUrls();
         };
         
         const uploadToImgBB = async (file, retries = 2) => {
@@ -3732,79 +3956,6 @@
             if (mapMyLocationBtn) {
                 mapMyLocationBtn.addEventListener('click', centerMapToUserLocation);
             }
-        };
-        
-        const cleanup = () => {
-            cleanupPhotoUrls();
-        };
-        
-        const init = () => {
-            initScheduleDate();
-            setupEventListeners();
-            updatePriceCardVisibility();
-            
-            if (tg?.MainButton) {
-                try {
-                    tg.MainButton.setText('Заполните форму');
-                    tg.MainButton.setParams({
-                        color: tg.themeParams?.button_color || '#007aff',
-                        text_color: tg.themeParams?.button_text_color || '#ffffff',
-                        is_active: false,
-                        is_visible: true
-                    });
-                    tg.MainButton.onClick(showPreview);
-                    tg.MainButton.show();
-                } catch (e) {
-                    console.error('MainButton init error:', e);
-                }
-            }
-            
-            if (tg?.initDataUnsafe?.user?.username && elements.contact) {
-                elements.contact.value = `@${tg.initDataUnsafe.user.username}`;
-                handleContactInput();
-            }
-            
-            updateProgress();
-            
-            window.addEventListener('beforeunload', cleanup);
-            
-            const enableClosingConfirmation = () => {
-                const hasData = 
-                    elements.category?.value ||
-                    elements.title?.value?.trim() ||
-                    elements.description?.value?.trim() ||
-                    elements.contact?.value?.trim() ||
-                    state.photoData.length > 0;
-                
-                try {
-                    if (hasData && tg?.enableClosingConfirmation) {
-                        tg.enableClosingConfirmation();
-                    } else if (!hasData && tg?.disableClosingConfirmation) {
-                        tg.disableClosingConfirmation();
-                    }
-                } catch (e) {}
-            };
-            
-            const formInputs = [
-                elements.category,
-                elements.subcategory,
-                elements.condition,
-                elements.title,
-                elements.description,
-                elements.contact,
-                elements.price
-            ].filter(Boolean);
-            
-            formInputs.forEach(input => {
-                input.addEventListener('input', enableClosingConfirmation);
-                input.addEventListener('change', enableClosingConfirmation);
-            });
-            
-            const originalHandlePhotoSelect = handlePhotoSelect;
-            window.handlePhotoSelect = async function(...args) {
-                await originalHandlePhotoSelect(...args);
-                enableClosingConfirmation();
-            };
         };
         
         if (document.readyState === 'loading') {
