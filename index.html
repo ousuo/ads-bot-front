@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Новое объявление</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Leaflet Map -->
     <script src="https://api-maps.yandex.ru/2.1/?apikey=0ea443fd-4bed-4404-a064-f2202a8de835&lang=ru_RU" type="text/javascript"></script>
     <style>
         :root {
@@ -616,17 +615,6 @@
             50% { transform: translate(-50%, -100%) translateY(-10px); }
             100% { transform: translate(-50%, -100%) translateY(0); }
         }
-
-        /* Leaflet popup custom style */
-        .leaflet-popup-content-wrapper {
-            border-radius: 12px;
-            padding: 8px;
-        }
-
-        .leaflet-popup-content {
-            margin: 8px 12px;
-            font-size: 14px;
-        }
                 
         .textarea {
             resize: none;
@@ -1159,7 +1147,7 @@
     <header class="header" id="header">
         <div class="header-content">
             <h1 id="headerTitle">Новое объявление</h1>
-            <p class="header-subtitle" id="headerSubtitle">Заполните информацию о товаре</p>
+            <p class="header-subtitle" id="headerSubtitle">Выберите категорию и заполните форму</p>
             <div class="progress-wrapper">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
@@ -1186,15 +1174,9 @@
                                     <option value="" disabled selected>Выберите категорию</option>
                                     <option value="Работа">💼 Работа</option>
                                     <option value="Транспорт">🚗 Транспорт</option>
-                                    <option value="Недвижимость">🏠 Недвижимость</option>
                                     <option value="Электроника">📱 Электроника</option>
                                     <option value="Одежда">👕 Одежда и обувь</option>
-                                    <option value="Дом">🏡 Дом и сад</option>
-                                    <option value="Детское">👶 Детские товары</option>
-                                    <option value="Хобби">🎨 Хобби и отдых</option>
-                                    <option value="Животные">🐾 Животные</option>
                                     <option value="Услуги">🔧 Услуги</option>
-                                    <option value="Другое">📦 Другое</option>
                                 </select>
                                 <p class="error-message">Выберите категорию</p>
                             </div>
@@ -1423,8 +1405,8 @@
                     <aside class="info-banner">
                         <span style="font-size: 20px;">💡</span>
                         <div class="info-banner-content">
-                            <p class="info-banner-title">Модерация</p>
-                            <p class="info-banner-text">Объявление проверит модератор (обычно 5-30 минут). После одобрения оно будет опубликовано бесплатно!</p>
+                            <p class="info-banner-title">Модерация и публикация</p>
+                            <p class="info-banner-text">Объявление проверит модератор (обычно 5-30 минут). После одобрения оно будет опубликовано в соответствующей теме чата бесплатно! 🎉</p>
                         </div>
                     </aside>
                 </form>
@@ -1456,7 +1438,7 @@
                 </div>
 
                 <p class="preview-hint">
-                    Проверьте, как будет выглядеть ваше объявление в канале. При необходимости вы можете вернуться и внести изменения.
+                    Проверьте, как будет выглядеть ваше объявление в чате. При необходимости вы можете вернуться и внести изменения.
                 </p>
             </div>
         </div>
@@ -1504,9 +1486,10 @@
         
         const IMGBB_API_KEY = 'a8b93dc965da4e9536ce642c7422db1f';
         const MAX_PHOTOS = 5;
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-        const MAX_DATA_SIZE = 40000; // Telegram limit for sendData
+        const MAX_FILE_SIZE = 5 * 1024 * 1024;
+        const MAX_DATA_SIZE = 40000;
         
+        // ОБНОВЛЕНО: Только 5 основных категорий
         const SUBCATEGORIES = {
             'Работа': [
                 { value: 'Ищу_сотрудника', label: '👔 Ищу сотрудника' },
@@ -1520,13 +1503,6 @@
                 { value: 'Мотоциклы', label: '🏍️ Мотоциклы' },
                 { value: 'Спецтехника', label: '🚜 Спецтехника' },
                 { value: 'Запчасти', label: '🔧 Запчасти' }
-            ],
-            'Недвижимость': [
-                { value: 'Продажа_жилья', label: '🏡 Продажа жилья' },
-                { value: 'Покупка_жилья', label: '🔍 Покупка жилья' },
-                { value: 'Аренда_жилья', label: '🏠 Аренда жилья' },
-                { value: 'Коммерческая', label: '🏢 Коммерческая недвижимость' },
-                { value: 'Земля', label: '🌿 Земельные участки' }
             ],
             'Электроника': [
                 { value: 'Телефоны', label: '📱 Телефоны' },
@@ -1543,35 +1519,6 @@
                 { value: 'Обувь', label: '👟 Обувь' },
                 { value: 'Аксессуары', label: '👜 Аксессуары' },
                 { value: 'Детская', label: '👶 Детская одежда' }
-            ],
-            'Дом': [
-                { value: 'Мебель', label: '🛋️ Мебель' },
-                { value: 'Бытовая_техника', label: '🔌 Бытовая техника' },
-                { value: 'Посуда', label: '🍽️ Посуда' },
-                { value: 'Текстиль', label: '🛏️ Текстиль' },
-                { value: 'Сад', label: '🌱 Сад и огород' },
-                { value: 'Инструменты', label: '🔨 Инструменты' }
-            ],
-            'Детское': [
-                { value: 'Игрушки', label: '🧸 Игрушки' },
-                { value: 'Коляски', label: '🍼 Коляски' },
-                { value: 'Одежда', label: '👶 Одежда' },
-                { value: 'Мебель', label: '🛏️ Детская мебель' },
-                { value: 'Книги', label: '📚 Детские книги' }
-            ],
-            'Хобби': [
-                { value: 'Спорт', label: '⚽ Спорт' },
-                { value: 'Музыка', label: '🎸 Музыка' },
-                { value: 'Книги', label: '📚 Книги' },
-                { value: 'Коллекции', label: '🎨 Коллекции' },
-                { value: 'Рукоделие', label: '🧵 Рукоделие' }
-            ],
-            'Животные': [
-                { value: 'Собаки', label: '🐕 Собаки' },
-                { value: 'Кошки', label: '🐈 Кошки' },
-                { value: 'Птицы', label: '🦜 Птицы' },
-                { value: 'Аквариум', label: '🐠 Аквариум' },
-                { value: 'Товары', label: '🦴 Товары для животных' }
             ],
             'Услуги': [
                 { value: 'Ремонт', label: '🔧 Ремонт' },
@@ -1887,148 +1834,6 @@
                     }
                 ]
             },
-            'Продажа_жилья': {
-                title: '🏡 Параметры жилья',
-                fields: [
-                    {
-                        id: 'property_type',
-                        label: 'Тип жилья',
-                        type: 'select',
-                        required: true,
-                        options: [
-                            { value: '', label: 'Выберите тип', disabled: true },
-                            { value: 'Квартира', label: '🏢 Квартира' },
-                            { value: 'Дом', label: '🏡 Дом' },
-                            { value: 'Таунхаус', label: '🏘️ Таунхаус' },
-                            { value: 'Часть_дома', label: '🏠 Часть дома' },
-                            { value: 'Комната', label: '🚪 Комната' }
-                        ]
-                    },
-                    {
-                        id: 'rooms_count',
-                        label: 'Количество комнат',
-                        type: 'select',
-                        required: true,
-                        options: [
-                            { value: '', label: 'Выберите', disabled: true },
-                            { value: 'Студия', label: '🛋️ Студия' },
-                            { value: '1', label: '1 комната' },
-                            { value: '2', label: '2 комнаты' },
-                            { value: '3', label: '3 комнаты' },
-                            { value: '4', label: '4 комнаты' },
-                            { value: '5+', label: '5+ комнат' }
-                        ]
-                    },
-                    {
-                        id: 'total_area',
-                        label: 'Общая площадь (м²)',
-                        type: 'number',
-                        required: true,
-                        placeholder: '65',
-                        min: 1
-                    },
-                    {
-                        id: 'floor',
-                        label: 'Этаж / Этажность',
-                        type: 'text',
-                        required: false,
-                        placeholder: 'Например: 5/9'
-                    }
-                ]
-            },
-            'Покупка_жилья': {
-                title: '🔍 Параметры поиска',
-                fields: [
-                    {
-                        id: 'property_type',
-                        label: 'Тип жилья',
-                        type: 'select',
-                        required: true,
-                        options: [
-                            { value: '', label: 'Выберите тип', disabled: true },
-                            { value: 'Квартира', label: '🏢 Квартира' },
-                            { value: 'Дом', label: '🏡 Дом' },
-                            { value: 'Таунхаус', label: '🏘️ Таунхаус' },
-                            { value: 'Часть_дома', label: '🏠 Часть дома' },
-                            { value: 'Комната', label: '🚪 Комната' }
-                        ]
-                    },
-                    {
-                        id: 'rooms_count',
-                        label: 'Количество комнат',
-                        type: 'select',
-                        required: false,
-                        options: [
-                            { value: '', label: 'Выберите', disabled: true },
-                            { value: 'Студия', label: '🛋️ Студия' },
-                            { value: '1', label: '1 комната' },
-                            { value: '2', label: '2 комнаты' },
-                            { value: '3', label: '3 комнаты' },
-                            { value: '4+', label: '4+ комнат' },
-                            { value: 'Не_важно', label: '✨ Не важно' }
-                        ]
-                    },
-                    {
-                        id: 'budget_from',
-                        label: 'Бюджет от',
-                        type: 'number',
-                        required: false,
-                        placeholder: '3000000',
-                        min: 0
-                    },
-                    {
-                        id: 'budget_to',
-                        label: 'Бюджет до',
-                        type: 'number',
-                        required: false,
-                        placeholder: '5000000',
-                        min: 0
-                    }
-                ]
-            },
-            'Аренда_жилья': {
-                title: '🏠 Параметры жилья',
-                fields: [
-                    {
-                        id: 'property_type',
-                        label: 'Тип жилья',
-                        type: 'select',
-                        required: true,
-                        options: [
-                            { value: '', label: 'Выберите тип', disabled: true },
-                            { value: 'Квартира', label: '🏢 Квартира' },
-                            { value: 'Дом', label: '🏡 Дом' },
-                            { value: 'Комната', label: '🚪 Комната' }
-                        ]
-                    },
-                    {
-                        id: 'rooms_count',
-                        label: 'Количество комнат',
-                        type: 'select',
-                        required: true,
-                        options: [
-                            { value: '', label: 'Выберите', disabled: true },
-                            { value: 'Студия', label: '🛋️ Студия' },
-                            { value: '1', label: '1 комната' },
-                            { value: '2', label: '2 комнаты' },
-                            { value: '3', label: '3 комнаты' },
-                            { value: '4+', label: '4+ комнат' }
-                        ]
-                    },
-                    {
-                        id: 'rent_period',
-                        label: 'Срок аренды',
-                        type: 'select',
-                        required: true,
-                        options: [
-                            { value: '', label: 'Выберите срок', disabled: true },
-                            { value: 'Длительно', label: '📅 Длительно' },
-                            { value: 'Посуточно', label: '🌙 Посуточно' },
-                            { value: 'Помесячно', label: '📆 Помесячно' }
-                        ]
-                    }
-                ]
-            },
             'Телефоны': {
                 title: '📱 Характеристики',
                 fields: [
@@ -2080,11 +1885,9 @@
             isTransitioning: false
         };
         
-        // DOM helpers
         const $ = (id) => document.getElementById(id);
         const $$ = (selector, parent = document) => parent.querySelectorAll(selector);
         
-        // Initialize Telegram WebApp
         if (tg) {
             try {
                 tg.ready();
@@ -2095,7 +1898,6 @@
             }
         }
         
-        // Cache DOM elements
         const elements = {
             formView: $('formView'),
             previewView: $('previewView'),
@@ -2153,13 +1955,11 @@
             priceCard: $('priceCard')
         };
         
-        // Validation patterns
         const patterns = {
             username: /^@[a-zA-Z][a-zA-Z0-9_]{4,31}$/,
             phone: /^[\d\s+()-]{10,}$/
         };
         
-        // Haptic feedback helper
         const haptic = (type = 'light') => {
             try {
                 if (tg?.HapticFeedback) {
@@ -2169,19 +1969,15 @@
                         tg.HapticFeedback.impactOccurred(type);
                     }
                 }
-            } catch (e) {
-                // Silently fail
-            }
+            } catch (e) {}
         };
         
-        // Field state management
         const setFieldState = (group, state) => {
             if (!group) return;
             group.classList.remove('is-success', 'is-error');
             if (state) group.classList.add(state);
         };
         
-        // Character counter
         const updateCharCounter = (el, current, max) => {
             if (!el) return;
             el.textContent = `${current}/${max}`;
@@ -2191,14 +1987,12 @@
             else if (ratio >= 0.8) el.classList.add('is-warning');
         };
         
-        // Photo status
         const setPhotoStatus = (text, type = '') => {
             if (!elements.photoStatus) return;
             elements.photoStatus.textContent = text;
             elements.photoStatus.className = 'photo-status' + (type ? ' ' + type : '');
         };
         
-        // Contact validation
         const validateContact = (value) => {
             const v = value.trim();
             
@@ -2225,21 +2019,17 @@
             return { valid: false, type: null, message: 'Введите @username или номер' };
         };
         
-        // Check if price is needed for current category/subcategory
         const isPriceNeeded = () => {
             const category = elements.category?.value;
             const subcategory = elements.subcategory?.value;
             
-            // Categories where price is not needed at all
             const noPriceCategories = ['Работа'];
             
-            // Subcategories where price is not needed
             const noPriceSubcategories = [
                 'Ищу_работу',
                 'Ищу_сотрудника',
                 'Подработка',
-                'Стажировка',
-                'Покупка_жилья'
+                'Стажировка'
             ];
             
             if (noPriceCategories.includes(category)) {
@@ -2253,7 +2043,6 @@
             return true;
         };
         
-        // Update price card visibility
         const updatePriceCardVisibility = () => {
             const priceCard = elements.priceCard;
             if (!priceCard) return;
@@ -2264,25 +2053,20 @@
                 priceCard.style.display = 'block';
             } else {
                 priceCard.style.display = 'none';
-                // Reset price values when hidden
                 if (elements.price) elements.price.value = '';
                 if (elements.negotiable) elements.negotiable.checked = false;
             }
         };
         
-        // Clean up object URLs
         const cleanupPhotoUrls = () => {
             state.photoUrls.forEach(url => {
                 try {
                     URL.revokeObjectURL(url);
-                } catch (e) {
-                    // Ignore errors
-                }
+                } catch (e) {}
             });
             state.photoUrls.clear();
         };
         
-        // Upload to ImgBB with retry
         const uploadToImgBB = async (file, retries = 2) => {
             const formData = new FormData();
             formData.append('image', file);
@@ -2317,7 +2101,6 @@
             }
         };
         
-        // Photo handling
         const handlePhotoSelect = async (files) => {
             const fileArray = Array.from(files);
             
@@ -2453,8 +2236,7 @@
             
             elements.photoUploadArea.classList.toggle('uploading', state.uploadingCount > 0);
         };
-        
-        // Dynamic fields management
+               
         const createDynamicFields = (config) => {
             const card = document.createElement('article');
             card.className = 'card dynamic-section';
@@ -2529,7 +2311,6 @@
                 const card = createDynamicFields(state.currentDynamicFields);
                 elements.dynamicFieldsContainer.appendChild(card);
                 
-                // Add event listeners
                 state.currentDynamicFields.fields.forEach(field => {
                     const fieldId = `dynamic_${field.id}`;
                     const el = $(fieldId);
@@ -2595,7 +2376,6 @@
             haptic('light');
         };
         
-        // Category management
         const handleCategoryChange = () => {
             const selectedCategory = elements.category.value;
             
@@ -2603,12 +2383,10 @@
             setFieldState(elements.categoryGroup, 'is-success');
             haptic();
             
-            // Reset subcategory
             elements.subcategory.value = '';
             elements.subcategory.classList.add('placeholder');
             setFieldState(elements.subcategoryGroup, null);
             
-            // Reset condition
             elements.condition.value = '';
             elements.condition.classList.add('placeholder');
             setFieldState(elements.conditionGroup, null);
@@ -2737,7 +2515,6 @@
             updateProgress();
         };
         
-        // Schedule management
         const initScheduleDate = () => {
             if (!elements.scheduleDate) return;
             
@@ -2818,33 +2595,26 @@
             haptic();
         };
         
-        // Progress tracking
         const updateProgress = () => {
             let filled = 0;
             let total = 0;
             
-            // Category (always required)
             total++;
             if (elements.category?.value) filled++;
             
-            // Subcategory (required only if there are subcategories)
             if (state.currentSubcategories) {
                 total++;
                 if (elements.subcategory?.value) filled++;
             }
             
-            // Condition (required only if there are conditions)
             if (state.currentConditions) {
                 total++;
                 if (elements.condition?.value) filled++;
             }
             
-            // Dynamic required fields (only visible required fields)
             if (state.currentDynamicFields) {
                 state.currentDynamicFields.fields.forEach(field => {
-                    // Only count required fields
                     if (field.required) {
-                        // Skip conditional fields that shouldn't be visible
                         if (field.condition && state.currentCondition !== field.condition) {
                             return;
                         }
@@ -2859,23 +2629,18 @@
                 });
             }
             
-            // Title (always required)
             total++;
             if (elements.title?.value.trim().length >= 3) filled++;
             
-            // Description (always required)
             total++;
             if (elements.description?.value.trim().length >= 10) filled++;
             
-            // Contact (always required)
             total++;
             if (validateContact(elements.contact?.value || '').valid) filled++;
             
-            // Calculate percentage
             const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
             const formComplete = filled === total && total > 0;
             
-            // Update UI progress bar
             if (elements.progressFill) {
                 elements.progressFill.style.width = `${pct}%`;
                 elements.progressFill.classList.toggle('complete', formComplete);
@@ -2887,7 +2652,6 @@
             
             const canProceed = formComplete && state.uploadingCount === 0;
             
-            // Update main button
             if (tg?.MainButton && state.currentView === 'form') {
                 try {
                     if (state.uploadingCount > 0) {
@@ -2911,12 +2675,10 @@
             return canProceed;
         };
         
-        // Form validation
         const validateForm = () => {
             let valid = true;
             const errors = [];
             
-            // Reset states
             setFieldState(elements.categoryGroup, null);
             setFieldState(elements.subcategoryGroup, null);
             setFieldState(elements.conditionGroup, null);
@@ -2924,32 +2686,27 @@
             setFieldState(elements.descriptionGroup, null);
             setFieldState(elements.contactGroup, null);
             
-            // Validate category
             if (!elements.category?.value) {
                 setFieldState(elements.categoryGroup, 'is-error');
                 errors.push('• Категория');
                 valid = false;
             }
             
-            // Validate subcategory
             if (state.currentSubcategories && !elements.subcategory?.value) {
                 setFieldState(elements.subcategoryGroup, 'is-error');
                 errors.push('• Подкатегория');
                 valid = false;
             }
             
-            // Validate condition
             if (state.currentConditions && !elements.condition?.value) {
                 setFieldState(elements.conditionGroup, 'is-error');
                 errors.push('• Состояние');
                 valid = false;
             }
             
-            // Validate dynamic fields
             if (state.currentDynamicFields) {
                 state.currentDynamicFields.fields.forEach(field => {
                     if (field.required) {
-                        // Skip conditional fields
                         if (field.condition && state.currentCondition !== field.condition) {
                             return;
                         }
@@ -2967,21 +2724,18 @@
                 });
             }
             
-            // Validate title
             if ((elements.title?.value.trim().length || 0) < 3) {
                 setFieldState(elements.titleGroup, 'is-error');
                 errors.push('• Заголовок (мин. 3 символа)');
                 valid = false;
             }
             
-            // Validate description
             if ((elements.description?.value.trim().length || 0) < 10) {
                 setFieldState(elements.descriptionGroup, 'is-error');
                 errors.push('• Описание (мин. 10 символов)');
                 valid = false;
             }
             
-            // Validate contact
             const contactResult = validateContact(elements.contact?.value || '');
             if (!contactResult.valid) {
                 if (elements.contactError) {
@@ -2992,7 +2746,6 @@
                 valid = false;
             }
             
-            // Validate schedule
             if (elements.scheduleToggle?.checked) {
                 const date = elements.scheduleDate?.value;
                 const time = elements.scheduleTime?.value;
@@ -3013,7 +2766,6 @@
                 }
             }
             
-            // Show errors
             if (!valid && errors.length > 0) {
                 const errorMsg = 'Заполните все обязательные поля:\n\n' + errors.join('\n');
                 
@@ -3031,7 +2783,6 @@
             return valid;
         };
         
-        // View switching
         const switchView = (view) => {
             if (state.isTransitioning) return;
             
@@ -3044,21 +2795,17 @@
             
             const isForward = view === 'preview';
             
-            // Clear animation classes
             fromElement.classList.remove('slide-in-right', 'slide-out-left', 'slide-in-left', 'slide-out-right');
             toElement.classList.remove('slide-in-right', 'slide-out-left', 'slide-in-left', 'slide-out-right');
             
-            // Add exit animation
             fromElement.classList.add(isForward ? 'slide-out-left' : 'slide-out-right');
             
             setTimeout(() => {
                 fromElement.classList.remove('active');
                 toElement.classList.add('active');
                 
-                // Add enter animation
                 toElement.classList.add(isForward ? 'slide-in-right' : 'slide-in-left');
                 
-                // Update header
                 const headerContent = elements.header?.querySelector('.header-content');
                 if (headerContent) {
                     headerContent.classList.add('changing');
@@ -3066,7 +2813,7 @@
                 
                 if (view === 'form') {
                     if (elements.headerTitle) elements.headerTitle.textContent = 'Новое объявление';
-                    if (elements.headerSubtitle) elements.headerSubtitle.textContent = 'Заполните информацию о товаре';
+                    if (elements.headerSubtitle) elements.headerSubtitle.textContent = 'Выберите категорию и заполните форму';
                     
                     if (tg?.MainButton) {
                         try {
@@ -3085,9 +2832,7 @@
                     if (tg?.MainButton) {
                         try {
                             tg.MainButton.hide();
-                        } catch (e) {
-                            // Ignore
-                        }
+                        } catch (e) {}
                     }
                     
                     renderPreview();
@@ -3128,11 +2873,9 @@
             switchView('preview');
         };
         
-        // Preview rendering
         const renderPreview = () => {
             if (!elements.previewMessage) return;
             
-            // Reset animations
             const resetAnimation = (element) => {
                 if (element) {
                     element.style.animation = 'none';
@@ -3145,7 +2888,6 @@
             resetAnimation(elements.previewMessage);
             resetAnimation(elements.previewPhotos);
             
-            // Build hashtags
             const category = elements.category?.value.replace(/\s+/g, '_').replace(/[()]/g, '') || '';
             let hashtags = category ? `#${category}` : '';
             
@@ -3161,7 +2903,6 @@
                 elements.previewHashtags.textContent = hashtags;
             }
             
-            // Set title and description
             if (elements.previewTitle) {
                 elements.previewTitle.textContent = elements.title?.value.trim() || '';
             }
@@ -3170,10 +2911,8 @@
                 elements.previewDescription.textContent = elements.description?.value.trim() || '';
             }
             
-            // Build info HTML
             let infoHTML = '';
             
-            // Add price only if price card is visible
             const showPrice = isPriceNeeded();
             
             if (showPrice) {
@@ -3195,13 +2934,11 @@
                 `;
             }
             
-            // Add dynamic fields
             if (state.currentDynamicFields) {
                 state.currentDynamicFields.fields.forEach(field => {
                     const fieldId = `dynamic_${field.id}`;
                     const el = $(fieldId);
                     
-                    // Skip conditional hidden fields
                     if (field.condition && state.currentCondition !== field.condition) {
                         return;
                     }
@@ -3209,13 +2946,11 @@
                     if (el?.value?.trim()) {
                         let displayValue = el.value.trim();
                         
-                        // For select, get option text
                         if (el.tagName === 'SELECT') {
                             const selectedOption = el.options[el.selectedIndex];
                             displayValue = selectedOption?.textContent || displayValue;
                         }
                         
-                        // Handle salary/payment range fields
                         if (field.id.includes('salary_from') || field.id.includes('desired_salary_from') || field.id.includes('payment_from')) {
                             const toFieldId = field.id.replace('_from', '_to');
                             const toEl = $(`dynamic_${toFieldId}`);
@@ -3248,12 +2983,10 @@
                             return;
                         }
                         
-                        // Skip "_to" salary/payment fields as they're handled above
                         if (field.id.includes('_to') && (field.id.includes('salary') || field.id.includes('payment') || field.id.includes('budget'))) {
                             return;
                         }
                         
-                        // Determine icon
                         let icon = '📋';
                         const fieldIdLower = field.id.toLowerCase();
                         if (fieldIdLower.includes('brand') || fieldIdLower.includes('model')) icon = '🏷️';
@@ -3276,7 +3009,6 @@
                 });
             }
             
-            // Add location
             if (elements.location?.value.trim()) {
                 const locationText = elements.location.value.trim();
                 const lat = elements.locationLat?.value;
@@ -3284,7 +3016,6 @@
                 
                 let locationHTML = locationText;
                 
-                // Add map link if coordinates available
                 if (lat && lon) {
                     locationHTML += ` <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" style="color: #64B5EF; text-decoration: none;">🗺️</a>`;
                 }
@@ -3297,7 +3028,6 @@
                 `;
             }
             
-            // Add contact
             infoHTML += `
                 <div class="message-info-item">
                     <span class="message-info-icon">👤</span>
@@ -3305,7 +3035,6 @@
                 </div>
             `;
             
-            // Add schedule
             if (elements.scheduleToggle?.checked) {
                 const date = elements.scheduleDate?.value;
                 const time = elements.scheduleTime?.value;
@@ -3327,9 +3056,7 @@
                                 <span><span class="message-info-label">Публикация:</span> ${formatted}</span>
                             </div>
                         `;
-                    } catch (e) {
-                        // Ignore
-                    }
+                    } catch (e) {}
                 }
             }
             
@@ -3337,7 +3064,6 @@
                 elements.previewInfo.innerHTML = infoHTML;
             }
             
-            // Render photos
             if (elements.previewPhotos) {
                 elements.previewPhotos.innerHTML = '';
                 
@@ -3368,7 +3094,6 @@
             }
         };
         
-        // Form submission
         const handleSubmit = () => {
             haptic('medium');
             
@@ -3408,7 +3133,6 @@
             
             const jsonData = JSON.stringify(data);
             
-            // Check size
             if (jsonData.length > MAX_DATA_SIZE) {
                 if (tg?.showPopup) {
                     tg.showPopup({
@@ -3424,9 +3148,7 @@
             if (tg?.MainButton) {
                 try {
                     tg.MainButton.showProgress(true);
-                } catch (e) {
-                    // Ignore
-                }
+                } catch (e) {}
             }
             
             console.log('Sending data:', jsonData.length, 'bytes');
@@ -3440,9 +3162,7 @@
                     if (tg?.MainButton) {
                         try {
                             tg.MainButton.hideProgress();
-                        } catch (e2) {
-                            // Ignore
-                        }
+                        } catch (e2) {}
                     }
                     if (tg?.showPopup) {
                         tg.showPopup({
@@ -3457,16 +3177,13 @@
                 if (tg?.MainButton) {
                     try {
                         tg.MainButton.hideProgress();
-                    } catch (e) {
-                        // Ignore
-                    }
+                    } catch (e) {}
                 }
                 console.log('Debug mode - data:', data);
                 alert('Режим отладки\n\nДанные готовы к отправке:\n' + jsonData.length + ' bytes');
             }
         };
         
-        // Input handlers
         const handleTitleInput = () => {
             const len = elements.title?.value.length || 0;
             updateCharCounter(elements.titleCounter, len, 100);
@@ -3505,7 +3222,6 @@
             updateProgress();
         };
 
-        // Location handling
         const handleLocationClick = () => {
             haptic('medium');
             openMapModal();
@@ -3520,18 +3236,15 @@
             const lat = location.latitude;
             const lon = location.longitude;
             
-            // Save coordinates
             if (elements.locationLat) elements.locationLat.value = lat;
             if (elements.locationLon) elements.locationLon.value = lon;
             
-            // Show loading
             if (elements.location) {
                 elements.location.value = 'Определение адреса...';
                 elements.location.classList.remove('location-selected');
             }
             
             try {
-                // Reverse geocoding using Nominatim (OpenStreetMap)
                 const response = await fetch(
                     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=ru`,
                     {
@@ -3548,7 +3261,6 @@
                 let addressParts = [];
                 const addr = data.address;
                 
-                // Build readable address
                 if (addr.city) {
                     addressParts.push(addr.city);
                 } else if (addr.town) {
@@ -3590,7 +3302,6 @@
             } catch (error) {
                 console.error('Reverse geocoding error:', error);
                 
-                // Fallback to coordinates
                 const coordsText = `📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
                 
                 if (elements.location) {
@@ -3620,10 +3331,9 @@
             }
         };
         
-        // Map modal functionality
         let map = null;
         let mapMarker = null;
-        let mapCenter = [43.024615, 44.681767]; // Vladikavkaz default [lat, lng]
+        let mapCenter = [43.024615, 44.681767];
         let selectedLocation = null;
 
         const openMapModal = () => {
@@ -3633,7 +3343,6 @@
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             
-            // Initialize map after modal is visible
             setTimeout(() => {
                 initializeMap();
             }, 100);
@@ -3648,13 +3357,11 @@
             modal.classList.remove('active');
             document.body.style.overflow = '';
             
-            // Удаляем центральную метку
             const centerMarker = document.getElementById('centerMarker');
             if (centerMarker) {
                 centerMarker.remove();
             }
             
-            // Destroy map to prevent memory leaks
             if (map) {
                 map.destroy();
                 map = null;
@@ -3665,26 +3372,22 @@
         };
 
         const initializeMap = () => {
-            if (map) return; // Already initialized
+            if (map) return;
             
-            // Wait for Yandex Maps API to load
             if (typeof ymaps === 'undefined') {
                 console.error('Yandex Maps API не загружен');
                 return;
             }
             
             ymaps.ready(() => {
-                // Create map
                 map = new ymaps.Map('locationMap', {
                     center: mapCenter,
                     zoom: 13,
-                    controls: [] // Убираем стандартные контролы
+                    controls: []
                 });
                 
-                // Добавляем фиксированную метку в центр экрана через CSS
                 const mapContainer = map.container.getParentElement();
                 
-                // Создаем контейнер для центральной метки
                 const centerMarker = document.createElement('div');
                 centerMarker.style.cssText = `
                     position: absolute;
@@ -3702,10 +3405,8 @@
                 
                 mapContainer.appendChild(centerMarker);
                 
-                // Обновляем адрес при остановке карты
                 let updateTimeout;
                 map.events.add('boundschange', () => {
-                    // Добавляем небольшую анимацию подпрыгивания при движении
                     const marker = document.getElementById('centerMarker');
                     if (marker) {
                         marker.style.animation = 'none';
@@ -3718,17 +3419,15 @@
                     updateTimeout = setTimeout(() => {
                         const center = map.getCenter();
                         updateMapAddress(center[0], center[1]);
-                    }, 500); // Обновляем адрес через 500мс после остановки
+                    }, 500);
                 });
                 
-                // Получаем текущую позицию пользователя
                 getUserLocation();
             });
         };
 
         const getUserLocation = () => {
             if (!navigator.geolocation) {
-                // Fallback to default location
                 updateMapAddress(mapCenter[0], mapCenter[1]);
                 return;
             }
@@ -3747,7 +3446,6 @@
                         map.setCenter([lat, lng], 15, {
                             duration: 300
                         });
-                        mapMarker.geometry.setCoordinates([lat, lng]);
                         updateMapAddress(lat, lng);
                     }
                     
@@ -3755,7 +3453,6 @@
                 },
                 (error) => {
                     console.log('Geolocation error:', error);
-                    // Just use default location
                     updateMapAddress(mapCenter[0], mapCenter[1]);
                 },
                 {
@@ -3779,7 +3476,6 @@
             }
             
             try {
-                // Use Yandex Geocoder
                 if (typeof ymaps === 'undefined') {
                     throw new Error('Yandex Maps API недоступен');
                 }
@@ -3793,16 +3489,12 @@
                         throw new Error('Адрес не найден');
                     }
                     
-                    // Получаем полный адрес
                     let address = firstGeoObject.getAddressLine();
                     
-                    // Убираем "Республика Северная Осетия — Алания, " из начала адреса
                     address = address.replace(/^Республика\s+[^,]+,\s*/i, '');
-                    
-                    // Также убираем другие варианты республик
                     address = address.replace(/^Республика\s+[^,]+—[^,]+,\s*/i, '');
-                    address = address.replace(/^[А-Яа-я\s]+область,\s*/i, ''); // На случай областей
-                    address = address.replace(/^[А-Яа-я\s]+край,\s*/i, ''); // На случай краёв
+                    address = address.replace(/^[А-Яа-я\s]+область,\s*/i, '');
+                    address = address.replace(/^[А-Яа-я\s]+край,\s*/i, '');
                     
                     selectedLocation = {
                         address: address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
@@ -3821,7 +3513,6 @@
                 }).catch((error) => {
                     console.error('Yandex geocoding error:', error);
                     
-                    // Fallback to coordinates
                     selectedLocation = {
                         address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
                         lat: lat,
@@ -3840,7 +3531,6 @@
             } catch (error) {
                 console.error('Geocoding error:', error);
                 
-                // Fallback to coordinates
                 selectedLocation = {
                     address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
                     lat: lat,
@@ -3860,7 +3550,6 @@
         const confirmMapLocation = () => {
             if (!selectedLocation) return;
             
-            // Update form fields
             if (elements.location) {
                 elements.location.value = selectedLocation.address;
                 elements.location.classList.add('location-selected');
@@ -3888,7 +3577,6 @@
             getUserLocation();
         };
 
-        // Scroll handler
         let scrollTicking = false;
         const handleScroll = () => {
             if (!scrollTicking) {
@@ -3902,9 +3590,7 @@
             }
         };
         
-        // Event listeners setup
         const setupEventListeners = () => {
-            // Photo upload
             if (elements.photoUploadArea && elements.photoInput) {
                 elements.photoUploadArea.addEventListener('click', () => {
                     if (state.photoData.length + state.uploadingCount < MAX_PHOTOS) {
@@ -3920,7 +3606,6 @@
                     }
                 });
                 
-                // Drag and drop
                 elements.photoUploadArea.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     elements.photoUploadArea.classList.add('dragover');
@@ -3939,7 +3624,6 @@
                 });
             }
             
-            // Category
             if (elements.category) {
                 elements.category.addEventListener('change', handleCategoryChange);
             }
@@ -3952,7 +3636,6 @@
                 elements.condition.addEventListener('change', handleConditionChange);
             }
             
-            // Form inputs
             if (elements.title) {
                 elements.title.addEventListener('input', handleTitleInput);
             }
@@ -3973,7 +3656,6 @@
                 elements.location.addEventListener('input', updateProgress);
             }
 
-            // Location picker
             if (elements.location) {
                 elements.location.addEventListener('click', handleLocationClick);
                 elements.location.addEventListener('focus', (e) => {
@@ -3986,7 +3668,6 @@
                 elements.negotiable.addEventListener('change', () => haptic());
             }
             
-            // Toggle fields
             if (elements.negotiableField) {
                 elements.negotiableField.addEventListener('click', (e) => {
                     if (!e.target.closest('.toggle') && elements.negotiable) {
@@ -3996,7 +3677,6 @@
                 });
             }
             
-            // Schedule
             if (elements.scheduleToggle) {
                 elements.scheduleToggle.addEventListener('change', handleScheduleToggle);
             }
@@ -4018,7 +3698,6 @@
                 elements.scheduleTime.addEventListener('change', updateScheduleHint);
             }
             
-            // Preview buttons
             if (elements.submitBtn) {
                 elements.submitBtn.addEventListener('click', handleSubmit);
             }
@@ -4027,15 +3706,12 @@
                 elements.backToFormBtn.addEventListener('click', () => switchView('form'));
             }
             
-            // Scroll
             window.addEventListener('scroll', handleScroll, { passive: true });
             
-                        // Focus haptic
             $$('.input, .textarea, .select').forEach(el => {
                 el.addEventListener('focus', () => haptic());
             });
             
-            // Map modal controls
             const mapCloseBtn = $('mapCloseBtn');
             const mapCancelBtn = $('mapCancelBtn');
             const mapConfirmBtn = $('mapConfirmBtn');
@@ -4058,18 +3734,15 @@
             }
         };
         
-        // Cleanup on unload
         const cleanup = () => {
             cleanupPhotoUrls();
         };
         
-        // Initialize
         const init = () => {
             initScheduleDate();
             setupEventListeners();
             updatePriceCardVisibility();
             
-            // Setup Telegram Main Button
             if (tg?.MainButton) {
                 try {
                     tg.MainButton.setText('Заполните форму');
@@ -4086,7 +3759,6 @@
                 }
             }
             
-            // Auto-fill username
             if (tg?.initDataUnsafe?.user?.username && elements.contact) {
                 elements.contact.value = `@${tg.initDataUnsafe.user.username}`;
                 handleContactInput();
@@ -4094,12 +3766,9 @@
             
             updateProgress();
             
-            // Cleanup on unload
             window.addEventListener('beforeunload', cleanup);
             
-            // Включаем подтверждение закрытия ТОЛЬКО если форма заполнена
             const enableClosingConfirmation = () => {
-                // Проверяем, есть ли хоть какие-то данные
                 const hasData = 
                     elements.category?.value ||
                     elements.title?.value?.trim() ||
@@ -4113,12 +3782,9 @@
                     } else if (!hasData && tg?.disableClosingConfirmation) {
                         tg.disableClosingConfirmation();
                     }
-                } catch (e) {
-                    // Ignore
-                }
+                } catch (e) {}
             };
             
-            // Отслеживаем изменения формы
             const formInputs = [
                 elements.category,
                 elements.subcategory,
@@ -4134,7 +3800,6 @@
                 input.addEventListener('change', enableClosingConfirmation);
             });
             
-            // Отслеживаем загрузку фото
             const originalHandlePhotoSelect = handlePhotoSelect;
             window.handlePhotoSelect = async function(...args) {
                 await originalHandlePhotoSelect(...args);
@@ -4142,7 +3807,6 @@
             };
         };
         
-        // Start
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
